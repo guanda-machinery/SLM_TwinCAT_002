@@ -12,7 +12,19 @@ END_VAR
 
 
 
-hmi.Jog_Speed := Hmi_Web.Jog_Speed;]]></ST>
+hmi.Jog_Speed := Hmi_Web.Jog_Speed;
+
+// Fx 馬達位置
+Hmi_Web.Fx_Pos := Axis.Fx.fPos;
+// FxA 測長盤
+Hmi_Web.FxA_Ex_Pos := Axis.FxA_Exp_Pos;
+// FxB 測長盤
+Hmi_Web.FxB_Ex_Pos := Axis.FxB_Exp_Pos;
+	
+// FxA 油壓夾輪位置
+Hmi_Web.FxA_H_Pos := GroupFx.FxA_Clamp_Pos;
+// FxB 油壓夾輪位置
+Hmi_Web.FxB_H_Pos := GroupFx.FxB_Clamp_Pos;]]></ST>
     </Implementation>
     <Action Name="Clamp" Id="{6e3df157-7972-4f49-b719-7172aaa8a34f}">
       <Implementation>
