@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="GrobelVariable" Id="{5458de90-c2fd-4ee2-bd81-3f63aa7789d1}">
+    <Declaration><![CDATA[VAR_GLOBAL
+// 雜項
+	
+	ProgramReset:BOOL;
+	
+	// 機器已回零
+	bHome : BOOL;
+	
+	// 
+	LogFx : FxErrPos;
+END_VAR
+
+VAR_GLOBAL PERSISTENT
+	// 運轉次數
+	uRunCounter:UDINT;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

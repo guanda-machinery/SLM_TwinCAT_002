@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="LightTower" Id="{182d3297-b525-43be-a68b-24728cd4be9a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM LightTower
+VAR
+	tmr1: TON := (PT := TIME#650MS);
+	tmr2: TON := (PT := TIME#650MS);
+	GreenLight: BOOL;
+	YellowLight: BOOL;
+	RedLight: BOOL;
+	Buzzy: BOOL;
+	tmr10: TON;
+	halfPass: BOOL;
+	tmr1_tmp: BOOL;
+	trig: R_TRIG;
+	tmr11: TOF;
+	tmr5: TON;
+	tmr6: TON;
+END_VAR
+
+VAR_OUTPUT
+	clk : BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF tmr1.Q <> tmr1_tmp THEN
+	tmr1_tmp := tmr1.Q;
+	halfPass := TRUE;
+END_IF
+
+IF tmr10.Q THEN
+	halfPass:=FALSE;
+END_IF
+
+// trig(clk:=door);
+// IF trig.Q AND NOT(tmr11.q)THEN
+// 	halfPass := TRUE;
+// END_IF
+// 
+// tmr11(in:= door, PT:=T#1S);
+
+CASE hmi.State OF
+	// 緊急停止
+	MachineState.emergency :
+		GreenLight := FALSE;
+		YellowLight := FALSE;
+		RedLight := tmr1.Q;
+		buzzy := FALSE;
+		tmr1.PT := T#1S200MS;
+		tmr10.PT := T#50MS;
+		
+	// 安全光柵觸發
+	MachineState.Door :
+		GreenLight := FALSE;
+		YellowLight := NOT(door) AND tmr1.Q;
+		RedLight := door AND tmr1.Q;
+		buzzy := tmr1.Q AND door;
+		tmr1.PT := T#1S200MS;
+		tmr10.PT := T#50MS;	
+	
+	// 發生錯誤
+	MachineState.error :
+		GreenLight := FALSE;
+		YellowLight := FALSE;
+		RedLight := tmr1.Q;
+		buzzy := tmr1.Q;
+	
+	// 自動模式
+	MachineState.auto_mode :
+		GreenLight := tmr1.Q;
+		YellowLight := FALSE;
+		RedLight := FALSE;
+		buzzy := halfPass AND ExpConver.Feed_bBuzy;
+		tmr1.PT := T#833MS;
+		tmr10.PT := T#50MS;
+		
+	MachineState.auto_mode_wait :
+		GreenLight := tmr1.Q;
+		YellowLight := NOT tmr1.Q;
+		RedLight := FALSE;
+		buzzy := halfPass AND ExpConver.Feed_bBuzy;
+		tmr1.PT := T#833MS;
+		tmr10.PT := T#50MS;
+		
+	// 自動模式
+// 	MachineState.Remote_Auto_mode :
+// 		GreenLight := tmr1.Q;
+// 		YellowLight := FALSE;
+// 		RedLight := FALSE;
+// 		buzzy := halfPass AND ExpConver.Feed_bBuzy;
+// 		tmr1.PT := T#650MS;
+// 		tmr10.PT := T#50MS;
+		
+	// 手動模式
+	MachineState.manual_mode :
+		GreenLight := FALSE;
+		YellowLight := tmr1.Q;
+		RedLight := FALSE;
+		
+//		IF axis.AxisMove THEN
+//			buzzy := halfPass AND NOT hmi.MainPage_Pause;
+//		ELSE
+//			buzzy := FALSE;
+//		END_IF
+		tmr1.PT := T#650MS;
+		
+	// 歸零模式
+	MachineState.Homing_mode :
+		GreenLight := tmr1.Q;
+		YellowLight := FALSE;
+		RedLight := FALSE;
+		buzzy := halfPass AND NOT(hmi.Auto_Pause);
+		tmr1.PT := T#650MS;
+		tmr10.PT := T#100MS;
+		
+	// 待命
+	MachineState.standby :
+		GreenLight := TRUE;
+		YellowLight := FALSE;
+		RedLight := FALSE;
+		buzzy := FALSE;
+		tmr10.PT := T#50MS;
+	
+END_CASE
+
+tmr2.PT := tmr1.PT;
+tmr1(in:=NOT tmr2.q);
+tmr2(in:=tmr1.q);
+
+tmr5(in:=NOT tmr6.q, pt:=T#50MS);
+tmr6(in:=tmr5.q, pt:=T#50ms);
+
+tmr10(in:=halfPass);
+
+clk := tmr1.q;
+
+io.q113:= GreenLight;
+io.q114:= YellowLight;
+io.q115:= RedLight;
+io.q116:= buzzy;
+
+
+// 第2組
+// io3.y107:= GreenLight;
+// io3.y108:= YellowLight;
+// io3.y106:= RedLight;
+// io3.Y109:= buzzy;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

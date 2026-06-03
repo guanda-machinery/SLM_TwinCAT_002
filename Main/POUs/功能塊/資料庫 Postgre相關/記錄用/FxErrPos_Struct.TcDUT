@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="FxErrPos_Struct" Id="{2201aaa5-bc05-4b37-a53e-f2eefd1463ec}">
+    <Declaration><![CDATA[TYPE FxErrPos_Struct :
+STRUCT
+	fx_a_pos	: LREAL;
+	ex_enc_pos	: LREAL;
+	data_time	: DT;
+	sheetid		: STRING(36);
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

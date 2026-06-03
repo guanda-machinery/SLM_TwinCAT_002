@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="Sql_TestData" Id="{49c1b3d6-d307-40e4-a0cb-7ac4325adc6f}">
+    <Declaration><![CDATA[TYPE Sql_TestData :
+STRUCT
+	ID : LINT;
+	LogTime : DATE_AND_TIME;
+	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

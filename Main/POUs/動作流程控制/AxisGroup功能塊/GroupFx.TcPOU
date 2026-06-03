@@ -1,0 +1,2976 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="GroupFx" Id="{cd7905a7-ae1f-43d2-aaa0-c41f5ea6d6c3}" SpecialFunc="None">
+    <Declaration><![CDATA[// B -> A
+PROGRAM GroupFx 
+VAR_INPUT
+	// 模塊名稱 (錯誤警報用)
+	name : WSTRING := "FxA_Move";
+
+	
+END_VAR
+VAR_OUTPUT
+	bDone : BOOL;
+	bError : BOOL;
+	bBuzy : BOOL;
+	
+	b_AC_Clamp		: BOOL;
+	b_BD_Clamp		: BOOL;
+	
+	// 下壓A動作流程
+	step_A_P: Sub_Step;
+	// 下壓B動作流程
+	step_B_P: Sub_Step;
+	// 下壓C動作流程
+	step_C_P: Sub_Step;
+	// 下壓D動作流程
+	step_D_P: Sub_Step;
+	// 下壓C動作流程
+	step_AC_C: Sub_Step;
+	// 下壓D動作流程
+	step_BD_C: Sub_Step;
+END_VAR
+VAR
+	step : INT;
+	
+	
+{region "============= 輸入  ============="}
+	// 下壓A 原點
+	pressureA_home_sensor		: BOOL; 
+	// 下壓A 壓力
+	pressureA_pressure_sensor	: BOOL; 
+	// 下壓B 原點
+	pressureB_home_sensor		: BOOL; 
+	// 下壓B 壓力
+	pressureB_pressure_sensor	: BOOL; 
+	// 下壓C 原點
+	pressureC_home_sensor		: BOOL; 
+	// 下壓C 壓力
+	pressureC_pressure_sensor	: BOOL; 
+	// 下壓D 原點
+	pressureD_home_sensor		: BOOL; 
+	// 下壓D 壓力
+	pressureD_pressure_sensor	: BOOL;
+	
+	// 油壓幫浦過載
+	Oli_Pump_Overload: BOOL;
+	// 油壓散熱幫浦過載
+	OliCooling_Pump_Overload: BOOL;
+	// 油壓幫浦已開啟
+	OliCooling_Pump_PowerOn: BOOL;
+	
+	
+	// A側 夾輪內側  ( 材料原點A )
+	AC_in_sensor : BOOL;
+	// A側 夾輪外側  ( A側入口感應器 )
+	AC_out_sensor : BOOL;
+	
+  	// B側 夾輪內側  ( 材料原點B )
+	BD_in_sensor : BOOL;
+	// B側 夾輪外側  ( B側入口感應器 )
+	BD_out_sensor : BOOL;
+	
+// 被動夾輪A 油壓位置
+	FxA_Clamp_Pos: LREAL;
+	// 被動夾輪B 油壓位置
+	FxB_Clamp_Pos: LREAL;
+
+{region "============= 輸出  ============="}
+	o_PressureA_Up:BOOL;
+	o_PressureA_Dn:BOOL;
+	
+	o_PressureB_Up:BOOL;
+	o_PressureB_Dn:BOOL;
+	
+	o_PressureC_Up:BOOL;
+	o_PressureC_Dn:BOOL;
+	
+	o_PressureD_Up:BOOL;
+	o_PressureD_Dn:BOOL;
+	
+	o_AC_Clamp_Close	: BOOL;
+	o_AC_Clamp_Open	: BOOL;
+	o_BD_Clamp_Close	: BOOL;
+	o_BD_Clamp_Open	: BOOL;
+
+	o_Oil_Pressure_Pump	:BOOL;
+		
+	o_AC_Encoder_enable: BOOL;
+	o_AC_Encoder_disable: BOOL;
+	o_BD_Encoder_enable: BOOL;
+	o_BD_Encoder_disable: BOOL;
+	
+{endregion}
+		 
+ 	tmr01: TON;
+	tmr02: TON;
+	
+	tmr101: TON;
+	tmr102: TON;
+	tmr103: TON;
+	tmr104: TON;
+	tmr105: TON;
+	tmr106: TON;
+	
+	tmr111: TON;
+	tmr112: TON;
+	tmr113: TON;
+	tmr114: TON;
+	tmr115: TON;
+	tmr116: TON;
+	
+	tmr_wdt : TON;
+	
+	tmr_Oil_Pressure_Pump : TOF;
+
+
+	
+	// 上次AC夾輪位置
+	FxA_Clamp_OldPos: LREAL;
+	// 上次BD夾輪位置
+	FxB_Clamp_OldPos: LREAL;
+	
+	// AC移動位置
+	AC_moveDis : LREAL := 0;
+	
+	// BD移動位置
+	BD_moveDis : LREAL := 0;
+	
+	
+	
+	AC_Home_sensor: BOOL;
+	BD_Home_sensor: BOOL;
+	
+	AC_Outsite_sensor: BOOL;
+	BD_Outsite_sensor: BOOL;
+	
+	b_AC_HOME		: BOOL;
+	b_BD_HOME		: BOOL;
+	
+	
+	
+	AC_StartPos: LREAL;
+	BD_StartPos: LREAL;
+	
+	
+
+	
+	boot : BOOL := TRUE;
+	FxA_Clamp_Spd: LREAL;
+	FxB_Clamp_Spd: LREAL;
+	Estop_Trig: R_TRIG;
+	
+	// 使用編碼器切換
+	_UserEncA: BOOL;
+	
+	_TargetPos	: LREAL;
+	
+	strmem1 : WStrMem;
+	
+	AC_Encoder_Active: BOOL;
+	BD_Encoder_Active: BOOL;
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[input();
+Encoder();
+
+
+
+
+bBuzy := step > 0 AND step < 10000;
+bError :=  step >= 10000;
+IF bBuzy OR bError THEN
+	bDone := FALSE;
+END_IF
+
+IF (EStop OR SystemError) THEN
+	IF bBuzy THEN
+		step := step  + 10000;
+	END_IF
+	
+	IF step_A_P.bBuzy THEN
+		step_A_P.step := step_A_P.step  + 10000;
+	END_IF
+	
+	IF step_B_P.bBuzy THEN
+		step_B_P.step := step_B_P.step  + 10000;
+	END_IF
+	
+	IF step_C_P.bBuzy THEN
+		step_C_P.step := step_C_P.step  + 10000;
+	END_IF
+	
+	IF step_D_P.bBuzy THEN
+		step_D_P.step := step_D_P.step  + 10000;
+	END_IF
+	
+	IF step_AC_C.bBuzy THEN
+		step_AC_C.step := step_AC_C.step  + 10000;
+	END_IF
+	
+	IF step_BD_C.bBuzy THEN
+		step_BD_C.step := step_BD_C.step  + 10000;
+	END_IF
+END_IF
+
+IF Fx.bBuzy THEN
+	IF o_AC_Clamp_Close AND NOT IO.i509 THEN
+		o_AC_Clamp_Close := FALSE;
+		pMsg.Push_Error("GroupFX:工件已脫離AC夾輪感應器");
+	ELSIF o_BD_Clamp_Close AND NOT IO.i510 THEN
+		o_BD_Clamp_Close := FALSE;
+		pMsg.Push_Error("GroupFX:工件已脫離BD夾輪感應器");
+	END_IF
+END_IF
+
+
+IF (EStop OR SystemError) THEN
+	bDone := FALSE;
+	o_PressureA_Up		:=FALSE;
+	o_PressureA_Dn		:=FALSE;
+	o_PressureB_Up		:=FALSE;
+	o_PressureB_Dn		:=FALSE;
+	o_PressureC_Up		:=FALSE;
+	o_PressureC_Dn		:=FALSE;
+	o_PressureD_Up		:=FALSE;
+	o_PressureD_Dn		:=FALSE;
+	
+	o_AC_Clamp_Close	:=FALSE;
+	o_AC_Clamp_Open		:=FALSE;
+	o_BD_Clamp_Close	:=FALSE;
+	o_BD_Clamp_Open		:=FALSE;
+	
+	o_Oil_Pressure_Pump :=FALSE;
+END_IF
+
+Pump_Close();
+
+
+
+Step_00_Start_Pump();
+Step_BD_00_Clamp();
+Step_BD_01_UnClamp();
+Step_BD_02_Stop();
+Step_BD_03_Home();
+
+Step_AC_00_Clamp();
+Step_AC_01_UnClamp();
+Step_AC_02_Stop();
+Step_AC_03_Home();
+
+Step_10_MoveTo();
+Step_20_Find_Home();
+Step_21_Set_A_Enc();
+
+Step_A_Push_UnPush();
+Step_B_Push_UnPush();
+Step_C_Push_UnPush();
+Step_D_Push_UnPush();
+
+timer();
+
+output();
+
+]]></ST>
+    </Implementation>
+    <Folder Name="內部功能" Id="{460ccaff-f0de-4f4a-ae51-469198ad2c0c}" />
+    <Method Name="A_Press" Id="{f82ae2d7-18fc-4e60-8ad5-24798a574025}">
+      <Declaration><![CDATA[METHOD A_Press : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_A_P.bDone := FALSE;
+step_A_P.Step:=1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="A_UnPress" Id="{90c5d193-64e1-40a8-a620-a7d9371bce0f}">
+      <Declaration><![CDATA[METHOD A_UnPress : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_A_P.bDone := FALSE;
+step_A_P.Step:=100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AC_Clamp" Id="{d5760080-08df-4ecf-af4a-5bef3498c1b1}">
+      <Declaration><![CDATA[METHOD AC_Clamp : BOOL
+VAR_INPUT
+	// 前進到位置
+	Pos : LREAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+AC_moveDis := ABS(Pos);
+
+step_AC_C.bDone := FALSE;
+step_AC_C.Step := 1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AC_Home" Id="{d1ee4dc0-eb7d-4c45-8134-12870d699528}">
+      <Declaration><![CDATA[METHOD AC_Home : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+b_AC_HOME := FALSE;
+step_AC_C.bDone := FALSE;
+step_AC_C.Step := 300;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AC_Stop" Id="{3bdda184-c990-481e-bf47-9ef1b08b8228}">
+      <Declaration><![CDATA[METHOD AC_Stop : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_AC_C.bDone := FALSE;
+step_AC_C.Step := 200;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="AC_UnClamp" Id="{9b3b73a9-40ad-4181-bc0f-b9469ceaeada}">
+      <Declaration><![CDATA[METHOD AC_UnClamp : BOOL
+VAR_INPUT
+	// 後退距離
+	Dis : REAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+AC_moveDis := ABS(Dis);
+
+step_AC_C.bDone := FALSE;
+step_AC_C.Step := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="B_Press" Id="{d3f0bb7d-1776-4e78-b81d-dbbc616b5d53}">
+      <Declaration><![CDATA[METHOD B_Press : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_B_P.bDone := FALSE;
+step_B_P.Step:=1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="B_UnPress" Id="{aa493dc3-71f1-46ed-bcb9-00711252eb65}">
+      <Declaration><![CDATA[METHOD B_UnPress : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_B_P.bDone := FALSE;
+step_B_P.Step:=100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="BD_Clamp" Id="{f32d3e6e-c2ec-4709-8ceb-db86352f7d37}">
+      <Declaration><![CDATA[METHOD BD_Clamp : BOOL
+VAR_INPUT
+	// 前進到位置
+	Pos: LREAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+BD_moveDis := ABS(Pos);
+
+step_BD_C.bDone := FALSE;
+step_BD_C.Step := 1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="BD_Home" Id="{710d74a1-7375-49c8-96e8-154214654e56}">
+      <Declaration><![CDATA[METHOD BD_Home : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+b_AC_HOME := FALSE;
+
+step_BD_C.bDone := FALSE;
+step_BD_C.Step := 300;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="BD_Stop" Id="{8657eee9-3da6-45e1-b8f3-8adf434e5bd3}">
+      <Declaration><![CDATA[METHOD BD_Stop : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_BD_C.bDone := FALSE;
+step_BD_C.Step := 200;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="BD_UnClamp" Id="{1cbe238d-5458-4421-abb6-995d7ff9e682}">
+      <Declaration><![CDATA[METHOD BD_UnClamp : BOOL
+VAR_INPUT
+	// 後退距離
+	Dis : REAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+BD_moveDis := ABS(Dis);
+step := 1;
+
+step_BD_C.bDone := FALSE;
+step_BD_C.Step := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="C_Press" Id="{881913f1-91b1-4408-a6fa-33d83deeb893}">
+      <Declaration><![CDATA[METHOD C_Press : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_C_P.bDone := FALSE;
+step_C_P.Step:=1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="C_UnPress" Id="{729dd88b-2b83-4242-9240-0338568fc20c}">
+      <Declaration><![CDATA[METHOD C_UnPress : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_C_P.bDone := FALSE;
+step_C_P.Step:=100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="D_Press" Id="{2b7646a9-0f76-4193-acf4-129fa2e4e5ee}">
+      <Declaration><![CDATA[METHOD D_Press : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_D_P.bDone := FALSE;
+step_D_P.Step:=1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="D_UnPress" Id="{01a498ba-7e88-4fb5-98e0-45af1d078f7d}">
+      <Declaration><![CDATA[METHOD D_UnPress : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_D_P.bDone := FALSE;
+step_D_P.Step:=100;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Encoder" Id="{56963486-1f8f-4658-9e5b-d9917bc3cfb6}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[(* =============== 夾輪位置 =============== *)
+FxA_Clamp_Pos := 
+	MaCfg.FxA_Clamp_Zero_Pos - (UDINT_TO_REAL(Axis.Encoder_FxA_Clamp.MDP5001_511_Input.MDP5001_511_Counter_value) - 10000) * 0.01;
+
+FxB_Clamp_Pos := 
+	MaCfg.FxB_Clamp_Zero_Pos - ((UDINT_TO_REAL(Axis.Encoder_FxB_Clamp.MDP5001_511_Input.MDP5001_511_Counter_value) - 10000) * 0.01);
+
+FxA_Clamp_Spd := (FxA_Clamp_Pos - FxA_Clamp_OldPos) * 100;
+
+FxB_Clamp_Spd := (FxB_Clamp_Pos - FxB_Clamp_OldPos) * 100;
+
+FxA_Clamp_OldPos := FxA_Clamp_Pos;
+
+FxB_Clamp_OldPos := FxB_Clamp_Pos;
+
+FxA_Exp_Pos := (TO_LREAL(axis.Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value) - 100000) * MaCfg.FxA_Enc_Ext_Scale;
+
+FxB_Exp_Pos := (TO_LREAL(axis.Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value) - 100000) * MaCfg.FxB_Enc_Ext_Scale;
+
+IF _UserEncA THEN
+	Fx_Exp_Pos := FxA_Exp_Pos;
+ELSE
+	Fx_Exp_Pos := FxB_Exp_Pos;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Fx_Home" Id="{9c2c74f4-e82e-4baa-b643-a79afb0dc84a}">
+      <Declaration><![CDATA[METHOD Fx_Home : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 2000;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Fx_Move" Id="{a0cdd9df-85ba-4ed5-bc88-ad5aad120bed}">
+      <Declaration><![CDATA[METHOD Fx_Move : BOOL
+VAR_INPUT
+	Pos : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_TargetPos := Pos;
+bDone := FALSE;
+step := 1000;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Fx_Set_A_Enc" Id="{3f3ddac9-bcb0-4070-8d12-9345305d8ec0}">
+      <Declaration><![CDATA[METHOD Fx_Set_A_Enc : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 2100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Fx_Sync_EncA_2_EncB" Id="{e829be8c-b607-4d3e-8478-eb0a7e7ed4b2}">
+      <Declaration><![CDATA[METHOD Fx_Sync_EncA_2_EncB : BOOL
+VAR_INPUT
+END_VAR
+
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF 
+	Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value <> Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value AND
+	NOT Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done 
+	THEN
+		Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Set_counter_value := 
+				Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value;
+		Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := TRUE;
+		Fx_Sync_EncA_2_EncB := FALSE;
+ELSIF 
+	Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value <> Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value AND 
+	Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done 
+	THEN
+		Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		Fx_Sync_EncA_2_EncB := FALSE;
+ELSIF
+	Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value = Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value
+	THEN
+		Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		Fx_Sync_EncA_2_EncB := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Fx_Sync_EncB_2_EncA" Id="{037cd22a-7760-48cb-bdcd-2cc26854975e}">
+      <Declaration><![CDATA[METHOD Fx_Sync_EncB_2_EncA : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF 
+	Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value <> Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value AND
+	NOT Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done 
+	THEN
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Set_counter_value := 
+				Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value;
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := TRUE;
+		Fx_Sync_EncB_2_EncA := FALSE;
+ELSIF 
+	Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value <> Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value AND 
+	Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done 
+	THEN
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		Fx_Sync_EncB_2_EncA := FALSE;
+ELSIF
+	Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value = Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value
+	THEN
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		Fx_Sync_EncB_2_EncA := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="input" Id="{3348f645-a80a-4e01-80ba-b842c76980d7}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[// 下壓A 原點
+pressureA_home_sensor := NOT IO.i501;
+// 下壓B 原點
+pressureB_home_sensor  := NOT IO.i502;
+// 下壓C 原點
+pressureC_home_sensor  := NOT IO.i503;
+// 下壓D 原點
+pressureD_home_sensor  := NOT IO.i504;
+
+
+// 下壓A 壓力
+pressureA_pressure_sensor := IO.i505;
+// 下壓B 壓力
+pressureB_pressure_sensor  := IO.i506;
+// 下壓C 壓力
+pressureC_pressure_sensor  := IO.i507;
+// 下壓D 壓力
+pressureD_pressure_sensor  := IO.i508;
+
+
+// 油壓幫浦過載
+Oli_Pump_Overload := IO.i209;
+// 油壓散熱幫浦過載
+OliCooling_Pump_Overload := IO.i210;
+// 油壓幫浦已開啟
+OliCooling_Pump_PowerOn := NOT Oli_Pump_Overload AND NOT Oli_Pump_Overload AND o_Oil_Pressure_Pump;
+
+
+// A側 夾輪內側  (材料整料點)
+// AC_in_sensor  := IO.i512;		// 原始設計 (26.01.28)
+AC_in_sensor  := IO.i713;		// 換sick	(26.01.28) 轉極性
+// AC_in_sensor  := IO.i710;			// 新增下方原點		(26.01.28) X會被上方鋁件干擾
+AC_out_sensor := IO.i709;
+
+// B側 夾輪內側 (材料脫離點)
+BD_in_sensor  := IO.i511;
+BD_out_sensor  := IO.i711;
+
+
+// AC 夾輪座原點
+AC_Home_sensor	:= IO.i509;
+// BD 夾輪座原點
+BD_Home_sensor	:= IO.i510;
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="output" Id="{0610ef06-308c-45b7-b722-7dde8f757d39}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[// 下壓A 放鬆
+IO.q208 := o_PressureA_Up;
+// 下壓A 夾緊
+IO.q209 := o_PressureA_Dn;
+
+// 下壓B 放鬆
+IO.q211 := o_PressureB_Up;
+// 下壓B 夾緊
+IO.q210 := o_PressureB_Dn;
+
+// 下壓C 放鬆
+IO.q213 := o_PressureC_Up;
+// 下壓C 夾緊
+IO.q212 := o_PressureC_Dn;
+
+// 下壓D 放鬆
+IO.q215 := o_PressureD_Up;
+// 下壓D 夾緊
+IO.q214 := o_PressureD_Dn;
+
+
+
+
+// AC側 夾輪 夾緊
+IO.q301 := o_AC_Clamp_Close;
+// AC側 夾輪 放鬆
+IO.q302 := o_AC_Clamp_Open;
+
+IO.q311 := o_AC_Encoder_enable;
+IO.q312 := o_AC_Encoder_disable;
+
+IF o_AC_Encoder_enable THEN
+	AC_Encoder_Active := TRUE;
+ELSIF o_AC_Encoder_disable THEN
+	AC_Encoder_Active := FALSE; 
+END_IF
+
+// BD側 夾輪 夾緊
+IO.q303 := o_BD_Clamp_Close;
+// BD側 夾輪 放鬆
+IO.q304 := o_BD_Clamp_Open;
+
+IO.q313 := o_BD_Encoder_enable;
+IO.q314 := o_BD_Encoder_disable;
+IF o_BD_Encoder_enable THEN
+	BD_Encoder_Active := TRUE;
+ELSIF o_BD_Encoder_disable THEN
+	BD_Encoder_Active := FALSE; 
+END_IF
+
+// 油壓機
+IO.q202 := o_Oil_Pressure_Pump;
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Pump_Close" Id="{ee3cc342-089f-451e-b205-f6c55611b14d}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[tmr_Oil_Pressure_Pump(
+	IN := 
+		IO.q208 OR IO.q209 OR IO.q210 OR IO.q211 OR
+		IO.q212 OR IO.q213 OR IO.q214 OR IO.q215 OR
+		IO.q301 OR IO.q302 OR IO.q303 OR IO.q304,
+	PT := T#30M );
+// 油壓閒置關閉
+IF o_Oil_Pressure_Pump AND NOT tmr_Oil_Pressure_Pump.Q THEN
+	o_Oil_Pressure_Pump := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_00_Start_Pump" Id="{13b8780f-5eb8-47c8-b239-6bbbc8e2f222}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[{}
+CASE step OF
+	// FxA動作前檢查檢查
+	1: 
+		IF NOT  Oli_Pump_Overload THEN
+			step := step + 1;
+		ELSE
+			pMsg.Push_Error("油壓幫浦保護器異常 ");
+		END_IF
+		
+	2:
+		IF NOT  OliCooling_Pump_Overload THEN
+			step := step + 1;
+		ELSE
+			pMsg.Push_Error("油壓散熱幫浦保護器異常 ");
+		END_IF
+		
+	3:
+		step := 10;
+		
+		
+	10: // 確認油壓機啟動狀態
+		IF o_Oil_Pressure_Pump THEN
+			step := 20;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+		
+	11: // 設定閥體位置，防止油壓開啟時誤動作
+		// FxA
+		o_AC_Clamp_Close	:= FALSE;
+		o_AC_Clamp_Open		:= FALSE;
+		// FxB
+		o_BD_Clamp_Close	:= FALSE;
+		o_BD_Clamp_Open		:= FALSE;
+		step := step + 1;
+		
+	12:
+		tmr01.IN := TRUE;
+		tmr01.PT := T#200MS;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	13:// 開啟油壓
+		o_Oil_Pressure_Pump := TRUE;
+		step := step + 1;
+		
+	14:
+		tmr01.IN := TRUE;
+		tmr01.PT := T#1S;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	15:
+		step := 20;
+		
+	20:
+		bdone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_10_MoveTo" Id="{05bea816-0b26-4c20-afcd-6a449c739678}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	1000:
+		step := 1010;
+		
+(*	================================
+				移到點位
+	================================*)
+	1010:
+		Fx.AbsMove(_TargetPos - 10, spdc.HighSpeed_FX);
+		step := step + 1;
+		
+	1011:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1012:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1013:
+		tmr01.IN := NOT Fx.bBuzy;
+		tmr01.PT := T#1.5S;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	1014:
+		LogFx.Write(  fx_a_pos := Fx.Pos, ex_enc_pos := Fx_Exp_Pos);
+		step := 1020;
+
+(*	================================
+				位置補償(修正)
+	================================*)
+	1020:
+		IF ABS(_TargetPos - Fx_Exp_Pos) > 0.5  THEN
+			step := step + 1;
+		ELSE
+			step := 1030;
+		END_IF
+		
+	1021: // 移動鋼樑到 材料整料點 慢速
+		Fx.RelMove(_TargetPos - Fx_Exp_Pos, 20);
+		step := step + 1;
+		
+	1022:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1023:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1024:
+		tmr01.IN := NOT Fx.bBuzy;
+		tmr01.PT := T#500MS;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	1025:
+		step := 1020;
+		
+		
+(*	================================
+				移動結束
+	================================*)
+	1030:
+		Fx.SetPos(Fx_Exp_Pos);
+		step := step + 1;
+		
+	1031:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1032:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1033:
+		step := 1040;
+		
+	1040:
+		IF IO.i709 AND NOT AC_Encoder_Active THEN
+			step := step + 1;
+		ELSE
+			step := 1050;
+		END_IF
+		
+	1041:
+		o_AC_Encoder_enable :=TRUE;
+		o_AC_Encoder_disable :=FALSE;
+		
+		tmr01.IN := TRUE;
+		tmr01.PT := T#2S;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	1042:
+		o_AC_Encoder_enable :=FALSE;
+		step := step + 1;
+		
+	1043:
+		IF Fx_Sync_EncB_2_EncA() THEN
+			step := step + 1;
+		END_IF
+		
+	1044:
+		step := 1050;
+		
+		
+	1050:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_20_Find_Home" Id="{6efa487d-5a05-493e-a182-1b9c14fca49e}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	// FxA動作前檢查檢查
+	2000: // 確認材料進入FxA的夾輪
+		IF o_BD_Clamp_Close THEN
+			step := step + 1;
+		ELSE
+			step := step + 10000;
+			pMsg.Push_Error(WStrConcat(name, ":BD夾輪未夾緊 "));
+		END_IF
+		
+	2001:
+		IF NOT o_AC_Clamp_Close THEN
+			step := step + 1;
+		ELSE
+			step := step + 10000;
+			pMsg.Push_Error(WStrConcat(name, ":AC夾輪已夾緊 "));
+		END_IF
+		
+	2002:
+		_UserEncA := FALSE;
+		step := 2010;
+		
+(*	================================
+		快速後退 材料 到 脫離原點
+	================================*)
+	2010:
+		IF AC_in_sensor THEN
+			step := step + 1;
+		ELSE
+			step := 2020;
+		END_IF
+		
+	2011:
+		o_BD_Encoder_enable		:= TRUE;
+		o_BD_Encoder_disable	:= FALSE;
+		Fx.RelMove(-10000, SpdC.HighSpeed_FX);
+		step := step + 1;
+		
+	2012:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2013:
+		IF NOT AC_in_sensor THEN
+			step := step + 1;
+			Fx.Stop(SpdC.HighSpeed_FX);
+		ELSIF Fx.bDone THEN
+			step := step + 10000;
+			pMsg.Push_Error(WStrConcat(name, ":未找到材料脫離點 "));
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2014:
+		step := 2020;
+
+(*	================================
+		慢速前進 材料 到 進入原點
+	================================*)
+	2020:
+		IF NOT Fx.bBuzy THEN
+			step := step + 1;
+		END_IF
+		
+	2021: // 移動鋼樑到 材料整料點 慢速
+		Fx.RelMove(800, SpdC.HighSpeed_FX / 4);
+		step := step + 1;
+		
+	2022:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2023:
+		IF AC_in_sensor THEN
+			step := step + 1;
+			Fx.Stop(SpdC.HighSpeed_FX);
+		ELSIF Fx.bDone THEN
+			step := step + 10000;
+			pMsg.Push_Error(WStrConcat(name, ":未找到材料脫離點 "));
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2024:
+		tmr01.IN := NOT Fx.bBuzy;
+		tmr01.PT := T#500MS;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2025:
+		step := 2030;
+		
+		
+(*	================================
+		爬行(超慢速)後退 材料 到 離開原點
+	================================*)
+	2030:
+		Fx.RelMove(-500, SpdC.DotSpeed);
+		step := step + 1;
+		
+	2031:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2032:
+		IF NOT AC_in_sensor THEN
+			step := step + 1;
+			Fx.Stop(SpdC.HighSpeed_FX);
+		ELSIF Fx.bDone THEN
+			step := step + 10000;
+			pMsg.Push_Error(WStrConcat(name, ":未找到材料脫離點 "));
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2033:
+		tmr01.IN := NOT Fx.bBuzy;
+		tmr01.PT := T#500MS;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2034:
+		step := 2040;
+		
+(*	================================
+		移動鋼樑 到 原點偏移位置
+	================================*)
+	2040:  // 
+		Fx.RelMove(posc.Fx_HomeOffset, SpdC.HighSpeed_FX);
+		step := step + 1;
+		
+	2041:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2042:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2043:
+		tmr01.IN := TRUE;
+		tmr01.PT := T#500MS;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2044:
+		step := 2050;
+
+(*	================================
+			歸零FX位置
+	================================*)
+	2050:
+		Fx.Homing();
+		step := step + 1;
+		
+	2051:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2052:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2053:
+		step := 2060;
+
+(*	================================
+			歸零測長盤
+	================================*)
+
+	2060:
+		tmr01.IN := TRUE;
+		tmr01.PT := T#500MS;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2061:
+		o_BD_Encoder_enable		:= FALSE;
+		step := step + 1;
+		
+	2062:
+		step := 2070;
+		
+	2070:
+		Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Set_counter_value := 100000;
+		Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := TRUE;
+		step := step + 1;
+		
+	2071:
+		IF Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2072:
+		step := 2090;
+		
+		
+	2090:
+		bDone := TRUE;
+		AC_moveDis := 0;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_21_Set_A_Enc" Id="{d87e476b-11ac-4904-b119-81aa7725eabf}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	2100:
+		o_AC_Encoder_enable :=TRUE;
+		o_AC_Encoder_disable :=FALSE;
+		
+		tmr01.IN := TRUE;
+		tmr01.PT := T#2S;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2101:
+		o_AC_Encoder_enable :=FALSE;
+		step := step + 1;
+		
+	2102:
+		step := 2110;
+		
+		
+	2110:
+		Fx.RelMove( 20, spdc.HomeSpeed);	
+		step := step + 1;
+		
+	2111:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2112:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2113:
+		step := 2120;
+		
+	2120:
+		Fx.RelMove( -40, spdc.HomeSpeed);	
+		step := step + 1;
+		
+	2121:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2122:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2123:
+		step := 2130;
+		
+	2130:
+		Fx.RelMove( 20, spdc.HomeSpeed);	
+		step := step + 1;
+		
+	2131:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2132:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2133:
+		step := 2140;	
+	
+	2140:
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Set_counter_value := TO_UDINT(FxB_Exp_Pos / 0.144625) + 100000;
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := TRUE;
+		step := step + 1;
+		
+	2141:
+		IF Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2142:
+		_UserEncA := TRUE;
+		step := 2150;
+		
+		
+	2150:
+		o_BD_Encoder_enable		:= FALSE;
+		o_BD_Encoder_disable	:= TRUE;
+		
+		tmr01.IN := TRUE;
+		tmr01.PT := T#1S;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2151:
+		o_BD_Encoder_disable := FALSE;
+		step := step + 1;
+		
+	2152:
+		step := 2160;
+		
+	2160:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_21_Set_A_Enc_2" Id="{fedfbcae-909c-4f7d-849b-eb258029bf91}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	2100:
+		o_AC_Encoder_enable :=TRUE;
+		o_AC_Encoder_disable :=FALSE;
+		
+		tmr01.IN := TRUE;
+		tmr01.PT := T#2S;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2101:
+		o_AC_Encoder_enable :=FALSE;
+		step := step + 1;
+		
+	2102:
+		step := 2110;
+		
+		
+	2110:
+		Fx.RelMove( 20, spdc.HomeSpeed);	
+		step := step + 1;
+		
+	2111:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2112:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2113:
+		step := 2120;
+		
+	2120:
+		Fx.RelMove( -40, spdc.HomeSpeed);	
+		step := step + 1;
+		
+	2121:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2122:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2123:
+		step := 2130;
+		
+	2130:
+		Fx.RelMove( 20, spdc.HomeSpeed);	
+		step := step + 1;
+		
+	2131:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2132:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2133:
+		step := 2140;	
+	
+	2140:
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Set_counter_value := TO_UDINT(FxB_Exp_Pos / 0.144625) + 100000;
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := TRUE;
+		step := step + 1;
+		
+	2141:
+		IF Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2142:
+		_UserEncA := TRUE;
+		step := 2150;
+		
+		
+	2150:
+		o_BD_Encoder_enable		:= FALSE;
+		o_BD_Encoder_disable	:= TRUE;
+		
+		tmr01.IN := TRUE;
+		tmr01.PT := T#1S;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2151:
+		o_BD_Encoder_disable := FALSE;
+		step := step + 1;
+		
+	2152:
+		step := 2160;
+		
+	2160:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_22_SyncEncA_2_EncB" Id="{109d3279-e534-43da-a575-775cca3103f1}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	2200:
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Set_counter_value := 
+			Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value;
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := TRUE;
+		step := step + 1;
+		
+	2201:
+		IF Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2202:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_23_SyncEncB_2_EncA" Id="{0eb35c65-ee6e-40ce-96e1-520af76e9c2a}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	2100:
+		o_AC_Encoder_enable :=TRUE;
+		o_AC_Encoder_disable :=FALSE;
+		
+		tmr01.IN := TRUE;
+		tmr01.PT := T#2S;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2101:
+		o_AC_Encoder_enable :=FALSE;
+		step := step + 1;
+		
+	2102:
+		step := 2110;
+		
+		
+	2110:
+		Fx.RelMove( 20, spdc.HomeSpeed);	
+		step := step + 1;
+		
+	2111:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2112:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2113:
+		step := 2120;
+		
+	2120:
+		Fx.RelMove( -40, spdc.HomeSpeed);	
+		step := step + 1;
+		
+	2121:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2122:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2123:
+		step := 2130;
+		
+	2130:
+		Fx.RelMove( 20, spdc.HomeSpeed);	
+		step := step + 1;
+		
+	2131:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2132:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2133:
+		step := 2140;	
+	
+	2140:
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Set_counter_value := TO_UDINT(FxB_Exp_Pos / 0.144625) + 100000;
+		Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := TRUE;
+		step := step + 1;
+		
+	2141:
+		IF Encoder_FxA_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			Encoder_FxA_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2142:
+		_UserEncA := TRUE;
+		step := 2150;
+		
+		
+	2150:
+		o_BD_Encoder_enable		:= FALSE;
+		o_BD_Encoder_disable	:= TRUE;
+		
+		tmr01.IN := TRUE;
+		tmr01.PT := T#1S;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	2151:
+		o_BD_Encoder_disable := FALSE;
+		step := step + 1;
+		
+	2152:
+		step := 2160;
+		
+	2160:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_A_Push_UnPush" Id="{43e4df2b-dfe6-42cd-b295-8067ed034c41}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_A_P.Step OF
+(*	================================
+				A下壓
+ 	================================*)	
+
+	// FxA動作前檢查檢查
+	1: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_A_P.Step := step_A_P.Step + 1;
+		ELSE
+			step_A_P.Step := step_A_P.Step + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(".A_Push");
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	2:
+		tmr111.IN := TRUE;
+		tmr111.PT := T#10S;
+		IF o_Oil_Pressure_Pump OR tmr111.Q THEN
+			tmr111.IN := FALSE;
+			IF o_Oil_Pressure_Pump THEN
+				step_A_P.Step := step_A_P.Step + 1;
+			ELSIF tmr111.Q THEN
+				pMsg.Push_Error(WStrConcat(name, ".A_Push:下壓A等待油壓系統啟動逾時"));
+				step_A_P.Step := step_A_P.Step + 10000;
+			END_IF
+		END_IF
+		
+	3:
+		step_A_P.Step := 10;
+		
+		
+	10: // 下壓啟動
+		o_PressureA_Up := FALSE;
+		o_PressureA_Dn := TRUE;
+		step_A_P.Step := step_A_P.Step + 1;
+		
+		
+	11:
+		tmr101.IN := TRUE;
+		tmr101.PT := T#500MS;
+		IF tmr101.q THEN
+			tmr101.IN := FALSE;
+			step_A_P.Step := step_A_P.Step + 1;
+		END_IF
+		
+	12:
+		o_PressureA_Dn := FALSE;
+		step_A_P.Step := step_A_P.Step + 1;
+		
+	13:
+		tmr101.IN := pressureA_pressure_sensor;
+		tmr101.PT := T#500MS;
+		tmr111.IN := TRUE;
+		tmr111.PT := T#10S;
+		IF tmr101.q OR tmr111.q THEN
+			tmr101.IN := FALSE;
+			tmr111.IN := FALSE;
+			step_A_P.Step := step_A_P.Step + 1;
+		END_IF
+		
+	14:
+		step_A_P.bDone := TRUE;
+		step_A_P.Step := 0;
+
+
+(*	================================
+				A放開
+ 	================================*)
+	// FxA動作前檢查檢查
+	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_A_P.Step := step_A_P.Step + 1;
+		ELSE
+			step_A_P.Step := step_A_P.Step + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(".A_Push");
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	101:
+		tmr111.IN := TRUE;
+		tmr111.PT := T#10S;
+		IF o_Oil_Pressure_Pump OR tmr111.Q THEN
+			tmr111.IN := FALSE;
+			IF o_Oil_Pressure_Pump THEN
+				step_A_P.Step := step_A_P.Step + 1;
+			ELSIF tmr111.Q THEN
+				pMsg.Push_Error(WStrConcat(name, ".A_Push:下壓A等待油壓系統啟動逾時"));
+				step_A_P.Step := step_A_P.Step + 10000;
+			END_IF
+		END_IF
+		
+	102:
+		step_A_P.Step := 110;
+		
+		
+	110: // 放開啟動
+		o_PressureA_Up := TRUE;
+		o_PressureA_Dn := FALSE;
+		step_A_P.Step := step_A_P.Step + 1;
+		
+		
+	111:
+		tmr101.IN := TRUE;
+		tmr101.PT := T#500MS;
+		IF tmr101.q THEN
+			tmr101.IN := FALSE;
+			step_A_P.Step := step_A_P.Step + 1;
+		END_IF
+		
+	112:
+		o_PressureA_Up := FALSE;
+		step_A_P.Step := step_A_P.Step + 1;
+		
+	113:
+		tmr101.IN := pressureA_home_sensor;
+		tmr101.PT := T#500MS;
+		tmr111.IN := TRUE;
+		tmr111.PT := T#10S;
+		IF tmr01.q OR tmr111.q THEN
+			tmr101.IN := FALSE;
+			tmr111.IN := FALSE;
+			step_A_P.Step := step_A_P.Step + 1;
+		END_IF
+		
+	114:
+		step_A_P.bDone := TRUE;
+		step_A_P.Step := 0;
+END_CASE
+
+step_A_P.bBuzy := step_A_P.Step > 0 AND step_A_P.Step < 10000;
+step_A_P.bError := step_A_P.Step >= 10000;
+
+IF step_A_P.bError OR step_A_P.bBuzy THEN
+	step_A_P.bDone := FALSE;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_AC_00_Clamp" Id="{6a89065b-7938-4874-a363-a1c0f80c8805}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_AC_C.Step  OF
+	// FxA動作前檢查檢查
+	1:  // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		tmr01.IN := FALSE;
+		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
+		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		IF GbZ.fPos >= 490 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		ELSE
+			step_AC_C.Step  := step_AC_C.Step  + 20000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+		// 確認AC下壓位置
+//		IF pressureA_home_sensor AND pressureC_home_sensor THEN
+//			step_AC_C.Step  := step_AC_C.Step  + 1;
+//		ELSE
+//			step_AC_C.Step  := step_AC_C.Step  + 10000;
+//			pMsg.Push_Error(StrConcat_2(name, ":下壓A or 下壓C 未停在原點，動作取消 "));
+//		END_IF
+		
+	2: // 確認材料進入FxA的夾輪
+		IF NOT (AC_in_sensor XOR AC_out_sensor) OR Hmi.Jog_UnLimite OR AC_moveDis > 0 THEN
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		ELSE
+			step_AC_C.Step  := step_AC_C.Step  + 20000;
+			pMsg.Push_Error(WStrConcat(name, ":未感應到原料，動作取消 "));
+		END_IF
+		
+	3:
+		IF o_Oil_Pressure_Pump THEN
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+		
+	4:
+		IF AC_moveDis = 0 OR NOT b_AC_HOME THEN
+			// 夾緊
+			step_AC_C.Step  := 10; 
+		ELSE
+			// 進到設定距離
+			step_AC_C.Step  := 40;
+		END_IF
+		
+		
+	10: // AC夾輪夾
+		o_AC_Clamp_Open		:= FALSE;
+		o_AC_Clamp_Close	:= TRUE;
+		
+		// 編碼器歸零
+		IF NOT b_AC_HOME AND NOT io.i509 THEN
+			Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := TRUE;
+			Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Set_counter_value := 10000;
+		END_IF
+		
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	11: 
+		// 編碼器歸零完成
+		IF Axis.Encoder_FxA_Clamp.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
+			b_AC_HOME := TRUE;
+		END_IF
+		
+		IF b_AC_HOME AND AC_moveDis > 0 THEN
+			step_AC_C.Step  := 41;
+		END_IF
+		
+		// 確定BD夾輪停止移動
+		tmr105.IN := ABS(FxA_Clamp_Spd) <= 1;
+		tmr105.PT := T#1S;
+		IF tmr105.Q THEN
+			tmr105.IN := FALSE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+		
+		
+	12:
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	13:
+		step_AC_C.Step  := 90;
+		
+{region "============= 進到設定位置  ============="}
+	40: // 判斷前進後退
+		IF AC_moveDis - FxA_Clamp_Pos > 0 THEN
+			// 目標大於現在位置
+			o_AC_Clamp_Close	:= FALSE;
+			o_AC_Clamp_Open		:= TRUE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		ELSIF AC_moveDis - FxA_Clamp_Pos < 0 THEN
+			// 目標小於現在位置
+			o_AC_Clamp_Close	:= TRUE;
+			o_AC_Clamp_Open		:= FALSE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		ELSE
+			step_AC_C.Step  := 90;
+		END_IF
+		
+	41: // 設定位置 - 目前位置 (接近0表示位置到達) <= 停止位移補償(移動速度 * 停止時間) 
+		IF ABS(AC_moveDis - FxA_Clamp_Pos) <= (ABS(FxA_Clamp_Spd) * 0.1) THEN
+			o_AC_Clamp_Close	:= FALSE;
+			o_AC_Clamp_Open		:= FALSE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+		
+		// 靜止1秒後，標示為功能完成
+		tmr105.IN := ABS(FxA_Clamp_Spd) <= 1;
+		tmr105.PT := T#1S;
+		IF tmr105.Q THEN
+			tmr105.IN := FALSE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+			 
+	42:
+		o_AC_Clamp_Close		:= FALSE;
+		o_AC_Clamp_Open			:= FALSE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+			 
+	43:
+		 step_AC_C.Step  := 90;
+	
+{endregion}
+	
+		
+	90:
+		AC_moveDis := 0;
+		step_AC_C.bDone := TRUE;
+		step_AC_C.Step  := 0;
+END_CASE
+
+IF o_AC_Clamp_Open THEN
+	b_AC_Clamp := FALSE;
+ELSIF step_AC_C.Step  = 90 THEN
+	b_AC_Clamp := TRUE;
+END_IF
+
+step_AC_C.bBuzy := step_AC_C.Step > 0 AND step_AC_C.Step < 10000;
+step_AC_C.bError := step_AC_C.Step >= 10000;
+
+IF step_AC_C.bError OR step_AC_C.bBuzy THEN
+	step_AC_C.bDone := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_AC_01_UnClamp" Id="{b1386a97-5c6b-4392-a236-0ccc7b605ce6}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_AC_C.Step  OF
+	// FxA動作前檢查檢查
+	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		tmr01.IN := FALSE;
+		IF GbZ.fpos > 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		ELSE
+			step_AC_C.Step  := step_AC_C.Step  + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	101:
+		IF o_Oil_Pressure_Pump THEN
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+		
+	102:
+		step_AC_C.Step  := 110;
+		
+		// 確認BD下壓位置
+//		IF pressureA_home_sensor AND pressureC_home_sensor THEN
+//			step_AC_C.Step  := step_AC_C.Step  + 1;
+//		ELSE
+//			step_AC_C.Step  := step_AC_C.Step  + 10000;
+//			pMsg.Push_Error(StrConcat_2(name, ":下壓A or 下壓C 未停在原點，動作取消 "));
+//		END_IF
+		
+
+		
+		
+	110: // 放開選擇
+		o_AC_Encoder_enable :=FALSE;
+		o_AC_Encoder_disable :=TRUE;
+		IF AC_moveDis = 0 THEN
+			// 退到原點
+			step_AC_C.Step  := 120; 
+		ELSE
+			// 退到設定距離
+			step_AC_C.Step  := 140;
+		END_IF
+
+	{region "============= 退到原點  ============="}
+	120: // 放開BD夾輪夾
+		o_AC_Clamp_Close	:= FALSE;
+		o_AC_Clamp_Open		:= TRUE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	121: // 確定BD夾輪停止移動
+		tmr105.IN := ABS(FxA_Clamp_Spd) <= 1;
+		tmr105.PT := T#1S;
+		IF tmr105.Q THEN
+			tmr105.IN := FALSE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+		
+	122:
+		o_AC_Clamp_Open		:= FALSE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	123: 
+		step_AC_C.Step  := 130;
+		
+	130:
+		
+		step_AC_C.Step  := 190;
+	{endregion}		
+		
+		
+		
+	{region "============= 退到設定距離  ============="}
+	140: // 紀錄開始位置
+		AC_StartPos := FxA_Clamp_Pos;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	141: // 開始後退
+		o_AC_Clamp_Close	:= FALSE;
+		o_AC_Clamp_Open		:= TRUE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	142: // 大於設定的距離 ( 開始位置 - 目前位置 ) >= 移動距離 - 停止位移補償(移動速度 * 停止時間)
+		IF ABS(AC_StartPos - FxA_Clamp_Pos) >= ABS(AC_moveDis) - ( ABS(FxA_Clamp_Spd) * 0.1) THEN
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+		
+		tmr105.IN := ABS(FxA_Clamp_Spd) <= 1;
+		tmr105.PT := T#1S;
+		IF tmr105.Q THEN
+			tmr105.IN := FALSE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+			 
+	143:
+		o_AC_Clamp_Open		:= FALSE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+			 
+	144:
+		 step_AC_C.Step  := 190;
+	
+	{endregion}
+	190:
+		o_AC_Encoder_enable :=FALSE;
+		o_AC_Encoder_disable :=FALSE;
+		o_AC_Clamp_Open		:= FALSE;
+		step_AC_C.bDone := TRUE;
+		step_AC_C.Step  := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_AC_02_Stop" Id="{40063994-3613-489b-b220-e33809770781}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_AC_C.Step OF
+	// FxA動作前檢查檢查
+	200: 
+		step_AC_C.Step := 210;
+		
+		
+	210: // BD夾輪夾
+		o_AC_Clamp_Open		:= FALSE;
+		o_AC_Clamp_Close	:= FALSE;
+		step_AC_C.Step := step_AC_C.Step + 1;
+		
+	211: 
+		step_AC_C.Step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_AC_03_Home" Id="{c3c71fb5-4ccb-482e-b003-303bedcbc7a9}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_AC_C.Step  OF
+	// FxA動作前檢查檢查
+	300:  // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		tmr01.IN := FALSE;
+		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
+		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		IF GbZ.fPos >= 490 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		ELSE
+			step_AC_C.Step  := step_AC_C.Step  + 20000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+		// 確認AC下壓位置
+//		IF pressureA_home_sensor AND pressureC_home_sensor THEN
+//			step_AC_C.Step  := step_AC_C.Step  + 1;
+//		ELSE
+//			step_AC_C.Step  := step_AC_C.Step  + 10000;
+//			pMsg.Push_Error(StrConcat_2(name, ":下壓A or 下壓C 未停在原點，動作取消 "));
+//		END_IF
+		
+	301: 
+		IF o_Oil_Pressure_Pump THEN
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+		
+	302:
+		IF IO.i509 THEN
+			step_AC_C.Step  := 310; 
+		ELSE
+			step_AC_C.Step  := 320; 
+		END_IF
+		
+		
+		
+	310: // AC夾輪夾
+		o_AC_Clamp_Open		:= TRUE;
+		o_AC_Clamp_Close	:= FALSE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	311:
+		tmr105.IN := NOT IO.i509;
+		tmr105.PT := T#1S;
+		IF tmr105.Q THEN
+			tmr105.IN := FALSE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+		
+	312:
+		o_AC_Clamp_Open		:= FALSE;
+		o_AC_Clamp_Close	:= FALSE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	313:
+		step_AC_C.Step  := 320;
+		
+		
+	320:
+		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := TRUE;
+		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Set_counter_value := 10000;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	321:
+		o_AC_Clamp_Open		:= FALSE;
+		o_AC_Clamp_Close	:= TRUE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+			
+	322:
+		// 編碼器歸零完成
+		IF Axis.Encoder_FxA_Clamp.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
+			b_AC_HOME := TRUE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+
+	323:
+		o_AC_Clamp_Open		:= FALSE;
+		o_AC_Clamp_Close	:= FALSE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+		
+	324:
+		step_AC_C.Step  := 330;
+	
+	330:
+		o_AC_Clamp_Open		:= TRUE;
+		o_AC_Clamp_Close	:= FALSE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	331:
+		tmr105.IN := NOT IO.i509;
+		tmr105.PT := T#1S;
+		IF tmr105.Q THEN
+			tmr105.IN := FALSE;
+			step_AC_C.Step  := step_AC_C.Step  + 1;
+		END_IF
+		
+	332:
+		o_AC_Clamp_Open		:= FALSE;
+		o_AC_Clamp_Close	:= FALSE;
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+	333:
+		step_AC_C.bDone := TRUE;
+		step_AC_C.Step  := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_B_Push_UnPush" Id="{9c858001-e0f2-40c9-aa15-c276d1e6be63}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_B_P.Step  OF
+(*	================================
+				B下壓
+ 	================================*)	
+
+	// FxA動作前檢查檢查
+	1: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_B_P.Step  := step_B_P.Step  + 1;
+		ELSE
+			step_B_P.Step  := step_B_P.Step  + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(".B_Push");
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	2:
+		tmr112.IN := TRUE;
+		tmr112.PT := T#10S;
+		IF o_Oil_Pressure_Pump OR tmr112.Q THEN
+			tmr112.IN := FALSE;
+			IF o_Oil_Pressure_Pump THEN
+				step_B_P.Step  := step_B_P.Step  + 1;
+			ELSIF tmr112.Q THEN
+				pMsg.Push_Error(WStrConcat(name, ".B_Push:下壓B等待油壓系統啟動逾時"));
+				step_B_P.Step  := step_B_P.Step  + 10000;
+			END_IF
+		END_IF
+		
+	3:
+		step_B_P.Step  := 10;
+		
+		
+	10: // 下壓啟動
+		o_PressureB_Up := FALSE;
+		o_PressureB_Dn := TRUE;
+		step_B_P.Step  := step_B_P.Step  + 1;
+		
+	11:
+		tmr102.IN := TRUE;
+		tmr102.PT := T#500MS;
+		IF tmr102.q THEN
+			tmr102.IN := FALSE;
+			step_B_P.Step  := step_B_P.Step  + 1;
+		END_IF
+		
+	12:
+		o_PressureB_Dn := FALSE;
+		step_B_P.Step  := step_B_P.Step  + 1;
+		
+	13:
+		tmr102.IN := pressureB_pressure_sensor;
+		tmr102.PT := T#500MS;
+		tmr112.IN := TRUE;
+		tmr112.PT := T#10S;
+		IF tmr102.q OR tmr112.q THEN
+			tmr102.IN := FALSE;
+			tmr112.IN := FALSE;
+			step_B_P.Step  := step_B_P.Step  + 1;
+		END_IF
+		
+	14:
+		step_B_P.bDone := TRUE;
+		step_B_P.Step  := 0;
+
+
+(*	================================
+				B放開
+ 	================================*)
+	// FxA動作前檢查檢查
+	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_B_P.Step  := step_B_P.Step  + 1;
+		ELSE
+			step_B_P.Step  := step_B_P.Step  + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(".B_Push");
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	101:
+		IF o_Oil_Pressure_Pump OR tmr112.Q THEN
+			tmr112.IN := FALSE;
+			IF o_Oil_Pressure_Pump THEN
+				step_B_P.Step  := step_B_P.Step  + 1;
+			ELSIF tmr112.Q THEN
+				pMsg.Push_Error(WStrConcat(name, ".B_Push:下壓B等待油壓系統啟動逾時"));
+				step_B_P.Step  := step_B_P.Step  + 10000;
+			END_IF
+		END_IF
+		
+	102:
+		step_B_P.Step  := 110;
+		
+		
+	110: // 放開啟動
+		o_PressureB_Up := TRUE;
+		o_PressureB_Dn := FALSE;
+		step_B_P.Step  := step_B_P.Step  + 1;
+		
+	111:
+		tmr102.IN := TRUE;
+		tmr102.PT := T#500MS;
+		IF tmr102.q THEN
+			tmr102.IN := FALSE;
+			step_B_P.Step  := step_B_P.Step  + 1;
+		END_IF
+		
+	112:
+		o_PressureB_Up := FALSE;
+		step_B_P.Step  := step_B_P.Step  + 1;
+		
+	113:
+		tmr102.IN := pressureB_home_sensor;
+		tmr102.PT := T#500MS;
+		tmr112.IN := TRUE;
+		tmr112.PT := T#10S;
+		IF tmr102.q OR tmr112.q THEN
+			tmr102.IN := FALSE;
+			tmr112.IN := FALSE;
+			step_B_P.Step  := step_B_P.Step  + 1;
+		END_IF
+		
+	114:
+		step_B_P.bDone := TRUE;
+		step_B_P.Step  := 0;
+END_CASE
+
+step_B_P.bBuzy := step_B_P.Step > 0 AND step_B_P.Step < 10000;
+step_B_P.bError := step_B_P.Step >= 10000;
+
+IF step_B_P.bError OR step_B_P.bBuzy THEN
+	step_B_P.bDone := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_BD_00_Clamp" Id="{8507acf2-42ba-4836-ae67-3588c9830f22}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_BD_C.Step  OF
+	// FxA動作前檢查檢查
+	1: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		tmr01.IN := FALSE;
+		IF GbZ.fPos > 490 OR GbX.fPos < 50 OR NOT Hmi.Jog_UnLimite THEN
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		ELSE
+			step_BD_C.Step  := step_BD_C.Step  + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+		
+	2: // 確認材料進入FxB的夾輪
+		IF NOT (BD_in_sensor XOR BD_out_sensor)  OR Hmi.Jog_UnLimite OR BD_moveDis > 0 THEN
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		ELSE
+			step_BD_C.Step  := step_BD_C.Step  + 10000;
+			pMsg.Push_Error(WStrConcat(name, ":未感應到原料，動作取消 "));
+		END_IF
+		
+//	102: // 確認BD下壓位置
+//		IF pressureB_home_sensor AND pressureD_home_sensor THEN
+//			step_BD_C.Step  := step_BD_C.Step  + 1;
+//		ELSE
+//			step_BD_C.Step  := step_BD_C.Step  + 10000;
+//			pMsg.Push_Error(StrConcat_2(name, ":下壓B or 下壓D 未停在原點，動作取消 "));
+//		END_IF
+		
+	3: 
+		IF o_Oil_Pressure_Pump THEN
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+		
+	4:
+		IF BD_moveDis = 0 OR NOT b_BD_HOME THEN
+			// 夾緊
+			step_BD_C.Step  := 10; 
+		ELSE
+			// 進到設定距離
+			step_BD_C.Step  := 40;
+		END_IF
+		
+		
+	10: // BD夾輪夾
+		Axis.Encoder_FxB_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
+		Axis.Encoder_FxB_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		o_BD_Clamp_Open		:= FALSE;
+		o_BD_Clamp_Close	:= TRUE;
+		
+		// 編碼器歸零
+		IF NOT b_BD_HOME AND NOT io.i510 THEN
+			Axis.Encoder_FxB_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := TRUE;
+			Axis.Encoder_FxB_Clamp.MDP5001_511_Output.MDP5001_511_Set_counter_value := 10000;
+		END_IF
+		
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	11: 
+		// 編碼器歸零完成
+		IF Axis.Encoder_FxB_Clamp.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			Axis.Encoder_FxB_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
+			b_BD_HOME := TRUE;
+		END_IF
+		
+		IF b_BD_HOME AND BD_moveDis > 0 THEN
+			step_BD_C.Step  := 41;
+		END_IF
+		
+		// 確定BD夾輪停止移動
+		tmr106.IN := ABS(FxB_Clamp_Spd) <= 1;
+		tmr106.PT := T#1S;
+		IF tmr106.Q THEN
+			tmr106.IN := FALSE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+		
+		
+	12:
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	13:
+		step_BD_C.Step  := 90;
+		
+	{region "============= 進到設定位置  ============="}
+	40: // 判斷前進後退
+		IF BD_moveDis - FxB_Clamp_Pos > 0 THEN
+			// 目標大於現在位置
+			o_BD_Clamp_Close	:= FALSE;
+			o_BD_Clamp_Open		:= TRUE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		ELSIF BD_moveDis - FxB_Clamp_Pos < 0 THEN
+			// 目標小於現在位置
+			o_BD_Clamp_Close	:= TRUE;
+			o_BD_Clamp_Open		:= FALSE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		ELSE
+			step_BD_C.Step  := 90;
+		END_IF
+		
+	41: // 設定位置 - 目前位置 (接近0表示位置到達) <= 停止位移補償(移動速度 * 停止時間) 
+		IF ABS(BD_moveDis - FxB_Clamp_Pos) <= (ABS(FxB_Clamp_Spd) * 0.1) THEN
+			o_BD_Clamp_Close		:= FALSE;
+			o_BD_Clamp_Open		:= FALSE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+		
+		// 靜止1秒後，標示為功能完成
+		tmr106.IN := ABS(FxB_Clamp_Spd) <= 1;
+		tmr106.PT := T#1S;
+		IF tmr106.Q THEN
+			tmr106.IN := FALSE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+			 
+	42:
+		o_BD_Clamp_Open		:= FALSE;
+		o_BD_Clamp_Close	:= FALSE;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+			 
+	43:
+		 step_BD_C.Step  := 90;
+	
+{endregion}
+		
+	90:
+		BD_moveDis := 0;
+		step_BD_C.bDone := TRUE;
+		step_BD_C.Step  := 0;
+END_CASE
+
+IF o_BD_Clamp_Open THEN
+	b_BD_Clamp := FALSE;
+ELSIF step_BD_C.Step  = 90 THEN
+	b_BD_Clamp := TRUE;
+END_IF
+
+step_BD_C.bBuzy := step_BD_C.Step > 0 AND step_BD_C.Step < 10000;
+step_BD_C.bError := step_BD_C.Step >= 10000;
+
+IF step_BD_C.bError OR step_BD_C.bBuzy THEN
+	step_BD_C.bDone := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_BD_01_UnClamp" Id="{75d4a37a-df64-4629-ab62-9ac7014b8a8f}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_BD_C.Step  OF
+	// FxA動作前檢查檢查
+	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		tmr01.IN := FALSE;
+		IF GbZ.pos > 500 OR GbX.fPos < 50 OR NOT Hmi.Jog_UnLimite THEN
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		ELSE
+			step_BD_C.Step  := step_BD_C.Step  + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	101: 
+		IF o_Oil_Pressure_Pump THEN
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+		
+	102:
+		step_BD_C.Step  := 110;
+	
+		// 確認BD下壓位置
+//		IF pressureB_home_sensor AND pressureD_home_sensor THEN
+//			step_BD_C.Step  := step_BD_C.Step  + 1;
+//		ELSE
+//			step_BD_C.Step  := step_BD_C.Step  + 10000;
+//			pMsg.Push_Error(StrConcat_2(name, ":下壓B or 下壓D 未停在原點，動作取消 "));
+//		END_IF
+		
+		
+		
+	110: // 放開選擇
+		o_BD_Encoder_enable		:= FALSE;
+		o_BD_Encoder_disable	:= TRUE;
+		IF BD_moveDis = 0 THEN
+			// 退到原點
+			step_BD_C.Step  := 120; 
+		ELSE
+			// 退到設定距離
+			step_BD_C.Step  := 140;
+		END_IF
+
+	{region "============= 退到原點  ============="}
+	120: // 放開BD夾輪夾
+		o_BD_Clamp_Close	:= FALSE;
+		o_BD_Clamp_Open		:= TRUE;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	121: // 確定BD夾輪停止移動
+		tmr106.IN := ABS(FxB_Clamp_Spd) <= 1 ;
+		tmr106.PT := T#1S;
+		IF tmr106.Q THEN
+			tmr106.IN := FALSE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+		
+	122:
+		o_BD_Clamp_Open		:= FALSE;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	123: 
+		step_BD_C.Step  := 130;
+		
+	130:
+		step_BD_C.Step  := 190;
+	{endregion}		
+		
+		
+		
+	{region "============= 退到設定距離  ============="}
+	140: // 紀錄開始位置
+		BD_StartPos := FxB_Clamp_Pos;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	141: // 開始後退
+		o_BD_Clamp_Close	:= FALSE;
+		o_BD_Clamp_Open		:= TRUE;
+		step_BD_C.Step := step_BD_C.step + 1;
+		
+	142: // 大於設定距離
+		IF ABS(BD_StartPos - FxB_Clamp_Pos)  >= ABS(BD_moveDis) - ( ABS(FxB_Clamp_Spd) * 0.1) THEN
+			o_BD_Clamp_Open		:= FALSE;
+			step_BD_C.step := step_BD_C.step + 1;
+		END_IF
+		
+		tmr106.IN := ABS(FxB_Clamp_Spd) <= 1 ;
+		tmr106.PT := T#1S;
+		IF tmr01.Q THEN
+			tmr106.IN := FALSE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+			 
+	143:
+		o_BD_Clamp_Open		:= FALSE;
+		o_BD_Clamp_Close	:= FALSE;
+		step_BD_C.step := step_BD_C.step + 1;
+			 
+	144:
+		 step_BD_C.step := 190;
+	
+	{endregion}
+	190:
+		o_BD_Encoder_enable		:= FALSE;
+		o_BD_Encoder_disable	:= FALSE;
+		o_BD_Clamp_Open		:= FALSE;
+		step_BD_C.bDone := TRUE;
+		step_BD_C.step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_BD_02_Stop" Id="{98372c22-8675-4e33-8460-9c41651d3909}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_BD_C.step OF
+	// FxA動作前檢查檢查
+	200: 
+		step_BD_C.step := 210;
+		
+		
+	210: // BD夾輪夾
+		o_BD_Clamp_Open		:= FALSE;
+		o_BD_Clamp_Close	:= FALSE;
+		step_BD_C.step := step_BD_C.step + 1;
+		
+	211: 
+		step_BD_C.step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_BD_03_Home" Id="{b1097727-222d-4404-a79e-f80833b21600}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_BD_C.Step  OF
+	// FxA動作前檢查檢查
+	300:  // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		tmr01.IN := FALSE;
+		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
+		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		IF GbZ.fPos >= 490 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		ELSE
+			step_BD_C.Step  := step_BD_C.Step  + 20000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+		// 確認AC下壓位置
+//		IF pressureA_home_sensor AND pressureC_home_sensor THEN
+//			step_BD_C.Step  := step_BD_C.Step  + 1;
+//		ELSE
+//			step_BD_C.Step  := step_BD_C.Step  + 10000;
+//			pMsg.Push_Error(StrConcat_2(name, ":下壓A or 下壓C 未停在原點，動作取消 "));
+//		END_IF
+		
+	301: 
+		IF o_Oil_Pressure_Pump THEN
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+		
+	302:
+		IF IO.i510 THEN
+			step_BD_C.Step  := 310; 
+		ELSE
+			step_BD_C.Step  := 320; 
+		END_IF
+		
+		
+		
+	310: // AC夾輪夾
+		o_BD_Clamp_Open		:= TRUE;
+		o_BD_Clamp_Close	:= FALSE;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	311:
+		tmr105.IN := NOT IO.i510;
+		tmr105.PT := T#1S;
+		IF tmr105.Q THEN
+			tmr105.IN := FALSE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+		
+	312:
+		o_BD_Clamp_Open		:= FALSE;
+		o_BD_Clamp_Close	:= FALSE;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	313:
+		step_BD_C.Step  := 320;
+		
+		
+	320:
+		Axis.Encoder_FxB_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := TRUE;
+		Axis.Encoder_FxB_Clamp.MDP5001_511_Output.MDP5001_511_Set_counter_value := 10000;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	321:
+		o_BD_Clamp_Open		:= FALSE;
+		o_BD_Clamp_Close	:= TRUE;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+			
+	322:
+		// 編碼器歸零完成
+		IF Axis.Encoder_FxB_Clamp.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			Axis.Encoder_FxB_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
+			b_BD_HOME := TRUE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+
+	323:
+		o_BD_Clamp_Open		:= FALSE;
+		o_BD_Clamp_Close	:= FALSE;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+		
+	324:
+		step_BD_C.Step  := 330;
+	
+	330:
+		o_BD_Clamp_Open		:= TRUE;
+		o_BD_Clamp_Close	:= FALSE;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	331:
+		tmr105.IN := NOT IO.i510;
+		tmr105.PT := T#1S;
+		IF tmr105.Q THEN
+			tmr105.IN := FALSE;
+			step_BD_C.Step  := step_BD_C.Step  + 1;
+		END_IF
+		
+	332:
+		o_BD_Clamp_Open		:= FALSE;
+		o_BD_Clamp_Close	:= FALSE;
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+		
+	333:
+		step_BD_C.bDone := TRUE;
+		step_BD_C.Step  := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_C_Push_UnPush" Id="{26236847-5d32-470a-961f-e4d90f6e2448}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_C_P.Step OF
+(*	================================
+				C下壓
+ 	================================*)	
+
+	// FxA動作前檢查檢查
+	1: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		IF GbZ.fPos >= 500 OR GbX.fPos > 50 OR NOT Hmi.Jog_UnLimite THEN
+			step_C_P.Step  := step_C_P.Step  + 1;
+		ELSE
+			step_C_P.Step  := step_C_P.Step  + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(".C_Push");
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	2:
+		tmr114.IN := TRUE;
+		tmr114.PT := T#10S;
+		IF o_Oil_Pressure_Pump OR tmr113.Q THEN
+			tmr113.IN := FALSE;
+			IF o_Oil_Pressure_Pump THEN
+				step_C_P.Step  := step_C_P.Step  + 1;
+			ELSIF tmr113.Q THEN
+				pMsg.Push_Error(WStrConcat(name, ".C_Push:下壓B等待油壓系統啟動逾時"));
+				step_C_P.Step  := step_C_P.Step  + 10000;
+			END_IF
+		END_IF
+		
+	3:
+		step_C_P.Step  := 10;
+		
+		
+	10: // 下壓啟動
+		o_PressureC_Up := FALSE;
+		o_PressureC_Dn := TRUE;
+		step_C_P.Step  := step_C_P.Step  + 1;
+		
+	11:
+		tmr103.IN := TRUE;
+		tmr103.PT := T#500MS;
+		IF tmr103.q THEN
+			tmr103.IN := FALSE;
+			step_C_P.Step  := step_C_P.Step  + 1;
+		END_IF
+		
+	12:
+		o_PressureC_Dn := FALSE;
+		step_C_P.Step  := step_C_P.Step  + 1;
+		
+	13:
+		tmr103.IN := pressureC_pressure_sensor;
+		tmr103.PT := T#500MS;
+		tmr113.IN := TRUE;
+		tmr113.PT := T#10S;
+		IF tmr103.q OR tmr113.q THEN
+			tmr103.IN := FALSE;
+			tmr113.IN := FALSE;
+			step_C_P.Step  := step_C_P.Step  + 1;
+		END_IF
+		
+	14:
+		step_C_P.bDone := TRUE;
+		step_C_P.Step  := 0;
+
+
+(*	================================
+				C放開
+ 	================================*)
+	// FxA動作前檢查檢查
+	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		IF GbZ.pos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_C_P.Step  := step_C_P.Step  + 1;
+		ELSE
+			step_C_P.Step  := step_C_P.Step  + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(".C_Push");
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	101:
+		IF o_Oil_Pressure_Pump OR tmr113.Q THEN
+			tmr113.IN := FALSE;
+			IF o_Oil_Pressure_Pump THEN
+				step_C_P.Step  := step_C_P.Step  + 1;
+			ELSIF tmr113.Q THEN
+				pMsg.Push_Error(WStrConcat(name, ".C_Push:下壓B等待油壓系統啟動逾時"));
+				step_C_P.Step  := step_C_P.Step  + 10000;
+			END_IF
+		END_IF
+		
+	102:
+		step_C_P.Step  := 110;
+		
+		
+	110: // 放開啟動
+		o_PressureC_Up := TRUE;
+		o_PressureC_Dn := FALSE;
+		step_C_P.Step  := step_C_P.Step  + 1;
+		
+	111:
+		tmr103.IN := TRUE;
+		tmr103.PT := T#500MS;
+		IF tmr103.q THEN
+			tmr103.IN := FALSE;
+			step_C_P.Step  := step_C_P.Step  + 1;
+		END_IF
+		
+	112:
+		o_PressureC_Up := FALSE;
+		step_C_P.Step  := step_C_P.Step  + 1;
+		
+	113:
+		tmr103.IN := pressureC_home_sensor;
+		tmr103.PT := T#500MS;
+		tmr113.IN := TRUE;
+		tmr113.PT := T#10S;
+		IF tmr103.q OR tmr113.q THEN
+			tmr103.IN := FALSE;
+			tmr113.IN := FALSE;
+			step_C_P.Step  := step_C_P.Step  + 1;
+		END_IF
+		
+	114:
+		step_C_P.bDone := TRUE;
+		step_C_P.Step  := 0;
+END_CASE
+
+step_C_P.bBuzy := step_C_P.Step  > 0 AND step_C_P.Step  < 10000;
+step_C_P.bError := step_C_P.Step  >= 10000;
+
+IF step_C_P.bBuzy OR step_C_P.bError THEN
+	step_C_P.bDone := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_D_Push_UnPush" Id="{a198dba7-110c-4f15-a431-4a1ba7e06c19}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step_D_P.Step  OF
+(*	================================
+				D下壓
+ 	================================*)	
+
+	// FxA動作前檢查檢查
+	1: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR NOT Hmi.Jog_UnLimite THEN
+			step_D_P.Step  := step_D_P.Step  + 1;
+		ELSE
+			step_D_P.Step  := step_D_P.Step  + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	2:
+		tmr114.IN := TRUE;
+		tmr114.PT := T#10S;
+		IF o_Oil_Pressure_Pump OR tmr114.Q THEN
+			tmr114.IN := FALSE;
+			IF o_Oil_Pressure_Pump THEN
+				step_D_P.Step  := step_D_P.Step  + 1;
+			ELSIF tmr114.Q THEN
+				pMsg.Push_Error(WStrConcat(name, ".C_Push:下壓B等待油壓系統啟動逾時"));
+				step_D_P.Step  := step_D_P.Step  + 10000;
+			END_IF
+		END_IF
+		
+	3:
+		step_D_P.Step  := 10;
+		
+		
+	10: // 下壓啟動
+		o_PressureD_Up := FALSE;
+		o_PressureD_Dn := TRUE;
+		step_D_P.Step  := step_D_P.Step  + 1;
+		
+	11:
+		tmr104.IN := TRUE;
+		tmr104.PT := T#500MS;
+		IF tmr104.q THEN
+			tmr104.IN := FALSE;
+			step_D_P.Step  := step_D_P.Step  + 1;
+		END_IF
+		
+	12:
+		o_PressureD_Dn := FALSE;
+		step_D_P.Step  := step_D_P.Step  + 1;
+		
+	13:
+		tmr104.IN := pressureD_pressure_sensor;
+		tmr104.PT := T#500MS;
+		tmr114.IN := TRUE;
+		tmr114.PT := T#10S;
+		IF tmr104.q OR tmr114.q THEN
+			tmr104.IN := FALSE;
+			tmr114.IN := FALSE;
+			step_D_P.Step  := step_D_P.Step  + 1;
+		END_IF
+		
+	14:
+		step_D_P.bDone := TRUE;
+		step_D_P.Step  := 0;
+
+
+(*	================================
+				D放開
+ 	================================*)
+	// FxA動作前檢查檢查
+	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
+		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+			step_D_P.Step  := step_D_P.Step  + 1;
+		ELSE
+			step_D_P.Step  := step_D_P.Step  + 10000;
+			strmem1.WRITE(name);
+			strmem1.APPEND(".C_Push");
+			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+			strmem1.APPEND(")");
+			pMsg.Push_Error(strmem1.READ);
+		END_IF
+		
+	101:
+		IF o_Oil_Pressure_Pump OR tmr114.Q THEN
+			tmr114.IN := FALSE;
+			IF o_Oil_Pressure_Pump THEN
+				step_D_P.Step  := step_D_P.Step  + 1;
+			ELSIF tmr114.Q THEN
+				pMsg.Push_Error(WStrConcat(name, ".C_Push:下壓D等待油壓系統啟動逾時"));
+				step_D_P.Step  := step_D_P.Step  + 10000;
+			END_IF
+		END_IF
+		
+	102:
+		step_D_P.Step  := 110;
+		
+		
+	110: // 放開啟動
+		o_PressureD_Up := TRUE;
+		o_PressureD_Dn := FALSE;
+		step_D_P.Step  := step_D_P.Step  + 1;
+		
+		
+	111:
+		tmr104.IN := TRUE;
+		tmr104.PT := T#500MS;
+		IF tmr104.q THEN
+			tmr104.IN := FALSE;
+			step_D_P.Step  := step_D_P.Step  + 1;
+		END_IF
+		
+	112:
+		o_PressureD_Up := FALSE;
+		step_D_P.Step  := step_D_P.Step  + 1;
+		
+	113:
+		tmr104.IN := pressureD_home_sensor;
+		tmr104.PT := T#500MS;
+		tmr114.IN := TRUE;
+		tmr114.PT := T#10S;
+		IF tmr104.q OR tmr114.q THEN
+			tmr104.IN := FALSE;
+			tmr114.IN := FALSE;
+			step_D_P.Step  := step_D_P.Step  + 1;
+		END_IF
+		
+	114:
+		step_D_P.bDone := TRUE;
+		step_D_P.Step  := 0;
+END_CASE
+
+step_D_P.bBuzy := step_D_P.Step  > 0 AND step_D_P.Step  < 10000;
+step_D_P.bError := step_D_P.Step  >= 10000;
+
+IF step_D_P.bBuzy OR step_D_P.bError THEN
+	step_D_P.bDone := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="timer" Id="{d47e22a3-2839-4e92-a669-9c213cc7a069}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[tmr01();
+tmr02();
+
+tmr101();
+tmr102();
+tmr103();
+tmr104();
+tmr105();
+tmr106();
+
+tmr111();
+tmr112();
+tmr113();
+tmr114();
+tmr115();
+tmr116();
+
+tmr_wdt();]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

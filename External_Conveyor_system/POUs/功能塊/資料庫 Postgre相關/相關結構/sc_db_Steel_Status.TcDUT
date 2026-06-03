@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="sc_db_Steel_Status" Id="{ebfeb098-7626-4d0c-b90b-32be502bed7e}">
+    <Declaration><![CDATA[TYPE sc_db_Steel_Status :
+STRUCT
+	uuid : STRING(36);
+	steel_status : STRING(80);
+	steel_location : STRING(80);
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

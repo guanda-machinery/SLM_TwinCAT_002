@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="MAIN" Id="{b8aaffc0-b28a-4b26-916a-f66736143d5b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	
+	boot :BOOL := TRUE;
+
+	
+
+
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF boot THEN
+	boot:=FALSE;
+END_IF
+
+
+MaBaseState();
+
+GetEtherSta();
+
+Sensor();
+
+AutoMain();
+
+GroupFx();
+
+ExpConver();
+
+AxisAction();
+
+
+
+// SQL 專案資料讀寫功能
+ReadSQLData();
+
+LogFx();
+
+// C++操作介面
+//CppHmi();
+
+MsgMain();
+
+LightTower();
+
+Button();
+
+GetEtherSta();]]></ST>
+    </Implementation>
+    <Action Name="init" Id="{1f5dfe6f-0bec-44ca-887f-137cb5faa6b0}">
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

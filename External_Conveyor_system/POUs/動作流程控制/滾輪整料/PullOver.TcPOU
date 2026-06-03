@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="PullOver" Id="{53aefa45-fb87-4b0e-a3d8-e66dc28d2be9}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM PullOver
+VAR
+	step: UINT;
+	
+	
+END_VAR
+
+VAR_OUTPUT
+	bBuzy: BOOL;
+	bError: BOOL;
+	bDone: BOOL;
+	iErrorId : DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (EStop OR SystemError OR Input.Feed_Reset) AND bBuzy THEN
+	IF bBuzy THEN
+		step := step  + 10000;
+	END_IF
+END_IF
+
+bBuzy := (step >= 1 AND step < 10000);
+bError := (step > 10000);
+
+
+CASE step OF
+	1:
+		bDone := FALSE;
+		step := 10;	
+(*	=====================================
+				測高不再原點
+	=====================================*)
+	10:
+		IF HeightMeasurer.at_Home THEN
+			step := 100;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	11:
+		HeightMeasurer.Homing();
+		step := step + 1;
+		
+	12:
+		IF HeightMeasurer.bBuzy OR HeightMeasurer.bError THEN
+			step := step + 1;
+		END_IF
+		
+	13:
+		IF HeightMeasurer.bDone THEN
+			step := step + 1;
+		ELSIF HeightMeasurer.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	14:
+		step := 100;
+		
+		
+(*	=====================================
+				靠邊啟動
+	=====================================*)
+	100:
+		Hydraulic.Over_Pull(0);
+		step := step + 1;
+		
+	101:
+		IF (Hydraulic.bBuzy1 OR Hydraulic.bError1) THEN
+			step := step + 1;
+		END_IF
+		
+	102:
+		IF Hydraulic.bDone1 THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError1 THEN
+			step := step + 10000;
+		END_IF
+		
+	103:
+		step := 110;
+		
+(*	=====================================
+				高度測量
+	=====================================*)
+	110:
+		HeightMeasurer.Measure();
+		step := step + 1;
+		
+	111:
+		IF (HeightMeasurer.bBuzy OR HeightMeasurer.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	112:
+		IF HeightMeasurer.bDone THEN
+			step := step + 1;
+		ELSIF HeightMeasurer.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	113:
+		step := 120;
+		
+	
+	120:
+		bDone := TRUE;
+		step := 0;
+END_CASE
+
+IF Input.PullOver_Start AND NOT bBuzy THEN
+	step := 1;
+END_IF
+
+Output.PullOver_bBuzy := bBuzy;
+Output.PullOver_bDone := bDone;
+Output.PullOver_bError := bError;]]></ST>
+    </Implementation>
+    <Method Name="Start" Id="{d669c970-7439-445a-b346-047cf227a97b}">
+      <Declaration><![CDATA[METHOD Start
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 1;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

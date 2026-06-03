@@ -1,0 +1,385 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4026.19" ClassName="CNestedPlcProjDef">
+	<DataTypes>
+		<DataType>
+			<Name GUID="{267B677C-BB24-0AAA-3EE9-1EC9746C6B42}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..18] OF BOOL</Name>
+			<BitSize>144</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>18</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..16] OF BOOL</Name>
+			<BitSize>128</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>16</Elements>
+			</ArrayInfo>
+		</DataType>
+	</DataTypes>
+	<Project GUID="{83343E19-A944-4C4E-91CE-DDD337BD3D82}" Name="IO_External_Task" PrjFilePath="..\..\IO_External_Task\IO_External_Task.plcproj" TmcFilePath="..\..\IO_External_Task\IO_External_Task.tmc" ReloadTmc="true" AmsPort="854" FileArchiveSettings="#x000e" SymbolicMapping="true">
+		<Instance Id="#x085020c0" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{BA374780-2709-8496-B4C5-7C010A68EE98}" TmcPath="IO_External_Task\IO_External_Task.tmc">
+			<Name>IO_External_Task Instance</Name>
+			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+			<Vars VarGrpType="2" AreaNo="1">
+				<Name>Main_IO_Task Outputs</Name>
+				<Var>
+					<Name>EtherCAT.LoadMod_5.Output</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_6.Output</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_7.Output</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO101.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO102.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO103.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO104.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+			</Vars>
+			<Vars VarGrpType="1">
+				<Name>Main_IO_Task Inputs</Name>
+				<Var>
+					<Name>EtherCAT.LoadMod_1.Input</Name>
+					<Type GUID="{267B677C-BB24-0AAA-3EE9-1EC9746C6B42}">ARRAY [1..18] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_1.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_1.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_1.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_2.Input</Name>
+					<Type GUID="{267B677C-BB24-0AAA-3EE9-1EC9746C6B42}">ARRAY [1..18] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_2.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_2.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_2.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_3.Input</Name>
+					<Type GUID="{267B677C-BB24-0AAA-3EE9-1EC9746C6B42}">ARRAY [1..18] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_3.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_3.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_3.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_4.Input</Name>
+					<Type GUID="{267B677C-BB24-0AAA-3EE9-1EC9746C6B42}">ARRAY [1..18] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_4.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_4.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_4.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_5.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_5.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_5.Output_ShortCircuit</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_6.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_6.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_6.Output_ShortCircuit</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_7.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_7.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.LoadMod_7.Output_ShortCircuit</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO105.Out</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO106.Out</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO107.Out</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+			</Vars>
+			<Contexts>
+				<Context>
+					<Id>0</Id>
+					<Name>Main_IO_Task</Name>
+					<ManualConfig>
+						<OTCID>#x02010080</OTCID>
+					</ManualConfig>
+					<Priority>6</Priority>
+					<CycleTime>2000000</CycleTime>
+				</Context>
+			</Contexts>
+			<TaskPouOids>
+				<TaskPouOid Prio="6" OTCID="#x085020c2"/>
+			</TaskPouOids>
+		</Instance>
+	</Project>
+	<Mappings>
+		<OwnerA Name="IO_External_Task Instance">
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^DI570 10 (DI 570)">
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[10]" VarB="DI Mapping^DI9 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[11]" VarB="DI Mapping^DI10 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[12]" VarB="DI Mapping^DI11 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[13]" VarB="DI Mapping^DI12 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[14]" VarB="DI Mapping^DI13 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[15]" VarB="DI Mapping^DI14 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[16]" VarB="DI Mapping^DI15 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[1]" VarB="DI Mapping^DI0 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[2]" VarB="DI Mapping^DI1 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[3]" VarB="DI Mapping^DI2 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[4]" VarB="DI Mapping^DI3 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[5]" VarB="DI Mapping^DI4 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[6]" VarB="DI Mapping^DI5 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[7]" VarB="DI Mapping^DI6 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[8]" VarB="DI Mapping^DI7 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.Input[9]" VarB="DI Mapping^DI8 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.State" VarB="InfoData^State"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_3.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^DI570 11 (DI 570)">
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[10]" VarB="DI Mapping^DI9 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[11]" VarB="DI Mapping^DI10 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[12]" VarB="DI Mapping^DI11 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[13]" VarB="DI Mapping^DI12 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[14]" VarB="DI Mapping^DI13 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[15]" VarB="DI Mapping^DI14 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[16]" VarB="DI Mapping^DI15 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[1]" VarB="DI Mapping^DI0 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[2]" VarB="DI Mapping^DI1 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[3]" VarB="DI Mapping^DI2 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[4]" VarB="DI Mapping^DI3 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[5]" VarB="DI Mapping^DI4 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[6]" VarB="DI Mapping^DI5 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[7]" VarB="DI Mapping^DI6 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[8]" VarB="DI Mapping^DI7 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.Input[9]" VarB="DI Mapping^DI8 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.State" VarB="InfoData^State"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_4.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^DI570 8 (DI 570)">
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[10]" VarB="DI Mapping^DI9 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[11]" VarB="DI Mapping^DI10 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[12]" VarB="DI Mapping^DI11 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[13]" VarB="DI Mapping^DI12 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[14]" VarB="DI Mapping^DI13 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[15]" VarB="DI Mapping^DI14 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[16]" VarB="DI Mapping^DI15 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[1]" VarB="DI Mapping^DI0 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[2]" VarB="DI Mapping^DI1 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[3]" VarB="DI Mapping^DI2 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[4]" VarB="DI Mapping^DI3 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[5]" VarB="DI Mapping^DI4 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[6]" VarB="DI Mapping^DI5 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[7]" VarB="DI Mapping^DI6 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[8]" VarB="DI Mapping^DI7 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.Input[9]" VarB="DI Mapping^DI8 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.State" VarB="InfoData^State"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_1.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^DI570 9 (DI 570)">
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[10]" VarB="DI Mapping^DI9 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[11]" VarB="DI Mapping^DI10 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[12]" VarB="DI Mapping^DI11 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[13]" VarB="DI Mapping^DI12 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[14]" VarB="DI Mapping^DI13 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[15]" VarB="DI Mapping^DI14 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[16]" VarB="DI Mapping^DI15 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[1]" VarB="DI Mapping^DI0 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[2]" VarB="DI Mapping^DI1 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[3]" VarB="DI Mapping^DI2 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[4]" VarB="DI Mapping^DI3 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[5]" VarB="DI Mapping^DI4 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[6]" VarB="DI Mapping^DI5 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[7]" VarB="DI Mapping^DI6 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[8]" VarB="DI Mapping^DI7 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.Input[9]" VarB="DI Mapping^DI8 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.State" VarB="InfoData^State"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_2.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^DO570 4 (DO 570)">
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[10]" VarB="DO SC State Mapping^DO9 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[11]" VarB="DO SC State Mapping^DO10 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[12]" VarB="DO SC State Mapping^DO11 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[13]" VarB="DO SC State Mapping^DO12 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[14]" VarB="DO SC State Mapping^DO13 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[15]" VarB="DO SC State Mapping^DO14 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[16]" VarB="DO SC State Mapping^DO15 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[1]" VarB="DO SC State Mapping^DO0 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[2]" VarB="DO SC State Mapping^DO1 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[3]" VarB="DO SC State Mapping^DO2 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[4]" VarB="DO SC State Mapping^DO3 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[5]" VarB="DO SC State Mapping^DO4 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[6]" VarB="DO SC State Mapping^DO5 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[7]" VarB="DO SC State Mapping^DO6 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[8]" VarB="DO SC State Mapping^DO7 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.Output_ShortCircuit[9]" VarB="DO SC State Mapping^DO8 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.State" VarB="InfoData^State"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_5.WcState" VarB="WcState^WcState" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[10]" VarB="DO Mapping^DO9 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[11]" VarB="DO Mapping^DO10 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[12]" VarB="DO Mapping^DO11 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[13]" VarB="DO Mapping^DO12 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[14]" VarB="DO Mapping^DO13 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[15]" VarB="DO Mapping^DO14 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[16]" VarB="DO Mapping^DO15 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[1]" VarB="DO Mapping^DO0 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[2]" VarB="DO Mapping^DO1 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[3]" VarB="DO Mapping^DO2 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[4]" VarB="DO Mapping^DO3 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[5]" VarB="DO Mapping^DO4 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[6]" VarB="DO Mapping^DO5 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[7]" VarB="DO Mapping^DO6 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[8]" VarB="DO Mapping^DO7 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_5.Output[9]" VarB="DO Mapping^DO8 Value" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^DO570 5 (DO 570)">
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[10]" VarB="DO SC State Mapping^DO9 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[11]" VarB="DO SC State Mapping^DO10 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[12]" VarB="DO SC State Mapping^DO11 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[13]" VarB="DO SC State Mapping^DO12 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[14]" VarB="DO SC State Mapping^DO13 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[15]" VarB="DO SC State Mapping^DO14 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[16]" VarB="DO SC State Mapping^DO15 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[1]" VarB="DO SC State Mapping^DO0 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[2]" VarB="DO SC State Mapping^DO1 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[3]" VarB="DO SC State Mapping^DO2 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[4]" VarB="DO SC State Mapping^DO3 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[5]" VarB="DO SC State Mapping^DO4 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[6]" VarB="DO SC State Mapping^DO5 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[7]" VarB="DO SC State Mapping^DO6 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[8]" VarB="DO SC State Mapping^DO7 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.Output_ShortCircuit[9]" VarB="DO SC State Mapping^DO8 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.State" VarB="InfoData^State"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_6.WcState" VarB="WcState^WcState" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[10]" VarB="DO Mapping^DO9 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[11]" VarB="DO Mapping^DO10 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[12]" VarB="DO Mapping^DO11 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[13]" VarB="DO Mapping^DO12 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[14]" VarB="DO Mapping^DO13 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[15]" VarB="DO Mapping^DO14 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[16]" VarB="DO Mapping^DO15 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[1]" VarB="DO Mapping^DO0 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[2]" VarB="DO Mapping^DO1 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[3]" VarB="DO Mapping^DO2 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[4]" VarB="DO Mapping^DO3 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[5]" VarB="DO Mapping^DO4 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[6]" VarB="DO Mapping^DO5 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[7]" VarB="DO Mapping^DO6 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[8]" VarB="DO Mapping^DO7 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_6.Output[9]" VarB="DO Mapping^DO8 Value" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^DO570 6 (DO 570)">
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[10]" VarB="DO SC State Mapping^DO9 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[11]" VarB="DO SC State Mapping^DO10 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[12]" VarB="DO SC State Mapping^DO11 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[13]" VarB="DO SC State Mapping^DO12 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[14]" VarB="DO SC State Mapping^DO13 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[15]" VarB="DO SC State Mapping^DO14 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[16]" VarB="DO SC State Mapping^DO15 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[1]" VarB="DO SC State Mapping^DO0 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[2]" VarB="DO SC State Mapping^DO1 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[3]" VarB="DO SC State Mapping^DO2 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[4]" VarB="DO SC State Mapping^DO3 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[5]" VarB="DO SC State Mapping^DO4 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[6]" VarB="DO SC State Mapping^DO5 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[7]" VarB="DO SC State Mapping^DO6 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[8]" VarB="DO SC State Mapping^DO7 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.Output_ShortCircuit[9]" VarB="DO SC State Mapping^DO8 SC State" Size="1"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.State" VarB="InfoData^State"/>
+				<Link VarA="Main_IO_Task Inputs^EtherCAT.LoadMod_7.WcState" VarB="WcState^WcState" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[10]" VarB="DO Mapping^DO9 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[11]" VarB="DO Mapping^DO10 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[12]" VarB="DO Mapping^DO11 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[13]" VarB="DO Mapping^DO12 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[14]" VarB="DO Mapping^DO13 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[15]" VarB="DO Mapping^DO14 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[16]" VarB="DO Mapping^DO15 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[1]" VarB="DO Mapping^DO0 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[2]" VarB="DO Mapping^DO1 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[3]" VarB="DO Mapping^DO2 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[4]" VarB="DO Mapping^DO3 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[5]" VarB="DO Mapping^DO4 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[6]" VarB="DO Mapping^DO5 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[7]" VarB="DO Mapping^DO6 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[8]" VarB="DO Mapping^DO7 Value" Size="1"/>
+				<Link VarA="Main_IO_Task Outputs^EtherCAT.LoadMod_7.Output[9]" VarB="DO Mapping^DO8 Value" Size="1"/>
+			</OwnerB>
+		</OwnerA>
+	</Mappings>
+</TcSmItem>

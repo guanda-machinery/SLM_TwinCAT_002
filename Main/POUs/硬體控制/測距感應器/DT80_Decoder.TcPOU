@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="DT80_Decoder" Id="{e328e177-10d8-47d0-8b66-a9cbe1fbbeba}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK DT80_Decoder IMPLEMENTS I_DisSensor
+VAR_INPUT
+	// 關閉感應器
+	DisableSeosor :	BOOL;
+END_VAR
+VAR_OUTPUT
+	// 距離 (單位:mm)
+	fDistance : LREAL;
+	// 裝置狀態正常
+	SSC1_1			:BOOL;
+	// 裝置狀態正常
+	bDevice_is_OK			:BOOL;
+	// 需要維護
+	bMaintenance_required	:BOOL;
+	// 超出測量距離
+	bOut_of_specification	:BOOL;
+	// 檢查功能
+	bFunctional_check		:BOOL;
+	// 錯誤
+	bFailure				:BOOL;
+	// 距離比例(單位:公尺)
+	iScale_Distance			:INT;
+END_VAR
+VAR
+	// 原始資料輸入
+	in_RawData AT %I* : ARRAY [0..7] OF USINT;
+	// 原始資料輸出
+	out_rawdata AT %Q* :USINT;	
+	
+	
+
+	DistanceTmp : DINT;
+	
+	tmpfDistance : POINTER TO SINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fDistance := (in_RawData[0] * EXPT(2, 24)) + (in_RawData[1] * EXPT(2, 16)) + (in_RawData[2] * EXPT(2, 8)) + (in_RawData[3] * EXPT(2, 0));
+tmpfDistance := ADR(in_RawData[4]);
+
+fDistance := fDistance * EXPT(10, tmpfDistance^);
+]]></ST>
+    </Implementation>
+    <Property Name="Distance" Id="{dcda0402-ba59-4431-b975-291b6e405818}">
+      <Declaration><![CDATA[PROPERTY Distance : LREAL]]></Declaration>
+      <Get Name="Get" Id="{f879f010-7e38-4a11-a416-4fe27e1b7478}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Distance := fDistance;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

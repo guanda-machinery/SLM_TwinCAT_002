@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="ProjectData" Id="{799aa694-ddf0-4d01-8901-e66e0d127b00}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// 人工置料完成(已註冊)數量
+	WorkOrder_Nunber_At_holding : UINT;
+	
+	WorkOrder_At_holding 	: ARRAY [0..9] OF WorkOrder_Data;
+	
+	WorkOrder_Nunber_At_waitLoading : UINT;
+	
+	WorkOrder_At_waitLoading 	: ARRAY [0..9] OF WorkOrder_Data;
+	
+	WorkOrder_Nunber_At_Machining : UINT;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

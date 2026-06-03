@@ -1,0 +1,367 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="ProductRoller" Id="{b2b18013-bd8a-4aee-b227-40aa17bf91ca}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM ProductRoller
+VAR
+	step: INT;
+	
+	_run : BOOL;
+	
+	start_RTrig : R_TRIG;
+	start_FTrig : F_TRIG;
+	
+	_bError : BOOL;
+	
+	tmr0 : TON;
+	tmr1 : TON;
+	
+	Roller_Up :BOOL;
+	Roller_Down :BOOL;
+	
+	Roller_Fwd :BOOL;
+	Roller_Rev :BOOL;
+END_VAR
+
+VAR_OUTPUT
+	bDone: BOOL;
+	bBuzy: BOOL;
+	bError: BOOL;
+	
+	Move_Fwd : BOOL;
+	Move_Rev : BOOL;
+	At_Up : BOOL;
+	At_Down : BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (EStop OR SystemError OR Input.Feed_Reset) AND bBuzy THEN
+	IF bBuzy THEN
+		step := step  + 10000;
+	END_IF
+	IO.q114 := FALSE;
+	IO.q115 := FALSE;
+	IO.q305 := FALSE;
+	IO.q306 := FALSE;
+END_IF
+
+
+// 外部 送入 啟動訊號
+start_RTrig(CLK := Input.Out_Moter_Start);
+
+IF	start_RTrig.q THEN
+	step := 1;
+END_IF
+
+// 外部 解除 啟動訊號
+start_FTrig(CLK := Input.Out_Moter_Start);
+
+IF start_FTrig.Q THEN
+	step := 100;
+END_IF
+
+
+
+// 執行動作發生錯誤
+_bError := step > 10000;
+
+IF _bError THEN
+	_run := FALSE;
+	IO.q114 := FALSE;
+	IO.q115 := FALSE;
+END_IF
+
+// 馬達 動作中過載檢知
+IF IO.i109 AND step > 0 AND step < 10000 THEN
+	step := 10900;
+END_IF
+
+bBuzy := step > 0 AND step < 10000;
+bError := step > 10000;
+
+IF bBuzy THEN
+	bDone := FALSE;
+END_IF
+
+IF NOT Pause THEN
+	step_0_Auto_Start();
+	step_1_Auto_Stop();
+
+	IO.q115 := Roller_Fwd;
+	IO.q114 := Roller_Rev;
+	IO.q306 := Roller_Up;
+	IO.q305 := Roller_Down;
+ELSE
+	IO.q115 := FALSE;
+	IO.q114 := FALSE;
+	IO.q306 := FALSE;
+	IO.q305 := FALSE;
+END_IF
+
+step_7_Jog_FwdRev();
+step_8_Jog_UpDown();
+
+
+
+Output.Out_Moter_Running := step > 0 OR Move_Fwd OR Move_Rev;;
+Output.Out_Moter_Error := _bError;
+
+tmr0();
+tmr1();
+
+Move_Fwd	:= IO.q115;
+Move_Rev	:= IO.q114;
+At_Up		:= IO.i316;
+At_Down		:= IO.i315;]]></ST>
+    </Implementation>
+    <Folder Name="內部動作" Id="{9337504a-a13d-4cc3-82df-fcde306e61ad}" />
+    <Method Name="Jog_Down" Id="{ee43bea7-f0df-443c-9d01-c6371e4b428d}">
+      <Declaration><![CDATA[METHOD Jog_Down
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+
+step := 820;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Jog_Fwd" Id="{751d7438-9290-4c92-96f5-44b1516eab9b}">
+      <Declaration><![CDATA[METHOD Jog_Fwd
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+
+step := 700;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Jog_Rev" Id="{bfc6c74d-8e02-4f6e-a833-6f997b26fd8c}">
+      <Declaration><![CDATA[METHOD Jog_Rev
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+
+step := 720;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Jog_Stop" Id="{859ae5f3-d06c-4b76-a50d-4a8a1728bdbd}">
+      <Declaration><![CDATA[METHOD Jog_Stop
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 780;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Jog_Up" Id="{18fc746a-4f5c-4a98-8df6-8f98344e1f95}">
+      <Declaration><![CDATA[METHOD Jog_Up
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+
+step := 800;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="step_0_Auto_Start" Id="{b7ec628d-d5ea-4b1e-a138-b9bf8b1c8de7}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	1:
+		IF IO.i112 THEN
+			// 滾輪馬達保護氣跳脫
+			step := step + 10000;
+// 		ELSIF IO.i113 THEN
+// 			
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	2:
+		step := 10;
+		
+	10:
+		Roller_Down := FALSE;
+		Roller_Up 	:= TRUE;
+		tmr1.PT := T#10S;
+		tmr1.IN := TRUE;
+		step := step + 1;
+		
+	11:
+		IF NOT IO.i315 OR tmr1.Q THEN
+			Roller_Up := FALSE;
+			tmr1.IN := FALSE;
+			IF NOT IO.i315 THEN
+				step := step + 1;
+			ELSE
+				// 上升超時
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	12:
+		step := 20;
+		
+	20:
+		Roller_Rev := FALSE;
+		Roller_Fwd := TRUE;
+		_run :=	TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_1_Auto_Stop" Id="{7f96a8d7-9b34-46d2-8b4c-855b739ec25d}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	100:
+		Roller_Rev := FALSE;
+		Roller_Fwd := FALSE;
+		step := step + 1;
+		
+	101:
+		tmr0.PT:= T#1S;
+		tmr0.IN := TRUE;
+		IF tmr0.Q THEN
+			tmr0.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	102:
+		step := 110;
+		
+	110:
+		Roller_Down := TRUE;
+		Roller_Up := FALSE;
+		tmr1.PT := T#10S;
+		tmr1.IN := TRUE;
+		step := step + 1;
+		
+	111:
+		IF IO.i315 OR tmr1.Q THEN
+			Roller_Down := FALSE;
+			tmr1.IN := FALSE;
+			IF IO.i315 THEN
+				step := step + 1;
+			ELSE
+				// 上升超時
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	112:
+		_run :=	FALSE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7_Jog_FwdRev" Id="{998c40b1-23b4-4525-be25-7c1e9bb94889}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	700:
+		Roller_Rev := FALSE;
+		IF IO.i112 THEN
+			// 滾輪馬達保護氣跳脫
+			step := step + 10000;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	701: // 啟動馬達
+		Roller_Fwd := TRUE;
+		bDone := TRUE;
+		step := 0;
+		
+	
+		
+
+
+	720:
+		Roller_Fwd := FALSE;
+		IF IO.i112 THEN
+			// 滾輪馬達保護氣跳脫
+			step := step + 10000;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	721:
+		Roller_Rev := TRUE;
+		bDone := TRUE;
+		step := 0;
+		
+	
+		
+
+
+	780:
+		Roller_Rev := FALSE;
+		Roller_Fwd := FALSE;
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8_Jog_UpDown" Id="{2cf60315-3ecd-48a7-8332-a2f675be5e96}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	800:
+		Roller_Up 	:= TRUE;
+		Roller_Down := FALSE;
+		
+		tmr1.PT := T#10S;
+		tmr1.IN := TRUE;
+		step := step + 1;
+		
+	801: // 滾輪上升
+		IF NOT IO.i315 OR tmr1.Q THEN
+			Roller_Up := FALSE;
+			tmr1.IN := FALSE;
+			IF not IO.i315 THEN
+				step := step + 1;
+			ELSE
+				// 上升超時
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	802:
+		bDone := TRUE;
+		step := 0;
+		
+	
+		
+
+
+	820:
+		Roller_Up := FALSE;
+		Roller_Down := TRUE;
+		
+		tmr1.PT := T#10S;
+		tmr1.IN := TRUE;
+		step := step + 1;
+		
+	821: // 滾輪上升
+		IF IO.i315 OR tmr1.Q THEN
+			Roller_Down := FALSE;
+			tmr1.IN := FALSE;
+			IF IO.i315 THEN
+				step := step + 1;
+			ELSE
+				// 上升超時
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	822:
+		bDone := TRUE;
+		step := 0;
+		
+	
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

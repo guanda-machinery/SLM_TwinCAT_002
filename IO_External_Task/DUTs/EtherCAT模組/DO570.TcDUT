@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="DO570" Id="{c45ca261-0aae-4cf2-82c1-57c18db25f03}">
+    <Declaration><![CDATA[TYPE DO570 :
+STRUCT
+	ModType : STRING := 'KEBA DO570';
+	WcState AT %I*:BOOL;
+	State AT %I*:UINT;
+	Output_ShortCircuit AT %I*:ARRAY [1..16] OF BOOL;
+	Output AT %Q*:ARRAY [1..16] OF BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

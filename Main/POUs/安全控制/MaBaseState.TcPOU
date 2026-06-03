@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="MaBaseState" Id="{b447f688-f1f6-4a95-81ca-68b9872d27df}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MaBaseState
+VAR
+//	msg: MsgPush;
+	
+	
+	trig1: F_TRIG;
+	trig2: F_TRIG;
+	tmrEstop: TOF;
+	ldp: R_TRIG;
+	tmpState: MachineState;
+	bDoorLock: BOOL;
+	carDoor: BOOL;
+	E_stop_trig1: F_TRIG;
+	E_stop_trig2: F_TRIG;
+	Door_trig1: F_TRIG;
+	Door_trig2: F_TRIG;
+	
+	// 維修門切換延遲
+	doorDelay: TOF;
+	Door1_alarm_set: BOOL;
+	Door2_alarm_set: BOOL;
+	doorDelay1: TOF;
+	tmr_Door_Car_Around: TOF;
+	E_stop_trig3: F_TRIG;
+	boot_tmr: TON := (IN := TRUE, PT := TIME#2s0ms);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF boot_tmr.q THEN
+	E_Stop();
+	
+	IF Estop THEN
+		hmi.State := MachineState.emergency;
+	ELSIF Door THEN
+		hmi.State := MachineState.Door;
+	ELSIF SystemError THEN
+		hmi.State := MachineState.error;
+	ELSIF NOT AutoMain.bBuzy THEN
+		hmi.State := MachineState.standby;
+	ELSIF AutoMain.bBuzy AND AutoMain.step >= 8000 AND AutoMain.step < 10000 THEN
+		hmi.State := MachineState.manual_mode;
+	END_IF
+	
+	IF hmi.SysErrorRest THEN
+		SystemError :=FALSE;
+		
+		IF NOT SystemError THEN
+			hmi.SysErrorRest := FALSE;
+		END_IF
+	END_IF
+ELSE
+	boot_tmr();
+END_IF
+
+
+]]></ST>
+    </Implementation>
+    <Action Name="E_Stop" Id="{8328284c-1bc1-418b-bbc2-275c568b728a}">
+      <Implementation>
+        <ST><![CDATA[//	========================================
+//					緊急停止				
+//	========================================
+
+Estop := NOT(IO.i101);
+
+//// 緊急停止
+E_stop_trig1(clk:=IO.i616); 
+IF E_stop_trig1.Q THEN
+	pMsg.Push_Error("緊急停止 MPG");
+END_IF
+
+E_stop_trig2(clk:=IO.i101); 
+IF E_stop_trig2.Q AND NOT SystemError THEN
+	pMsg.Push_Error("緊急停止 面板");
+END_IF
+
+//E_stop_trig2(clk:=io0.X002 AND io0.X003); 
+//IF E_stop_trig2.Q THEN
+//	pMsg.Push_Error("緊急停止 台車面板");
+//END_IF
+
+//E_stop_trig3(clk:=io0.X101); 
+//IF E_stop_trig3.Q THEN
+//	pMsg.Push_Error("緊急停止 台車");
+//END_IF]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

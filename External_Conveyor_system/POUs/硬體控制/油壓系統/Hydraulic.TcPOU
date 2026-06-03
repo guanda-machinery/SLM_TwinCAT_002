@@ -1,0 +1,1676 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Hydraulic" Id="{a6b1b6e2-5dcd-49ab-82ea-537e5369fc7a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Hydraulic
+VAR
+	// 臺車升降用
+	step : INT;
+	// 靠邊用
+	step1 : INT;
+	
+	ActionMode : Hydraulic_Action;
+	
+	// 升降動作的台車 bit0:台車1 bit1:台車2 bit2:台車3 bit3:台車4
+	CarLift_Select : WORD;
+	
+	// 升降動作等待繼續 bit0:台車1 bit1:台車2 bit2:台車3 bit3:台車4
+	CarLift_WaitSync : WORD;
+	
+	tmr01: TON;
+	
+	tmr1_01: TON;
+	tmr1_02: TON;
+	
+	StepA : INT;
+	StepB : INT;
+	StepC : INT;
+	StepD : INT;
+	
+	tmrA_1: TON;
+	tmrA_10: TON;
+	tmrB_1: TON;
+	tmrB_10: TON;
+	tmrC_1: TON;
+	tmrC_10: TON;
+	tmrD_1: TON;
+	tmrD_10: TON;
+	
+	tmr_pump: TON;
+	
+	TryCount: INT;
+END_VAR
+
+
+VAR_OUTPUT
+	bDone: BOOL;
+	bBuzy: BOOL;
+	bError: BOOL;
+	
+	bDone1: BOOL;
+	bBuzy1: BOOL;
+	bError1: BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (EStop OR SystemError) AND bBuzy THEN
+	IF bBuzy THEN
+		step := step  + 10000;
+	END_IF
+	io.q101 := FALSE;
+	io.q301 := FALSE;
+	io.q201 := FALSE;
+	io.q202 := FALSE;
+	io.q203 := FALSE;
+	io.q204 := FALSE;
+	io.q205 := FALSE;
+	io.q206 := FALSE;
+	io.q207 := FALSE;
+	io.q208 := FALSE;
+	io.q302 := FALSE;
+END_IF
+
+
+// 
+Step_0_Start();
+Step_1_Stop();
+step_2_CarLift_Up();
+step_4_CarLift_Mid();
+step_6_CarLift_Down();
+
+step1_1_Pull_over();
+step1_2_Pull_over_Jog();
+
+bBuzy := step > 0 AND step < 10000;
+bError := step > 10000;
+
+IF bError OR bBuzy THEN
+	bDone := FALSE;
+END_IF
+
+bBuzy1 := step1 > 0 AND step1 < 10000;
+bError1 := step1 > 10000;
+
+IF bError1 OR bBuzy1 THEN
+	bDone1 := FALSE;
+END_IF
+
+
+// 油壓未使用關閉計時器
+tmr_pump.in := NOT(bBuzy OR bBuzy1) AND io.q101;
+tmr_pump.pt := T#1M;
+
+IF tmr_pump.q THEN
+	io.q101 := FALSE;
+	io.q301 := FALSE;
+END_IF
+
+tmrAct();]]></ST>
+    </Implementation>
+    <Folder Name="內部動作" Id="{a3dd82c1-d31b-464e-9501-a873d3cbe04e}" />
+    <Method Name="CarLift_Down" Id="{24288a7f-6d2a-4236-8f64-e756ef2fb3dd}">
+      <Declaration><![CDATA[METHOD CarLift_Down : BOOL
+VAR_INPUT
+	// 動作的台車 bit0:台車1、bit0:台車2、bit0:台車3、bit0:台車4
+	Action_Select : WORD := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ActionMode := Hydraulic_Action.Car_2_Dn;
+
+CarLift_Select := Action_Select;
+
+step := 1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CarLift_Mid" Id="{56ed50ac-eae1-4a0e-83c1-879262a47f53}">
+      <Declaration><![CDATA[METHOD CarLift_Mid : BOOL
+VAR_INPUT
+	// 動作的台車 bit0:台車1、bit0:台車2、bit0:台車3、bit0:台車4
+	Action_Select : WORD := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ActionMode := Hydraulic_Action.Car_2_Mid;
+
+CarLift_Select := Action_Select;
+
+step := 1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="CarLift_Up" Id="{77b889fb-c594-4ad7-bf1e-58140876757f}">
+      <Declaration><![CDATA[METHOD CarLift_Up : BOOL
+VAR_INPUT
+	// 動作的台車 bit0:台車1、bit0:台車2、bit0:台車3、bit0:台車4
+	Action_Select : WORD := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ActionMode := Hydraulic_Action.Car_2_Up;
+
+CarLift_Select := Action_Select;
+
+step := 1;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="io_ref" Id="{e831044a-a021-44d6-9601-a1144ade54ee}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Over_Pull" Id="{e97c139a-8294-4020-aa59-fc2782e29572}">
+      <Declaration><![CDATA[// 靠邊油壓動作
+METHOD Over_Pull : BOOL
+VAR_INPUT
+	// 使用的感應器 感應器1 : 2,300mm  感應器2 : X 感應器2 : 6,080mm  感應器3 : 10,230mm 
+	Leageth : INT;
+END_VAR
+VAR
+	Select_tmp:WORD;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ActionMode := Hydraulic_Action.Pull_over;
+
+Select_tmp := 0;
+
+Select_tmp.0 := Leageth > 2300;
+Select_tmp.1 := FALSE;
+Select_tmp.2 := Leageth > 6080;
+Select_tmp.3 := Leageth > 10230;
+
+CarLift_Select := Select_tmp;
+
+IF NOT io.q101 THEN
+	step := 1;
+ELSE
+	step1 := 100;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Over_Pull_Jog" Id="{ba6d39cf-7151-4f8c-9588-57d822a4df0f}">
+      <Declaration><![CDATA[// 靠邊油壓動作
+METHOD Over_Pull_Jog : BOOL
+VAR_INPUT
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ActionMode := Hydraulic_Action.Pull_over_Jog;
+
+IF NOT io.q101 THEN
+	step := 1;
+ELSE
+	step1 := 200;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Step_0_Start" Id="{a2bbe2ac-b596-4c34-8ec6-7febfa1ae489}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	1:// 檢查油壓泵狀態
+		IF io.i102 THEN
+			// !!錯誤!! 油壓泵馬達過載
+			step := step + 10000;
+		ELSIF io.i104 THEN
+			// !!錯誤!! 油壓泵馬達過載
+			step := step + 10000;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	2:
+		
+		step := 10;
+		
+	10: // 如果油壓流已經啟動，則跳過
+		IF io.q101 THEN
+			step := 20;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	11:// 啟動油壓泵
+		io.q101 := TRUE;
+		step := step + 1;
+		
+	12:
+		tmr01.PT := T#1S;
+		tmr01.in := TRUE;
+		IF tmr01.q THEN
+			tmr01.in := FALSE;
+			step := step + 1;
+		END_IF
+		
+	13:
+		step := 20;
+		
+	20:
+		step := 80;
+		
+	80:
+		CASE ActionMode OF
+			Hydraulic_Action.Car_2_Up:
+				Step := 200;
+			
+			Hydraulic_Action.Car_2_Mid:
+				step := 400;
+				
+			Hydraulic_Action.Car_2_dn:
+				step := 600;
+				
+			Hydraulic_Action.Pull_over:
+				io.q301 := TRUE;
+				step1 := 100;
+				step := 0;
+				
+			Hydraulic_Action.Pull_over_Jog:
+				io.q301 := TRUE;
+				step1 := 200;
+				step := 0;
+				
+		END_CASE
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_1_Stop" Id="{396ace1b-67b6-49b2-bcdc-c3f49cdc33a0}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	100:
+		io.q201 := FALSE;
+		io.q202 := FALSE;
+		io.q203 := FALSE;
+		io.q204 := FALSE;
+		io.q205 := FALSE;
+		io.q206 := FALSE;
+		io.q207 := FALSE;
+		io.q208 := FALSE;
+		
+		stepA := 0;
+		stepB := 0;
+		stepC := 0;
+		stepD := 0;
+		
+		io.q301 := FALSE;
+		io.q302 := FALSE;
+		
+		tmr01.IN :=FALSE;
+		step := step + 1;
+		
+	101:
+		step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_2_CarLift_Up" Id="{a6bc35ea-f328-4124-a856-6bc141ecbdbc}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	200:
+		
+		IF (CarLift_Select AND 16#F) = 0 THEN
+			CarLift_Select := 15;
+		END_IF
+		step := step + 1;
+	
+	201:
+		io.q301 := TRUE;
+		IF CarLift_Select.0 THEN
+			stepA := 200;
+		END_IF
+		
+		IF CarLift_Select.1 THEN
+			stepB := 200;
+		END_IF
+		
+		IF CarLift_Select.2 THEN
+			stepC := 200;
+		END_IF
+		
+		IF CarLift_Select.3 THEN
+			stepD := 200;
+		END_IF
+		
+		step := step + 1;
+		
+	202:
+		IF stepA = 0 AND stepB = 0 AND stepC = 0 AND stepD = 0 THEN
+			step := step + 1;
+		ELSIF stepA > 10000 OR stepB > 10000 OR stepC > 10000 OR stepD > 10000 THEN
+			step := step + 10000;
+		END_IF
+		
+	203:
+		io.q301 := false;
+		CarLift_Select := 0;
+		bDone := TRUE;
+		step := 0;
+		
+END_CASE
+
+{region "============= 台車A上升  ============="}
+CASE stepA OF
+	200: // 啟動上升
+		io.q201 := TRUE;
+		io.q202 := FALSE;
+		stepA := stepA + 1;
+		
+	201: // 啟動超時計時器
+		tmrA_10.PT := T#20S;
+		tmrA_10.IN := TRUE;
+		stepA := stepA + 1;
+		
+	202: // 等待
+		IF NOT io.i201 OR tmrA_10.q THEN
+			tmrA_10.in := FALSE;
+			IF NOT io.i201 THEN
+				stepA := stepA + 1;
+			ELSIF tmrA_10.q THEN
+				io.q201 := FALSE;
+				stepA := stepA + 10000;
+			END_IF
+		END_IF
+		
+	203: // 成功之後等待1秒
+		tmrA_1.PT := T#1S;
+		tmrA_1.IN := TRUE;
+		IF tmrA_1.Q THEN
+		 	io.q201 := FALSE;
+			stepA := stepA + 1;
+		END_IF
+		
+	204:
+		stepA := 0;
+		
+END_CASE
+{endregion}
+
+{region "============= 台車B上升  ============="}
+CASE stepB OF
+	200: // 啟動上升
+		io.q203 := TRUE;
+		io.q204 := FALSE;
+		stepB := stepB + 1;
+		
+	201: // 啟動超時計時器
+		tmrB_10.PT := T#20S;
+		tmrB_10.IN := TRUE;
+		stepB := stepB + 1;
+		
+	202: // 等待
+		IF NOT io.i204 OR tmrB_10.q THEN
+			
+			tmrB_10.in := FALSE;
+			
+			IF NOT io.i204 THEN
+				stepB := stepB + 1;
+			ELSIF tmrB_10.q THEN
+				io.q203 := FALSE;
+				stepB := stepB + 10000;
+			END_IF
+		END_IF
+		
+	203: // 成功之後等待1秒
+		tmrB_1.PT := T#1S;
+		tmrB_1.IN := TRUE;
+		IF tmrB_1.Q THEN
+			io.q203 := FALSE;
+			stepB := stepB + 1;
+		END_IF
+		
+	204:
+		stepB := 0;
+		
+END_CASE
+{endregion}
+
+{region "============= 台車C上升  ============="}
+CASE stepC OF
+	200: // 啟動上升
+		io.q205 := TRUE;
+		io.q206 := FALSE;
+		stepC := stepC + 1;
+		
+	201: // 啟動超時計時器
+		tmrC_10.PT := T#20S;
+		tmrC_10.IN := TRUE;
+		stepC := stepC + 1;
+		
+	202: // 等待
+		IF NOT io.i207 OR tmrC_10.q THEN
+			tmrC_10.in := FALSE;
+			
+			IF NOT io.i207 THEN
+				stepC := stepC + 1;
+			ELSIF tmrC_10.q THEN
+				io.q205 := FALSE;
+				stepC := stepC + 10000;
+			END_IF
+		END_IF
+		
+	203: // 成功之後等待1秒
+		tmrC_1.PT := T#1S;
+		tmrC_1.IN := TRUE;
+		IF tmrC_1.Q THEN
+			io.q205 := FALSE;
+			stepC := stepC + 1;
+		END_IF
+		
+	204:
+		stepC := 0;
+		
+END_CASE
+{endregion}
+
+{region "============= 台車D上升  ============="}
+CASE stepD OF
+	200: // 啟動上升
+		io.q207 := TRUE;
+		io.q208 := FALSE;
+		stepD := stepD + 1;
+		
+	201: // 啟動超時計時器
+		tmrD_10.PT := T#20S;
+		tmrD_10.IN := TRUE;
+		stepD := stepD + 1;
+		
+	202: // 等待
+		IF NOT io.i210 OR tmrD_10.q THEN
+			tmrD_10.in := FALSE;
+			
+			IF NOT io.i210 THEN
+				stepD := stepD + 1;
+			ELSIF tmrD_10.q THEN
+				io.q207 := FALSE;
+				stepD := stepD + 10000;
+			END_IF
+		END_IF
+		
+	203: // 成功之後等待1秒
+		tmrD_1.PT := T#1S;
+		tmrD_1.IN := TRUE;
+		IF tmrD_1.Q THEN
+			io.q207 := FALSE;
+			stepD := stepD + 1;
+		END_IF
+		
+	204:
+		stepD := 0;
+		
+END_CASE
+{endregion}
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_4_CarLift_Mid" Id="{670557af-b3e4-46aa-8350-e96abd6a3d06}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	400:
+		CarLift_WaitSync := 0;
+		IF (CarLift_Select AND 16#F) = 0 THEN
+			CarLift_Select := 15;
+		END_IF
+		step := step + 1;
+	
+	401:
+		io.q301 := TRUE;
+		IF CarLift_Select.0 THEN
+			stepA := 400;
+		END_IF
+		
+		IF CarLift_Select.1 THEN
+			stepB := 400;
+		END_IF
+		
+		IF CarLift_Select.2 THEN
+			stepC := 400;
+		END_IF
+		
+		IF CarLift_Select.3 THEN
+			stepD := 400;
+		END_IF
+		
+		step := step + 1;
+		
+	402:
+		IF stepA = 0 AND stepB = 0 AND stepC = 0 AND stepD = 0 THEN
+			step := 420;
+		ELSIF CarLift_WaitSync = CarLift_Select THEN
+			step := 410;
+		ELSIF stepA > 10000 OR stepB > 10000 OR stepC > 10000 OR stepD > 10000 THEN
+			step := step + 10000;
+		END_IF
+		
+	410: // 切換成慢速模式
+		io.q301 := FALSE;
+		step := step + 1;
+		
+	411:
+		tmr01.PT := T#1S;
+		tmr01.in := TRUE;
+		IF tmr01.q THEN
+			tmr01.in := FALSE;
+			step := step + 1;
+		END_IF
+		
+	412:IF CarLift_Select.0 THEN
+			stepA := stepA + 1;
+		END_IF
+		
+		IF CarLift_Select.1 THEN
+			stepB := stepB + 1;
+		END_IF
+		
+		IF CarLift_Select.2 THEN
+			stepC := stepC + 1;
+		END_IF
+		
+		IF CarLift_Select.3 THEN
+			stepD := stepD + 1;
+		END_IF
+		step := step + 1;
+		
+	413:
+		step := 420;
+		
+	420:
+		io.q301 := FALSE;
+		CarLift_Select := 0;
+		bDone := TRUE;
+		step := 0;
+		
+END_CASE
+
+{region "============= 台車A中位移動  ============="}
+CASE stepA OF
+	400: // 判斷位置
+		IF NOT io.i202 THEN
+			stepA := 0;
+		ELSE
+			IF NOT io.i201 THEN
+				// 位置在上限
+				stepA := 410;
+			ELSIF NOT io.i203 THEN
+				// 位置在下限
+				stepA := 440;
+			ELSE
+			    // 位置不確定
+				stepA := 470;
+		 	END_IF
+		END_IF
+	{region "============= 位置在上限  ============="}	
+	410: // 位置在上限，下降
+		io.q201 := FALSE;
+		io.q202 := TRUE;
+		stepA := stepA + 1;
+			 
+	411:
+		tmrA_10.PT := T#60S;
+		tmrA_10.IN := TRUE;
+		stepA := stepA + 1;
+			 
+	412://
+		IF NOT io.i202 OR tmrA_10.q THEN
+			tmrA_10.in := FALSE;
+			IF NOT io.i202 THEN
+				stepA := stepA + 1;
+			ELSIF tmrA_10.q THEN
+				stepA := stepA + 10000;
+			END_IF
+		END_IF
+			 
+	413: // 先降過頭在慢速升回
+		IF io.i202 THEN
+			io.q202 := FALSE;
+			stepA := stepA + 1;
+		END_IF
+				  
+	414:
+		CarLift_WaitSync.0 := TRUE;
+		stepA := 420;
+				  
+//	420: // 等待主油壓切至慢速模式 ，完成後由主流程跳步
+		
+				  
+	421: // 用慢速上升
+		io.q201 := TRUE;
+		IF NOT io.i202 THEN
+			io.q201 := FALSE;
+			stepA := stepA + 1;
+		END_IF
+				  
+	422: // 用慢速上升
+		io.q201 := TRUE;
+		IF NOT io.i202 THEN
+			io.q201 := FALSE;
+			stepA := stepA + 1;
+		END_IF
+		
+	423:
+		stepA := 0;
+	{endregion}
+	{region "============= 位置在下限  ============="}	
+	440: // 位置在下限，上升
+		io.q201 := TRUE;
+		io.q202 := FALSE;
+		stepA := stepA + 1;
+			 
+	441:
+		tmrA_10.PT := T#60S;
+		tmrA_10.IN := TRUE;
+		stepA := stepA + 1;
+			 
+	442:// 到達中間感應器，停止
+		IF NOT io.i202 OR tmrA_10.q THEN
+			io.q201 := FALSE;
+			tmrA_10.in := FALSE;
+					  
+			IF NOT io.i202 THEN
+				stepA := stepA + 1;
+			ELSIF tmrA_10.q THEN
+				stepA := stepA + 10000;
+			END_IF
+		END_IF
+			 
+	443:
+		tmrA_1.PT := T#500ms;
+		tmrA_1.IN := TRUE;
+		IF tmrA_1.Q THEN
+			tmrA_1.IN := FALSE;
+			io.q202 := TRUE;
+			IF io.i202 THEN
+				// 如果上升到超過感應器，下降到有之後，繼續下降到脫離
+				stepA := 444;
+			ELSE
+				// 停在感應器上，下降到脫離
+				stepA := 445;
+			END_IF
+		END_IF
+			
+	444:// 
+		IF NOT io.i202 THEN
+			stepA := stepA + 1;
+		END_IF
+				  
+	445:
+		IF io.i202 THEN
+			io.q202 := FALSE;
+			stepA := stepA + 1;
+		END_IF
+				  
+	446:
+		CarLift_WaitSync.0 := TRUE;
+		stepA := 450;
+				  
+//	450: // 等待主油壓切至慢速模式 ，完成後由主流程跳步
+				  
+	451: // 用慢速上升
+		io.q201 := TRUE;
+		IF NOT io.i202 THEN
+			io.q201 := FALSE;
+			stepA := stepA + 1;
+		END_IF
+				  
+	452: // 用慢速上升
+		io.q201 := TRUE;
+		IF NOT io.i202 THEN
+			io.q201 := FALSE;
+			stepA := stepA + 1;
+		END_IF
+		
+	453:
+		stepA := 0;
+	{endregion}
+			  
+	{region "============= 位置不確定  ============="}	
+	470: // 位置不確定(沒在任何感應器上) ，先下降
+		io.q201 := FALSE;
+		io.q202 := TRUE;
+		stepA := stepA + 1;
+			 
+	471:
+		tmrA_10.PT := T#60S;
+		tmrA_10.IN := TRUE;
+		stepA := stepA + 1;
+			 
+	472:// 通過中間感應器 或 到達下方感應器
+		IF NOT io.i202 OR NOT io.i203 OR tmrA_10.q THEN
+			tmrA_10.in := FALSE;
+					  
+			IF NOT io.i203 THEN
+				// 到達下方感應器
+				io.q202 := FALSE;
+				stepA := 440;
+			ELSIF NOT io.i202 THEN
+				// 通過中間感應器
+				stepA := 480;
+			ELSIF tmrA_10.q THEN
+				stepA := stepA + 10000;
+			END_IF
+		END_IF
+			 
+	480: 
+		IF io.i202 THEN
+			io.q202 := FALSE;
+			stepA := stepA + 1;
+		END_IF
+			
+	481:// 
+		CarLift_WaitSync.0 := TRUE;
+		stepA := 420;
+	{endregion}
+		
+END_CASE
+{endregion}
+
+{region "============= 台車B中位移動  ============="}
+CASE stepB OF
+	400: // 判斷位置
+		IF NOT io.i205 THEN
+			stepB := 0;
+		ELSE
+			IF NOT io.i204 THEN
+				// 位置在上限
+				stepB := 410;
+			ELSIF NOT io.i206 THEN
+				// 位置在下限
+				stepB := 440;
+			ELSE
+			    // 位置不確定
+				stepB := 470;
+		 	END_IF
+		END_IF
+	{region "============= 位置在上限  ============="}	
+	410: // 位置在上限，下降
+		io.q203 := FALSE;
+		io.q204 := TRUE;
+		stepB := stepB + 1;
+			 
+	411:
+		tmrB_10.PT := T#60S;
+		tmrB_10.IN := TRUE;
+		stepB := stepB + 1;
+			 
+	412://
+		IF NOT io.i205 OR tmrB_10.q THEN
+			tmrB_10.in := FALSE;
+			IF NOT io.i205 THEN
+				stepB := stepB + 1;
+			ELSIF tmrB_10.q THEN
+				stepB := stepB + 10000;
+			END_IF
+		END_IF
+			 
+	413: // 先降過頭在慢速升回
+		IF io.i205 THEN
+			io.q204 := FALSE;
+			stepB := stepB + 1;
+		END_IF
+				  
+	414:
+		CarLift_WaitSync.1 := TRUE;
+		stepB := 420;
+				  
+//	420: // 等待主油壓切至慢速模式 ，完成後由主流程跳步
+		
+				  
+	421: // 用慢速上升
+		io.q203 := TRUE;
+		IF NOT io.i205 THEN
+			io.q203 := FALSE;
+			stepB := stepB + 1;
+		END_IF
+				  
+	422: // 用慢速上升
+		io.q203 := TRUE;
+		IF NOT io.i205 THEN
+			io.q203 := FALSE;
+			stepB := stepB + 1;
+		END_IF
+		
+	423:
+		stepB := 0;
+	{endregion}
+	{region "============= 位置在下限  ============="}	
+	440: // 位置在下限，上升
+		io.q203 := TRUE;
+		io.q204 := FALSE;
+		stepB := stepB + 1;
+			 
+	441:
+		tmrB_10.PT := T#60S;
+		tmrB_10.IN := TRUE;
+		stepB := stepB + 1;
+			 
+	442:// 到達中間感應器，停止
+		IF NOT io.i205 OR tmrB_10.q THEN
+			io.q203 := FALSE;
+			tmrB_10.in := FALSE;
+					  
+			IF NOT io.i205 THEN
+				stepB := stepB + 1;
+			ELSIF tmrB_10.q THEN
+				stepB := stepB + 10000;
+			END_IF
+		END_IF
+			 
+	443:
+		tmrB_1.PT := T#500ms;
+		tmrB_1.IN := TRUE;
+		IF tmrB_1.Q THEN
+			tmrB_1.IN := FALSE;
+			io.q204 := TRUE;
+			IF io.i205 THEN
+				// 如果上升到超過感應器，下降到有之後，繼續下降到脫離
+				stepB := 444;
+			ELSE
+				// 停在感應器上，下降到脫離
+				stepB := 445;
+			END_IF
+		END_IF
+			
+	444:// 
+		IF NOT io.i205 THEN
+			stepB := stepB + 1;
+		END_IF
+				  
+	445:
+		IF io.i205 THEN
+			io.q204 := FALSE;
+			stepB := stepB + 1;
+		END_IF
+				  
+	446:
+		CarLift_WaitSync.1 := TRUE;
+		stepB := 450;
+				  
+//	450: // 等待主油壓切至慢速模式 ，完成後由主流程跳步
+				  
+	451: // 用慢速上升
+		io.q203 := TRUE;
+		IF NOT io.i205 THEN
+			io.q203 := FALSE;
+			stepB := stepB + 1;
+		END_IF
+				  
+	452: // 用慢速上升
+		io.q203 := TRUE;
+		IF NOT io.i205 THEN
+			io.q203 := FALSE;
+			stepB := stepB + 1;
+		END_IF
+		
+	453:
+		stepB := 0;
+	{endregion}
+			  
+	{region "============= 位置不確定  ============="}	
+	470: // 位置不確定(沒在任何感應器上) ，先下降
+		io.q203 := FALSE;
+		io.q204 := TRUE;
+		stepB := stepB + 1;
+			 
+	471:
+		tmrB_10.PT := T#60S;
+		tmrB_10.IN := TRUE;
+		stepB := stepB + 1;
+			 
+	472:// 通過中間感應器 或 到達下方感應器
+		IF NOT io.i205 OR NOT io.i206 OR tmrB_10.q THEN
+			tmrB_10.in := FALSE;
+					  
+			IF NOT io.i206 THEN
+				// 到達下方感應器
+				io.q204 := FALSE;
+				stepB := 440;
+			ELSIF NOT io.i205 THEN
+				// 通過中間感應器
+				stepB := 480;
+			ELSIF tmrB_10.q THEN
+				stepB := stepB + 10000;
+			END_IF
+		END_IF
+			 
+	480: 
+		IF io.i205 THEN
+			io.q204 := FALSE;
+			stepB := stepB + 1;
+		END_IF
+			
+	481:// 
+		CarLift_WaitSync.1 := TRUE;
+		stepB := 420;
+	{endregion}
+		
+END_CASE
+{endregion}
+	 
+{region "============= 台車C中位移動  ============="}
+CASE stepC OF
+	400: // 判斷位置
+		IF NOT io.i208 THEN
+			stepC := 0;
+		ELSE
+			IF NOT io.i207 THEN
+				// 位置在上限
+				stepC := 410;
+			ELSIF NOT io.i209 THEN
+				// 位置在下限
+				stepC := 440;
+			ELSE
+			    // 位置不確定
+				stepC := 470;
+		 	END_IF
+		END_IF
+	{region "============= 位置在上限  ============="}	
+	410: // 位置在上限，下降
+		io.q205 := FALSE;
+		io.q206 := TRUE;
+		stepC := stepC + 1;
+			 
+	411:
+		tmrC_10.PT := T#60S;
+		tmrC_10.IN := TRUE;
+		stepC := stepC + 1;
+			 
+	412://
+		IF NOT io.i208 OR tmrC_10.q THEN
+			tmrC_10.in := FALSE;
+			IF NOT io.i208 THEN
+				stepC := stepC + 1;
+			ELSIF tmrC_10.q THEN
+				stepC := stepC + 10000;
+			END_IF
+		END_IF
+			 
+	413: // 先降過頭在慢速升回
+		IF io.i208 THEN
+			io.q206 := FALSE;
+			stepC := stepC + 1;
+		END_IF
+				  
+	414:
+		CarLift_WaitSync.2 := TRUE;
+		stepC := 420;
+				  
+//	420: // 等待主油壓切至慢速模式 ，完成後由主流程跳步
+		
+				  
+	421: // 用慢速上升
+		io.q205 := TRUE;
+		IF NOT io.i208 THEN
+			io.q205 := FALSE;
+			stepC := stepC + 1;
+		END_IF
+				  
+	422: // 用慢速上升
+		io.q205 := TRUE;
+		IF NOT io.i208 THEN
+			io.q205 := FALSE;
+			stepC := stepC + 1;
+		END_IF
+		
+	423:
+		stepC := 0;
+	{endregion}
+	{region "============= 位置在下限  ============="}	
+	440: // 位置在下限，上升
+		io.q205 := TRUE;
+		io.q206 := FALSE;
+		stepC := stepC + 1;
+			 
+	441:
+		tmrC_10.PT := T#60S;
+		tmrC_10.IN := TRUE;
+		stepC := stepC + 1;
+			 
+	442:// 到達中間感應器，停止
+		IF NOT io.i208 OR tmrC_10.q THEN
+			io.q205 := FALSE;
+			tmrC_10.in := FALSE;
+					  
+			IF NOT io.i208 THEN
+				stepC := stepC + 1;
+			ELSIF tmrC_10.q THEN
+				stepC := stepC + 10000;
+			END_IF
+		END_IF
+			 
+	443:
+		tmrC_1.PT := T#500ms;
+		tmrC_1.IN := TRUE;
+		IF tmrC_1.Q THEN
+			tmrC_1.IN := FALSE;
+			io.q206 := TRUE;
+			IF io.i208 THEN
+				// 如果上升到超過感應器，下降到有之後，繼續下降到脫離
+				stepC := 444;
+			ELSE
+				// 停在感應器上，下降到脫離
+				stepC := 445;
+			END_IF
+		END_IF
+			
+	444:// 
+		IF NOT io.i208 THEN
+			stepC := stepC + 1;
+		END_IF
+				  
+	445:
+		IF io.i208 THEN
+			io.q206 := FALSE;
+			stepC := stepC + 1;
+		END_IF
+				  
+	446:
+		CarLift_WaitSync.2 := TRUE;
+		stepC := 450;
+				  
+//	450: // 等待主油壓切至慢速模式 ，完成後由主流程跳步
+				  
+	451: // 用慢速上升
+		io.q205 := TRUE;
+		IF NOT io.i208 THEN
+			io.q205 := FALSE;
+			stepC := stepC + 1;
+		END_IF
+				  
+	452: // 用慢速上升
+		io.q205 := TRUE;
+		IF NOT io.i208 THEN
+			io.q205 := FALSE;
+			stepC := stepC + 1;
+		END_IF
+		
+	453:
+		stepC := 0;
+	{endregion}
+			  
+	{region "============= 位置不確定  ============="}	
+	470: // 位置不確定(沒在任何感應器上) ，先下降
+		io.q205 := FALSE;
+		io.q206 := TRUE;
+		stepC := stepC + 1;
+			 
+	471:
+		tmrC_10.PT := T#60S;
+		tmrC_10.IN := TRUE;
+		stepC := stepC + 1;
+			 
+	472:// 通過中間感應器 或 到達下方感應器
+		IF NOT io.i208 OR NOT io.i209 OR tmrC_10.q THEN
+			tmrC_10.in := FALSE;
+					  
+			IF NOT io.i209 THEN
+				// 到達下方感應器
+				io.q206 := FALSE;
+				stepC := 440;
+			ELSIF NOT io.i208 THEN
+				// 通過中間感應器
+				stepC := 480;
+			ELSIF tmrC_10.q THEN
+				stepC := stepC + 10000;
+			END_IF
+		END_IF
+			 
+	480: 
+		IF io.i208 THEN
+			io.q206 := FALSE;
+			stepC := stepC + 1;
+		END_IF
+			
+	481:// 
+		CarLift_WaitSync.2 := TRUE;
+		stepC := 420;
+	{endregion}
+		
+END_CASE
+{endregion}
+	 
+{region "============= 台車D中位移動  ============="}
+CASE stepD OF
+	400: // 判斷位置
+		IF NOT io.i211 THEN
+			stepD := 0;
+		ELSE
+			IF NOT io.i210 THEN
+				// 位置在上限
+				stepD := 410;
+			ELSIF NOT io.i212 THEN
+				// 位置在下限
+				stepD := 440;
+			ELSE
+			    // 位置不確定
+				stepD := 470;
+		 	END_IF
+		END_IF
+	{region "============= 位置在上限  ============="}	
+	410: // 位置在上限，下降
+		io.q207 := FALSE;
+		io.q208 := TRUE;
+		stepD := stepD + 1;
+			 
+	411:
+		tmrD_10.PT := T#60S;
+		tmrD_10.IN := TRUE;
+		stepD := stepD + 1;
+			 
+	412://
+		IF NOT io.i211 OR tmrD_10.q THEN
+			tmrD_10.in := FALSE;
+			IF NOT io.i211 THEN
+				stepD := stepD + 1;
+			ELSIF tmrD_10.q THEN
+				stepD := stepD + 10000;
+			END_IF
+		END_IF
+			 
+	413: // 先降過頭在慢速升回
+		IF io.i211 THEN
+			io.q208 := FALSE;
+			stepD := stepD + 1;
+		END_IF
+				  
+	414:
+		CarLift_WaitSync.3 := TRUE;
+		stepD := 420;
+				  
+//	420: // 等待主油壓切至慢速模式 ，完成後由主流程跳步
+		
+				  
+	421: // 用慢速上升
+		io.q207 := TRUE;
+		IF NOT io.i211 THEN
+			io.q207 := FALSE;
+			stepD := stepD + 1;
+		END_IF
+				  
+	422: // 用慢速上升
+		io.q207 := TRUE;
+		IF NOT io.i211 THEN
+			io.q207 := FALSE;
+			stepD := stepD + 1;
+		END_IF
+		
+	423:
+		stepD := 0;
+	{endregion}
+	{region "============= 位置在下限  ============="}	
+	440: // 位置在下限，上升
+		io.q207 := TRUE;
+		io.q208 := FALSE;
+		stepD := stepD + 1;
+			 
+	441:
+		tmrD_10.PT := T#60S;
+		tmrD_10.IN := TRUE;
+		stepD := stepD + 1;
+			 
+	442:// 到達中間感應器，停止
+		IF NOT io.i211 OR tmrD_10.q THEN
+			io.q207 := FALSE;
+			tmrD_10.in := FALSE;
+					  
+			IF NOT io.i211 THEN
+				stepD := stepD + 1;
+			ELSIF tmrD_10.q THEN
+				stepD := stepD + 10000;
+			END_IF
+		END_IF
+			 
+	443:
+		tmrD_1.PT := T#500ms;
+		tmrD_1.IN := TRUE;
+		IF tmrD_1.Q THEN
+			tmrD_1.IN := FALSE;
+			io.q208 := TRUE;
+			IF io.i211 THEN
+				// 如果上升到超過感應器，下降到有之後，繼續下降到脫離
+				stepD := 444;
+			ELSE
+				// 停在感應器上，下降到脫離
+				stepD := 445;
+			END_IF
+		END_IF
+			
+	444:// 
+		IF NOT io.i211 THEN
+			stepD := stepD + 1;
+		END_IF
+				  
+	445:
+		IF io.i211 THEN
+			io.q208 := FALSE;
+			stepD := stepD + 1;
+		END_IF
+				  
+	446:
+		CarLift_WaitSync.3 := TRUE;
+		stepD := 450;
+				  
+//	450: // 等待主油壓切至慢速模式 ，完成後由主流程跳步
+				  
+	451: // 用慢速上升
+		io.q207 := TRUE;
+		IF NOT io.i211 THEN
+			io.q207 := FALSE;
+			stepD := stepD + 1;
+		END_IF
+				  
+	452: // 用慢速上升
+		io.q207 := TRUE;
+		IF NOT io.i211 THEN
+			io.q207 := FALSE;
+			stepD := stepD + 1;
+		END_IF
+		
+	453:
+		stepD := 0;
+	{endregion}
+			  
+	{region "============= 位置不確定  ============="}	
+	470: // 位置不確定(沒在任何感應器上) ，先下降
+		io.q207 := FALSE;
+		io.q208 := TRUE;
+		stepD := stepD + 1;
+			 
+	471:
+		tmrD_10.PT := T#60S;
+		tmrD_10.IN := TRUE;
+		stepD := stepD + 1;
+			 
+	472:// 通過中間感應器 或 到達下方感應器
+		IF NOT io.i211 OR NOT io.i212 OR tmrD_10.q THEN
+			tmrD_10.in := FALSE;
+					  
+			IF NOT io.i212 THEN
+				// 到達下方感應器
+				io.q208 := FALSE;
+				stepD := 440;
+			ELSIF NOT io.i211 THEN
+				// 通過中間感應器
+				stepD := 480;
+			ELSIF tmrD_10.q THEN
+				stepD := stepD + 10000;
+			END_IF
+		END_IF
+			 
+	480: 
+		IF io.i211 THEN
+			io.q208 := FALSE;
+			stepD := stepD + 1;
+		END_IF
+			
+	481:// 
+		CarLift_WaitSync.3 := TRUE;
+		stepD := 420;
+	{endregion}
+		
+END_CASE
+{endregion}]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_6_CarLift_Down" Id="{f4557512-4a81-4185-864f-aadb60eddb91}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	600:
+		IF (CarLift_Select AND 16#F) = 0 THEN
+			CarLift_Select := 15;
+		END_IF
+		step := step + 1;
+	
+	601:
+		io.q301 := TRUE;
+		IF CarLift_Select.0 THEN
+			stepA := 600;
+		END_IF
+		
+		IF CarLift_Select.1 THEN
+			stepB := 600;
+		END_IF
+		
+		IF CarLift_Select.2 THEN
+			stepC := 600;
+		END_IF
+		
+		IF CarLift_Select.3 THEN
+			stepD := 600;
+		END_IF
+		
+		step := step + 1;
+		
+	602:
+		IF stepA = 0 AND stepB = 0 AND stepC = 0 AND stepD = 0 THEN
+			step := step + 1;
+		ELSIF stepA > 10000 OR stepB > 10000 OR stepC > 10000 OR stepD > 10000 THEN
+			step := step + 10000;
+		END_IF
+		
+	603:
+		io.q301 := FALSE;
+		CarLift_Select := 0;
+		bDone := TRUE;
+		step := 0;
+		
+END_CASE
+
+{region "============= 台車A下降  ============="}
+CASE stepA OF
+	600: // 啟動上升
+		io.q201 := FALSE;
+		io.q202 := TRUE;
+		stepA := stepA + 1;
+		
+	601: // 啟動超時計時器
+		tmrA_10.PT := T#20S;
+		tmrA_10.IN := TRUE;
+		stepA := stepA + 1;
+		
+	602: // 等待
+		IF NOT io.i203 OR tmrA_10.q THEN
+			tmrA_10.in := FALSE;
+			
+			IF NOT io.i203 THEN
+				stepA := stepA + 1;
+			ELSIF tmrA_10.q THEN
+				io.q202 := FALSE;
+				stepA := stepA + 10000;
+			END_IF
+		END_IF
+		
+	603: // 成功之後等待1秒
+		tmrA_1.PT := T#1S;
+		tmrA_1.IN := TRUE;
+		IF tmrA_1.Q THEN
+			tmrA_1.IN := FALSE;
+			io.q202 := FALSE;
+			stepA := stepA + 1;
+		END_IF
+		
+	604:
+		stepA := 0;
+		
+END_CASE
+{endregion}
+
+{region "============= 台車B下降  ============="}
+CASE stepB OF
+	600: // 啟動上升
+		io.q203 := FALSE;
+		io.q204 := TRUE;
+		stepB := stepB + 1;
+		
+	601: // 啟動超時計時器
+		tmrB_10.PT := T#20S;
+		tmrB_10.IN := TRUE;
+		stepB := stepB + 1;
+		
+	602: // 等待
+		IF NOT io.i206 OR tmrB_10.q THEN
+			tmrB_10.in := FALSE;
+			
+			IF NOT io.i206 THEN
+				stepB := stepB + 1;
+			ELSIF tmrB_10.q THEN
+				io.q204 := FALSE;
+				stepB := stepB + 10000;
+			END_IF
+		END_IF
+		
+	603: // 成功之後等待1秒
+		tmrB_1.PT := T#1S;
+		tmrB_1.IN := TRUE;
+		IF tmrB_1.Q THEN
+			io.q204 := FALSE;
+			stepB := stepB + 1;
+		END_IF
+		
+	604:
+		stepB := 0;
+		
+END_CASE
+{endregion}
+
+{region "============= 台車C下降  ============="}
+CASE stepC OF
+	600: // 啟動上升
+		io.q205 := FALSE;
+		io.q206 := TRUE;
+		stepC := stepC + 1;
+		
+	601: // 啟動超時計時器
+		tmrC_10.PT := T#20S;
+		tmrC_10.IN := TRUE;
+		stepC := stepC + 1;
+		
+	602: // 等待
+		IF NOT io.i209 OR tmrC_10.q THEN
+			tmrC_10.in := FALSE;
+			
+			IF NOT io.i209 THEN
+				stepC := stepC + 1;
+			ELSIF tmrC_10.q THEN
+				io.q206 := FALSE;
+				stepC := stepC + 10000;
+			END_IF
+		END_IF
+		
+	603: // 成功之後等待1秒
+		tmrC_1.PT := T#1S;
+		tmrC_1.IN := TRUE;
+		IF tmrC_1.Q THEN
+			io.q206 := FALSE;
+			stepC := stepC + 1;
+		END_IF
+		
+	604:
+		stepC := 0;
+		
+END_CASE
+{endregion}
+
+{region "============= 台車D下降  ============="}
+CASE stepD OF
+	600: // 啟動上升
+		io.q207 := FALSE;
+		io.q208 := TRUE;
+		stepD := stepD + 1;
+		
+	601: // 啟動超時計時器
+		tmrD_10.PT := T#20S;
+		tmrD_10.IN := TRUE;
+		stepD := stepD + 1;
+		
+	602: // 等待
+		IF NOT io.i212 OR tmrD_10.q THEN
+			tmrD_10.in := FALSE;
+			
+			IF NOT io.i212 THEN
+				stepD := stepD + 1;
+			ELSIF tmrD_10.q THEN
+				io.q207 := FALSE;
+				stepD := stepD + 10000;
+			END_IF
+		END_IF
+		
+	603: // 成功之後等待1秒
+		tmrD_1.PT := T#1S;
+		tmrD_1.IN := TRUE;
+		IF tmrD_1.Q THEN
+			io.q208 := FALSE;
+			stepD := stepD + 1;
+		END_IF
+		
+	604:
+		stepD := 0;
+		
+END_CASE
+{endregion}]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step1_1_Pull_over" Id="{37305d7b-9267-4840-bfe3-b66d71cdb976}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step1 OF
+	100:// 檢查
+		TryCount := 0;
+		step1 := step1 + 1;
+		
+	101:
+		step1 := 110;
+		
+	110: // 啟動靠邊油壓閥
+		io.q302 := TRUE;
+		IF NOT bbuzy THEN
+			io.q301 := TRUE;
+		END_IF
+		step1 := step1 + 1;
+		
+	111: // 確定原點已脫離
+		IF io.i401 THEN
+			step1 := step1 + 1;
+		END_IF
+		
+	112: // 程序暫停5秒
+		tmr1_01.PT := T#4S;
+		tmr1_01.IN := io.i402 AND io.i404;
+		
+		tmr1_02.PT := T#6S;
+		tmr1_02.IN := TRUE;
+		IF tmr1_01.Q OR tmr1_02.q THEN
+			tmr1_01.IN := FALSE;
+			tmr1_02.IN := FALSE;
+			
+			IF tmr1_01.q THEN
+				step1 := 190;
+			ELSIF tmr1_02.Q THEN
+				step1 := step1 + 1;
+			END_IF
+		END_IF
+		
+	113:
+		step1 := 120;
+		
+	120:// 沒推到待命位置
+		io.q302 := FALSE;
+		step1 := step1 + 1;
+		
+	121: // 等待回原點
+		tmr01.PT := T#1S;
+		tmr01.IN := (NOT io.i401 AND NOT io.i403 AND NOT io.i405 AND NOT io.i407);
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step1 := step1 + 1;
+		END_IF
+		
+	122: 
+		
+		IF TryCount < 4 THEN
+			TryCount := TryCount + 1;
+			step1 := 110;
+		ELSE
+			TryCount := 0;
+			step1 := step1 + 10000;
+		END_IF
+		
+		
+	190:
+		
+		tmr1_01.PT := T#6S;
+		tmr1_01.IN := TRUE;
+		IF tmr1_01.Q THEN
+			tmr1_01.IN := FALSE;
+			step1 := step1 + 1;
+		END_IF
+		
+	191:
+		io.q302 := FALSE;
+		bdone1 := TRUE;
+		step1 := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step1_2_Pull_over_Jog" Id="{7a1bd5d6-45c2-4260-aa4f-f2d121955929}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step1 OF
+	200:// 檢查
+		step1 := step1 + 1;
+		
+	201:
+		IF io.q302 THEN
+			step1 := 220;
+		ELSE
+			step1 := 210;
+		END_IF
+		
+		
+	210: // 啟動靠邊油壓閥
+		io.q302 := TRUE;
+		IF NOT bbuzy THEN
+			io.q301 := TRUE;
+		END_IF
+		step1 := step1 + 1;
+		
+	211: // 確定原點已脫離
+		tmr01.PT := T#4S;
+		tmr01.IN := (io.i401 AND io.i403 AND io.i405 AND io.i407);
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step1 := step1 + 1;
+		END_IF
+		
+	212:
+		step1 := 290;
+		
+	220: // 關閉靠邊油壓閥
+		io.q302 := FALSE;
+		IF NOT bbuzy THEN
+			io.q301 := TRUE;
+		END_IF
+		step1 := step1 + 1;
+		
+	221: // 等待回原點
+		tmr01.PT := T#4S;
+		tmr01.IN := (NOT io.i401 AND NOT io.i403 AND NOT io.i405 AND NOT io.i407);
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step1 := step1 + 1;
+		END_IF
+		
+	222: 
+		step1 := 290;
+		
+		
+	290:
+		bdone1 := TRUE;
+		io.q301 := FALSE;
+		step1 := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Stop" Id="{3b895035-9a2b-4cf4-ad98-a75185892c62}">
+      <Declaration><![CDATA[METHOD Stop : BOOL
+VAR_INPUT
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="tmrAct" Id="{7612c37d-28e2-4a4f-850f-834fa7fcea48}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[tmr01();
+
+tmr1_01();
+tmr1_02();
+
+tmrA_1();
+tmrA_10();
+tmrB_1();
+tmrB_10();
+tmrC_1();
+tmrC_10();
+tmrD_1();
+tmrD_10();
+
+
+tmr_pump();]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

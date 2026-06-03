@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <Itf Name="I_Axis" Id="{5bcb8f92-06c3-49cb-b097-9cb3631a7f8b}">
+    <Declaration><![CDATA[INTERFACE I_Axis
+]]></Declaration>
+    <Method Name="AbsMove" Id="{862d5f0b-2167-41ad-bbdd-9f2c46e5ffd1}">
+      <Declaration><![CDATA[METHOD AbsMove : BOOL
+VAR_INPUT
+	// 目標位置
+	_Position : LREAL;
+	// 移動速度
+	_Velocity : LREAL := 0;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="Axis_States" Id="{8842a948-d9ba-4138-ad2c-768fc8821c2c}">
+      <Declaration><![CDATA[PROPERTY Axis_States : ST_AxisStatus]]></Declaration>
+      <Get Name="Get" Id="{5fe80cf1-9533-4e5b-add9-8d45d9a8f693}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Homing" Id="{88f870ba-a9cd-4a33-ad8d-f7b6c12cf01e}">
+      <Declaration><![CDATA[METHOD Homing : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="Pos" Id="{56a0b79e-680d-476c-8896-6367f38a766b}">
+      <Declaration><![CDATA[PROPERTY Pos : LREAL]]></Declaration>
+      <Get Name="Get" Id="{a7ba67e1-c959-4bd4-9c47-e21949b7e8b3}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="PowerOff" Id="{151df514-0fe1-4274-925f-5261d1e2f99e}">
+      <Declaration><![CDATA[METHOD PowerOff : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="PowerOn" Id="{07f07c58-f1e0-4524-a3b6-4ebcd328d5f7}">
+      <Declaration><![CDATA[METHOD PowerOn : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="RelMove" Id="{84f890a0-0974-43fc-bbdd-fa6d257efbb0}">
+      <Declaration><![CDATA[METHOD RelMove : BOOL
+VAR_INPUT
+	// 目標距離
+	_Position : LREAL;
+	
+	// 移動速度
+	_Velocity : LREAL := 0;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetLimit" Id="{5435af3f-959b-4488-aed7-79b87ec10366}">
+      <Declaration><![CDATA[METHOD SetLimit : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="State" Id="{c1ee1cb9-1a50-494d-b945-b814bed10e61}">
+      <Declaration><![CDATA[PROPERTY State : Sub_Step]]></Declaration>
+      <Get Name="Get" Id="{d64a0f38-557a-40d3-b755-aa04761e0b7b}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Stop" Id="{436249c2-fac5-49cd-9ed2-eb21601eb72e}">
+      <Declaration><![CDATA[METHOD Stop : BOOL
+VAR_INPUT
+	Dec : LREAL := 0;
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

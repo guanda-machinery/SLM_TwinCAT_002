@@ -1,0 +1,1018 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Axis_VFD" Id="{edbc04f7-bfb6-425a-9f7c-ee8caf462bd5}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Axis_VFD IMPLEMENTS I_Axis
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// 模式
+	Mode: ActionMode;
+	// 步進
+	step: INT;
+	// 發生錯誤步
+	ws_step: WSTRING;
+	// 目標位置
+	TargetPos: LREAL;
+	// 動作速度
+	Velocity: LREAL;
+	
+	
+(*=======================================
+				計時器
+=======================================*)
+	
+	tmr1: TON := (PT := TIME#100MS);
+	tmr2: TON := (PT := TIME#100MS);
+	tmr100: TON;
+	tmr200: TON := (PT := TIME#1S);
+	tmr201: TON := (PT := TIME#1S);
+	tmr800: TON := (PT := TIME#100MS);
+	
+	// 超時監視計時器
+	tmrWdt: Ton := (PT := TIME#10S0MS);
+  	
+	
+(*=======================================
+				軸IO
+=======================================*)
+	// 原點
+	_Origin				: POINTER TO  BOOL;
+	
+	// 正極限
+	_P_Limit			: POINTER TO  BOOL;
+	// 負極限
+	_N_Limit			: POINTER TO  BOOL;
+
+	// 編碼器
+	_Enc : POINTER TO  MM540;
+	
+	// 變頻器IO
+	Axis1_IO: VFD_E_IO;
+	
+	Limit_status : WORD;
+	
+	Estop_Old: BOOL;
+	
+	Estop_Trig : R_TRIG;
+
+(*==============================================*)
+
+	Origin_pos: LREAL;
+	// 位置
+	_pos : LREAL;
+	
+	// 軸名稱
+	scAxisName : WSTRING;
+	
+	
+	// 位置誤差量
+	_ErrorPos: LREAL;
+	
+	HightSpeed_Error : LREAL := 470;
+	MidSpeed_Error : LREAL := 80;
+	
+	// 上次位置
+	_lastPos: LREAL;
+	// 速度
+	_speed: LREAL;
+	
+	// 速度
+	_speed_average: ARRAY [0..10] OF LREAL;
+	
+	i : INT;
+END_VAR
+
+VAR_OUTPUT
+	// 功能執行中
+	bBuzy 	: BOOL;
+	// 功能結束
+	bDone	: BOOL;
+	// 發生錯誤
+	bError	: BOOL;
+	// 錯誤步驟
+	iErrorID	: INT;
+	// 功能錯誤碼
+	iFbErrorID	: INT;
+	// 已歸零
+	bHome	: BOOL;
+	
+	rFindPos : LREAL;
+END_VAR
+
+VAR_INPUT
+	bJogMode: BOOL;
+	
+	// 負極限
+	inLimiter: BOOL;
+	// 正極限
+	outLimiter: BOOL;
+	// 原點
+	origin : BOOL;
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Main();]]></ST>
+    </Implementation>
+    <Folder Name="內部程式" Id="{86c16185-c8eb-4089-b5a8-48df1e46de8e}" />
+    <Folder Name="設定" Id="{775d3b91-ee3f-4c6c-b768-03d09cceb522}" />
+    <Method Name="AbsMove" Id="{dc640350-bdf8-40c8-ad85-f7cf1a7578d6}">
+      <Declaration><![CDATA[METHOD AbsMove : BOOL
+VAR_INPUT
+	// 目標位置
+	_Position : LREAL;
+	// 移動速度
+	_Velocity : LREAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step:=1;
+Mode := ActionMode.AbsMove;
+TargetPos := _Position;
+Velocity := _Velocity;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Buzy" Id="{81938df5-8eaa-4fcc-b37e-e413e049052a}">
+      <Declaration><![CDATA[PROPERTY Buzy : bool]]></Declaration>
+      <Get Name="Get" Id="{752b27f8-61e8-4c15-9b6f-09d0e134211f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Buzy := bBuzy;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Done" Id="{798afcb4-329e-49d8-8b9e-cb78d364d680}">
+      <Declaration><![CDATA[PROPERTY Done : bool]]></Declaration>
+      <Get Name="Get" Id="{973799ff-3c2b-4b24-9c57-05e45e6fbbe7}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Done := bDone;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Property Name="Encoder" Id="{a9caad1e-32d6-4d05-b1d6-6a1f20e6fbff}" FolderPath="設定\">
+      <Declaration><![CDATA[PROPERTY Encoder : LWORD;]]></Declaration>
+      <Set Name="Set" Id="{d750aa4c-a55b-46d4-8193-137ab947ced4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_enc := Encoder;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Error" Id="{64de6eb2-4fdf-4287-b6a5-06a7753b44b1}">
+      <Declaration><![CDATA[PROPERTY Error : bool]]></Declaration>
+      <Get Name="Get" Id="{f551613d-0ef3-4f09-9ff3-97af4bd1da01}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Error := bError;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Find" Id="{8a3c4861-1544-4026-910a-42475cb11399}">
+      <Declaration><![CDATA[METHOD Find : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step:=1;
+Mode := ActionMode.Find;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Homing" Id="{8dccad21-b70a-4eac-a126-8890a7733230}">
+      <Declaration><![CDATA[METHOD Homing : BOOL
+VAR
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step:=1;
+Mode := ActionMode.Home;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Main" Id="{9a51f988-8cd1-4e98-b084-36c6cc75fe4f}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[Estop_Trig(CLK:= SystemError OR Input.Feed_Reset);
+
+IF Estop_Trig.Q THEN
+	iErrorId := step;
+	step:=800;
+	bDone := FALSE;
+END_IF
+
+bBuzy := step > 0 AND step < 10000;
+berror := step >= 10000;
+IF bBuzy OR berror THEN
+	bDone := FALSE;
+END_IF
+
+IF bError THEN
+	iErrorID := step - 10000;
+	Axis1_IO.o_Speed1^ 		:= FALSE;
+	Axis1_IO.o_Speed2^ 		:= FALSE;
+	Axis1_IO.o_Speed3^ 		:= FALSE;
+	Axis1_IO.o_FWD^			:= FALSE;
+	Axis1_IO.o_REV^			:= FALSE;
+END_IF
+
+IF _N_Limit > 0 THEN
+	Limit_status.0 := _N_Limit^;
+ELSE
+	Limit_status.0 := TRUE;
+END_IF
+
+IF _P_Limit > 0 THEN
+	Limit_status.1 := _P_Limit^;
+ELSE
+	Limit_status.1 := TRUE;
+END_IF
+
+IF _Origin > 0 THEN
+	Limit_status.2 := _Origin^;
+END_IF
+
+
+
+ws_step := INT_TO_WSTRING(step);
+
+CASE step OF
+	0://程式待命
+		tmr1.IN					:= FALSE;
+		tmr100.IN				:= FALSE;
+		tmr200.IN				:= FALSE;
+		tmr201.IN				:= FALSE;
+		tmr800.IN				:= FALSE;
+		tmrWdt.in 				:= FALSE;
+		Axis1_IO.o_Speed1^ 		:= FALSE;
+		Axis1_IO.o_Speed2^ 		:= FALSE;
+		Axis1_IO.o_Speed3^ 		:= FALSE;
+		Axis1_IO.o_FWD^			:= FALSE;
+		Axis1_IO.o_REV^			:= FALSE;
+		
+END_CASE
+
+_enc^();
+
+
+
+_pos := _Enc^.Pos * Config.FeedCar_Enc_Scal;
+
+_speed_average[10] := (_pos - _lastPos) * 100;
+
+FOR i := 0 TO 9 DO
+	_speed_average[9 - i] := _speed_average[10 - i];
+END_FOR
+
+_speed := 0;
+
+FOR i := 0 TO 10 DO
+	_speed := _speed + _speed_average[i];
+END_FOR
+
+_speed := _speed / 11;
+
+_lastPos := _pos;
+
+_ErrorPos := TargetPos - _pos;
+
+IF step > 0 THEN
+	Step0_Start();
+	Step1_1_AbsMove();
+//	Step1_2_RelMove();
+	Step1_3_Home();
+	Step1_4_Find();
+	Step8_End();
+END_IF
+
+
+
+
+timer();
+
+
+// 碰到正轉極限
+IF NOT Limit_status.0 AND Axis1_IO.o_REV^ THEN
+	Axis1_IO.o_REV^ := FALSE;
+END_IF
+
+// 碰到反轉極限
+IF NOT Limit_status.1 AND Axis1_IO.o_FWD^ THEN
+	Axis1_IO.o_FWD^ := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Property Name="Name" Id="{3df640ce-1c4b-4b17-8403-d79c1922aaf3}" FolderPath="設定\">
+      <Declaration><![CDATA[PROPERTY Name : WSTRING]]></Declaration>
+      <Get Name="Get" Id="{4302aef3-e602-4214-af97-4a427ed0ac52}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Name := scAxisName;
+
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{9f9c1500-30ae-415d-acd6-29644e2dc38f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[scAxisName := Name;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Pos" Id="{4c925604-78c3-4337-b9b1-010da8ca80c1}">
+      <Declaration><![CDATA[PROPERTY Pos : LREAL]]></Declaration>
+      <Get Name="Get" Id="{aae7094d-c043-41ff-8751-48ed303639d0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Pos := _pos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="PowerOff" Id="{bb06a9fb-dc05-4d7b-bc08-ce615cff56d9}">
+      <Declaration><![CDATA[METHOD PowerOff : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*===============================
+			關閉馬達
+  ===============================*)
+step:=800;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="PowerOn" Id="{a47bb3b2-501b-4de1-b17f-a962d4fb449f}">
+      <Declaration><![CDATA[METHOD PowerOn : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step:=1;
+Mode := ActionMode.DoNothing;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="RelMove" Id="{d221efc8-fbee-45bd-a5d6-f2619f303ee0}">
+      <Declaration><![CDATA[METHOD RelMove : BOOL
+VAR_INPUT
+	// 目標位置
+	_Position : LREAL;
+	
+	// 移動速度
+	_Velocity : LREAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step:=1;
+Mode := ActionMode.RelMove;
+TargetPos := _Position;
+
+IF _Velocity = 0 THEN
+	Velocity := 10;
+ELSE
+	Velocity := _Velocity;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_VFD_IO" Id="{8fe2b810-32af-4cdf-82f5-0abbfb867a05}" FolderPath="設定\">
+      <Declaration><![CDATA[METHOD Set_VFD_IO : BOOL
+VAR_INPUT
+	FWD : LWORD;
+	REV : LWORD;
+	Speed_Io_1 : LWORD;
+	Speed_Io_2 : LWORD;
+	Speed_Io_3 : LWORD;
+	Reset : LWORD;
+	
+	Run : LWORD;
+	Error : LWORD;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Axis1_IO.o_FWD := FWD;
+Axis1_IO.o_REV := REV;
+Axis1_IO.o_Speed1 := Speed_Io_1;
+Axis1_IO.o_Speed2 := Speed_Io_2;
+Axis1_IO.o_Speed3 := Speed_Io_3;
+Axis1_IO.o_Reset := Reset;
+
+Axis1_IO.i_Run := RUN;
+Axis1_IO.i_Error := Error;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetLimit" Id="{2a310a96-ebd6-41fd-99ae-1ddd03fde3cf}">
+      <Declaration><![CDATA[METHOD SetLimit : BOOL
+VAR_INPUT
+
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetLimit_IO" Id="{4e5448ad-2b57-4c53-be51-bba22bc0412a}" FolderPath="設定\">
+      <Declaration><![CDATA[METHOD SetLimit_IO : BOOL
+VAR_INPUT
+	Origin : LWORD;
+	
+	P_Limit : LWORD;
+	
+	N_Limit : LWORD;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_Origin := Origin;
+_P_Limit := P_Limit;
+_N_Limit := N_Limit;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Step0_Start" Id="{7c8f7c1f-eb40-4ac0-904b-31cf2fa1cd95}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*============================
+				啟動馬達
+	  ============================*)
+CASE step OF
+	
+	1://開始移動流程
+		// 設定狀態
+		bDone := FALSE;
+		Axis1_IO.o_Reset^ :=FALSE;
+		tmrWdt.IN := FALSE;
+		IF NOT bDone THEN
+			step := 10;
+		END_IF
+		
+	10:
+		IF NOT Axis1_IO.i_Error^ THEN
+			step := step + 1;
+		ELSE
+			step := 20;
+		END_IF
+		
+	11:
+		Axis1_IO.o_Reset^ :=TRUE;
+		step := step + 1;
+		
+	12:
+		tmr1.PT := T#2S;
+		tmr1.IN := TRUE;
+		IF tmr1.Q OR NOT Axis1_IO.i_Error^ THEN
+			tmr1.IN := FALSE;
+			step := step + 1;
+		END_IF
+
+
+	13:
+		Axis1_IO.o_Reset^ :=FALSE;
+		IF NOT Axis1_IO.i_Error^ THEN
+			// 變頻器錯誤無法重置		
+			step := step + 10000;
+		ELSE
+			step := 20;
+		END_IF
+		
+	20:
+		step := 80;
+		
+	80: //模式選擇
+		CASE Mode OF
+			ActionMode.AbsMove:
+				step := 100;
+				
+			ActionMode.RelMove:
+				step := 200;
+				
+			ActionMode.Home:
+				step := 300;
+				
+			ActionMode.Find:
+				step		:= 400;
+				
+			ActionMode.DoNothing:
+				step := step + 1;
+		END_CASE
+		
+	81:
+		bdone := TRUE;
+		step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step1_1_AbsMove" Id="{32a7c67e-d9e6-4936-a163-2c28770f7e33}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*========================================
+					開始移動
+	=========================================*)	
+
+	
+
+CASE step OF
+	100:		
+		Axis1_IO.o_Speed1^ 		:= FALSE;
+		Axis1_IO.o_Speed2^ 		:= FALSE;
+		Axis1_IO.o_Speed3^ 		:= FALSE;
+		step := step + 1;
+		
+	101:
+		IF ABS(_ErrorPos) < 2 THEN 
+			step:= 190;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	102:
+		step:= 109;
+		
+	109:
+		step:= 110;
+		
+
+	110: // 設定移動位置
+		Axis1_IO.o_Speed3^ := TRUE;
+		IF _ErrorPos > 0 THEN
+			Axis1_IO.o_FWD^ := TRUE;
+			Axis1_IO.o_REV^ := FALSE;
+		ELSE
+			Axis1_IO.o_FWD^ := FALSE;
+			Axis1_IO.o_REV^ := TRUE;
+		END_IF
+	
+	
+		IF ABS(_ErrorPos) > config.dis_to_MidSpeed AND (Velocity > 0) THEN
+			step := step + 1;
+		ELSIF ABS(_ErrorPos) > config.dis_to_LowSpeed THEN
+			step := 120;
+		ELSE
+			step := 130;
+		END_IF
+		
+		
+	111:
+		Axis1_IO.o_Speed2^ := TRUE;
+		step := step + 1;
+		
+	112:
+		IF ABS(_ErrorPos) <= ABS(_speed) * 1.5 THEN
+			step:=step + 1;
+		END_IF
+		
+	113:
+		step:= 120;
+		
+	120:
+		IF ABS(_ErrorPos) > config.dis_to_LowSpeed THEN
+			step:=step + 1;
+		ELSE
+			step := 130;
+		END_IF
+		
+	121:
+		Axis1_IO.o_Speed1^ := TRUE;
+		Axis1_IO.o_Speed2^ := FALSE;
+		step:=step + 1;
+		
+	122:
+		IF ABS(_ErrorPos) <= config.dis_to_LowSpeed THEN
+			step:=step + 1;
+		END_IF
+		
+	123:
+		step:= 130;
+		
+	130:
+		Axis1_IO.o_Speed1^ := TRUE;
+		Axis1_IO.o_Speed2^ := TRUE;
+		
+		step:=step + 1;
+		
+	131:
+		IF ABS(_speed) < 20 THEN
+			Axis1_IO.o_Speed3^ := FALSE;
+		END_IF
+		
+		IF ABS(_ErrorPos) <= 2 THEN
+			Axis1_IO.o_FWD^ := FALSE;
+			Axis1_IO.o_REV^ := FALSE;
+			Axis1_IO.o_Speed1^ := FALSE;
+			Axis1_IO.o_Speed2^ := FALSE;
+			step:=step + 1;
+		END_IF
+		
+	132:
+		step:= 190;
+
+
+	190:
+		bDone := TRUE;
+		step:=0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step1_2_RelMove" Id="{9d3e4e8e-d7f3-465e-bd78-44bf72aaae89}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*========================================
+					開始移動
+	=========================================*)	
+CASE step OF
+	200:
+		fb_RelMove.Execute := FALSE;
+		Axis1Halt.Execute := FALSE;
+		Axis1Stop.Execute := FALSE;
+		step := step + 1;
+		
+	201:
+		IF Velocity = 0 THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str2(scAxisName, ":Rel設定速度為0", 0)
+			);
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	202:
+		IF TargetPos = 0 THEN 
+			step:= 280;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	203:
+		IF Axis1.Status.HasJob THEN
+			Axis1Halt.Deceleration := 0;
+			Axis1Halt.Execute := TRUE;
+			step := step + 1;
+		ELSE
+			step:= 209;
+		END_IF
+		
+	204:
+		IF Axis1Halt.Busy OR Axis1Halt.Done OR Axis1Halt.Error THEN
+			step:=step + 1;
+		END_IF
+		
+	205:
+		IF Axis1Halt.Done THEN
+			Axis1Halt.Execute := FALSE;
+			step:=step + 1;
+		ELSIF Axis1Halt.Error THEN
+			Axis1Halt.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	206:
+		step:= 209;
+		
+	209:
+		step:= 210;
+		
+
+	210: // 設定移動位置
+		fb_RelMove.Distance := TargetPos;
+		fb_RelMove.Velocity:= Velocity;
+		fb_RelMove.BufferMode:= MC_Aborting;
+		step:=step + 1;
+		
+	211:
+		fb_RelMove.Execute := TRUE;
+		step:=step + 1;
+		
+	212:
+		IF fb_RelMove.Busy OR fb_RelMove.Done OR fb_RelMove.Error THEN
+			step:=step + 1;
+		END_IF
+		
+	213:
+		IF fb_RelMove.Done THEN
+			fb_RelMove.Execute := FALSE;
+			step:=step + 1;
+		ELSIF fb_RelMove.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str2(scAxisName, ":Rel移動失敗", fb_RelMove.ErrorID)
+			);
+			fb_RelMove.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	214:
+		step:=290;
+		
+	280:
+		tmr1.PT := T#500MS;
+		tmr1.IN := TRUE;
+		IF tmr1.Q THEN
+			tmr1.IN := FALSE;
+			step:=step + 1;
+		END_IF
+		
+	281:
+		step := 290;
+		
+	290:
+		bDone := TRUE;
+		step:=890;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step1_3_Home" Id="{55dd1d67-6503-4dfb-af12-4efd7081fa19}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[(*========================================
+				歸零
+=========================================*)	
+CASE step OF
+	// 檢查是否有原點感應器 ， 沒有直接結束歸零
+	300:
+		
+		IF _Origin > 0 THEN
+			step := step + 1;
+		ELSE
+			step := 0;
+		END_IF
+		
+	301:
+		Axis1_IO.o_Speed1^	:= FALSE;
+		Axis1_IO.o_Speed2^	:= FALSE;
+		Axis1_IO.o_Speed3^	:= FALSE;
+		Axis1_IO.o_FWD^ 	:= FALSE;
+		Axis1_IO.o_REV^ 	:= FALSE;
+		step := 310;
+		
+	310: // 沒原點開關訊號  (開關已碰到)
+		IF NOT _Origin^ THEN
+			step := step + 1;
+		ELSE
+			step := 320;
+		END_IF
+		
+	311:
+		Axis1_IO.o_Speed1^ := TRUE;
+		Axis1_IO.o_FWD^ := TRUE;
+		step := step + 1;
+		
+	312:
+		tmr1.PT := T#2S;
+		tmr1.IN := TRUE;
+		IF tmr1.Q OR _Origin^ THEN
+			tmr1.IN := FALSE;
+			Axis1_IO.o_FWD^ := FALSE;
+			Axis1_IO.o_Speed1^ := FALSE;
+	
+			IF _Origin^ THEN
+				step := step + 1;
+			ELSE
+		// !!錯誤!!  原點訊號沒出現
+				step := step + 10000;
+			END_IF
+			
+		END_IF
+		
+	313:
+		step := 320;
+		
+	320: // 往反方向找原點開關
+		Axis1_IO.o_Speed3^ := TRUE;
+		Axis1_IO.o_Speed1^ := TRUE;
+		Axis1_IO.o_Rev^ := TRUE;
+		step := step + 1;
+		
+	321:
+		tmr1.PT := T#2m;
+		tmr1.IN := TRUE;
+		IF tmr1.Q OR not _Origin^ THEN
+			tmr1.IN := FALSE;
+			Axis1_IO.o_Rev^ := FALSE;
+			Axis1_IO.o_Speed1^ := FALSE;
+	
+			IF NOT _Origin^ THEN
+				step := step + 1;
+			ELSE
+		// !!錯誤!!  原點訊號沒消失
+				step := step + 10000;
+			END_IF
+			
+		END_IF
+		
+	322:
+		step := 330;
+		
+	330: // 往 正方向  脫離原點開關 最慢速
+		Axis1_IO.o_Speed1^ := TRUE;
+		Axis1_IO.o_Speed2^ := TRUE;
+		Axis1_IO.o_Speed3^ := FALSE;
+		Axis1_IO.o_FWD^ := TRUE;
+		step := step + 1;
+		
+	331:
+		tmr1.PT := T#10S;
+		tmr1.IN := TRUE;
+		IF tmr1.Q OR _Origin^ THEN
+			tmr1.IN := FALSE;
+			Axis1_IO.o_FWD^ := FALSE;
+			Axis1_IO.o_Speed1^ := FALSE;
+			Axis1_IO.o_Speed2^ := FALSE;
+			IF _Origin^ THEN
+				step := step + 1;
+			ELSE
+		// !!錯誤!!  原點訊號沒恢復
+				step := step + 10000;
+			END_IF
+			
+		END_IF
+		
+	332:
+		step := 340;
+		
+	340:
+		tmr1.PT := T#500ms;
+		tmr1.IN := TRUE;
+		IF tmr1.Q THEN
+			tmr1.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	341:
+		_enc^.SetPos(Config.FeedCar_Enc_Origin_offset);
+		bhome := FALSE;
+		step := step + 1;
+		
+	342:
+		IF _enc^.bActive THEN
+			step := step + 1;
+		END_IF
+		
+	343:
+		Axis1_IO.o_Speed1^ := TRUE;
+		Axis1_IO.o_Speed2^ := TRUE;
+		Axis1_IO.o_FWD^ := TRUE;
+		step := step + 1;
+		
+	344:
+		IF _enc^.Done OR _enc^.Error THEN
+			Axis1_IO.o_Speed1^ := FALSE;
+			Axis1_IO.o_Speed2^ := FALSE;
+			Axis1_IO.o_FWD^ := FALSE;
+			IF _enc^.Done THEN
+				step := step + 1;
+			ELSIF _enc^.Error THEN
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	345:
+		bhome := TRUE;
+		bdone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step1_4_Find" Id="{997e2920-cb35-4cdf-9e7f-fc3736dc0598}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*========================================
+					開始移動
+	=========================================*)	
+
+	
+
+CASE step OF
+	400:		
+		Axis1_IO.o_Speed1^ 		:= FALSE;
+		Axis1_IO.o_Speed2^ 		:= FALSE;
+		step := step + 1;
+		
+	401:
+		step := 410;
+		
+		
+	410:
+		Axis1_IO.o_Speed1^	:= TRUE;
+		Axis1_IO.o_Speed2^	:= FALSE;
+		step := step + 1;
+		
+	411:
+		Axis1_IO.o_FWD^ 	:= TRUE;
+		step := step + 1;
+		
+	412:
+		tmr1.PT := T#1S;
+		tmr1.IN := _speed < 10;
+		IF tmr1.Q THEN
+			tmr1.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	413:
+		step := 420;
+		
+		
+	420:
+		Axis1_IO.o_Speed2^	:= TRUE;
+		step := step + 1;
+		
+	421:
+		tmr1.PT := T#0.5S;
+		tmr1.IN := _speed < 10;
+		IF tmr1.Q THEN
+			tmr1.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	422:
+		step := 430;
+		
+		
+	430:
+		rFindPos := config.pos_CarPin_StopPoint - _pos;
+		step := step + 1;
+		
+	431:
+		Axis1_IO.o_Speed1^	:= TRUE;
+		Axis1_IO.o_Speed2^	:= TRUE;
+		Axis1_IO.o_FWD^		:= FALSE;
+		Axis1_IO.o_REV^		:= TRUE;
+		step := step + 1;
+		
+	432:
+		tmr1.PT := T#3S;
+		tmr1.IN := TRUE;
+		IF tmr1.Q THEN
+			tmr1.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	433:
+		Axis1_IO.o_Speed1^	:= FALSE;
+		Axis1_IO.o_Speed2^	:= FALSE;
+		Axis1_IO.o_Speed3^	:= FALSE;
+		Axis1_IO.o_FWD^		:= FALSE;
+		Axis1_IO.o_REV^		:= FALSE;
+		step := step + 1;
+		
+	434:
+		bdone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step8_End" Id="{ee3b57bd-6d8f-466f-94c0-24ac75cdfaa6}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*======================================
+					關閉馬達
+	  ======================================*)
+CASE step OF
+	800:
+		Axis1_IO.o_Speed1^	:= FALSE;
+		Axis1_IO.o_Speed2^	:= FALSE;
+		Axis1_IO.o_Speed3^	:= FALSE;
+		Axis1_IO.o_FWD^		:= FALSE;
+		Axis1_IO.o_REV^		:= FALSE;
+		step := step + 1;
+		
+	801:
+		step := 0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Stop" Id="{d9802399-faa5-4742-9aee-310b0cd7274e}">
+      <Declaration><![CDATA[METHOD Stop : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*===============================
+			關閉馬達
+  ===============================*)
+step:=800;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="timer" Id="{5e3dcb98-b13b-42a1-940f-fdc1a23da6b5}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[tmr1();
+tmr2();
+tmr100(PT:=T#50MS);
+tmr200();
+tmr201();
+tmr800();
+tmrWdt();]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

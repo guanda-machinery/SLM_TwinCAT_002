@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="Payload_Write_Time" Id="{83afd9ad-3306-4c07-9d46-f8a0983b7938}">
+    <Declaration><![CDATA[TYPE Payload_Write_Time :
+STRUCT
+	// 時間
+	Start_TIME		: DATE_AND_TIME;
+	// 目標uid
+	Uid : STRING(36);
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

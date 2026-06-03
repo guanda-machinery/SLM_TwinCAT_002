@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.14">
+  <GVL Name="Safety" Id="{b536a2f0-a8a9-40d1-a6f3-e475eef4f773}">
+    <Declaration><![CDATA[
+VAR_GLOBAL
+	// 緊急停止
+	Estop: BOOL;	
+	// 光柵
+	Door: BOOL;
+	
+	SystemError :BOOL;
+	
+	SystemAlarm :BOOL;
+	
+	
+	close_Air_Pressure_Check:bool;
+	
+	//關閉前方光柵
+	close_Door_Bad:BOOL;
+	//關閉臺車出入口光柵
+	close_Door_Car_Gate:BOOL;
+	//關閉臺車周圍光柵
+	close_Door_Car_Around:BOOL;
+	
+	//關閉鏈條斷裂檢
+	close_Chain_Break_Check: BOOL;
+	
+	// 真空壓力感應器
+	VacuumSensor: BOOL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="MsgMain" Id="{c3cbb610-87f6-42c2-a790-69945b4ab6df}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MsgMain
+VAR
+	
+	
+	MsgNum			: USINT;
+	
+	_fb_PLCDBCmdEvt : FB_PLCDBCmdEvt(sNetID:= '', tTimeout:= T#5S );
+	
+	msg		: MsgStruct;
+	
+	_SqlCommand : STRING(255);
+	
+	_stPara		: ARRAY [0..5] OF ST_ExpParameter;
+	
+	tcMessage     : I_TcMessage;
+	
+	itmp: UINT;
+	
+	msgtmp		: MsgStruct_RAW;
+	
+	str : POINTER TO ARRAY[0..159] OF BYTE;
+	
+	str2 : POINTER TO ARRAY[0..159] OF BYTE;
+	
+	str3 : POINTER TO ARRAY[0..499] OF BYTE;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF msgbuff.DoneNumber < msgbuff.evenNumber THEN
+	MsgNum := ULINT_TO_USINT(msgbuff.DoneNumber MOD 16);
+
+	msg := msgbuff.messageList[MsgNum];
+
+	// SQL命令
+	_SqlCommand := 
+//	'INSERT INTO msg (msgtime, msg_level, msgnum, str1, str2) VALUES ({msgtime}, {msg_level}, {msgnum}, {str1})';
+
+	'INSERT INTO msg (sn, msgtime, msg_level, msgnum, str1, str2, raw_msg_str) VALUES (uuidv7(), {msgtime}, {msg_level}, {msgnum}, {str1}, {str2}, {raw_msg_str})';
+
+	msgtmp.msgTIME := msg.msgTIME;
+	msgtmp.Level := msg.Level;
+	msgtmp.Number := msg.Number;
+
+	str := ADR(msg.MsgStr1);
+	msgtmp.MsgStr1 := str^;
+
+	str2 := ADR(msg.MsgStr2);
+	msgtmp.MsgStr2 := str2^;
+
+	str3 := ADR(msg.raw_msg_str);
+	msgtmp.raw_msg_str := str3^;
+
+
+// 設定對應參數
+	_stPara[0].sParaName := 'msgtime'; 		_stPara[0].eParaType := E_ExpParameterType.DateTime; 	_stPara[0].nParaSize := SIZEOF(msgtmp.msgTIME);
+	_stPara[1].sParaName := 'msg_level'; 	_stPara[1].eParaType := E_ExpParameterType.Int16; 		_stPara[1].nParaSize := SIZEOF(msgtmp.Level);
+	_stPara[2].sParaName := 'msgnum';		_stPara[2].eParaType := E_ExpParameterType.Int16;		_stPara[2].nParaSize := SIZEOF(msgtmp.Number);
+	_stPara[3].sParaName := 'str1';			_stPara[3].eParaType := E_ExpParameterType.WSTRING_;	_stPara[3].nParaSize := 160;
+	_stPara[4].sParaName := 'str2';			_stPara[4].eParaType := E_ExpParameterType.WSTRING_;	_stPara[4].nParaSize := 160;
+	_stPara[5].sParaName := 'raw_msg_str';	_stPara[5].eParaType := E_ExpParameterType.WSTRING_;	_stPara[5].nParaSize := 500;
+
+
+	IF 
+		MsgMain._fb_PLCDBCmdEvt.Execute(
+			hDBID := 1,
+			pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+			cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+			pData:= ADR(msgtmp),		// 帶入的參數值
+			cbData:= SIZEOF(msgtmp),//itmp, 	// 帶入的參數值大小
+			pParameter:= ADR(_stPara), 				// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+			cbParameter:= SIZEOF(_stPara),			// 帶入的參數類型設定的大小
+		) 
+	THEN
+		IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+			tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+		END_IF
+		msgbuff.DoneNumber := msgbuff.DoneNumber + 1;
+	END_IF
+ELSIF msgbuff.DoneNumber > msgbuff.evenNumber THEN
+	msgbuff.DoneNumber := msgbuff.evenNumber;
+END_IF
+
+msgbuff.systime(
+	bEnable:= TRUE, 
+	dwCycle:= 1,
+	systemTime=> );
+msgbuff.currentTime := SYSTEMTIME_TO_DT(msgbuff.systime.systemTime);]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

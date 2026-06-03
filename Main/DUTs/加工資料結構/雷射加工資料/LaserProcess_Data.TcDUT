@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="LaserProcess_Data" Id="{12e6c86c-8783-4358-be5a-ebbe9170e67f}">
+    <Declaration><![CDATA[TYPE LaserProcess_Data :
+// 115 byte
+STRUCT
+	// 資料的UID
+	data_uid					: STRING(36);
+	// 面的UID
+	uid							: STRING(36);
+	// 該面的序號(順序)
+	paySerial					: DINT;
+	// 使用雷射參數
+	LaserParameter				: DINT;
+	// 加工內容的x座標
+	Point_X						: LREAL;
+	// 加工內容的y座標
+	Point_Y						: LREAL;
+	// 加工內容的寬度
+	Width						: LREAL;
+	// 加工內容的高度
+	Height						: LREAL;
+	// 是否是QRCode
+	isQRCode					: BOOL;
+	// 已完成
+	isDone						: BOOL;
+	// QRCode字串
+	qrcode_data					: STRING(100);
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

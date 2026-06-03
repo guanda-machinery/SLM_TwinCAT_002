@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="Data_Out" Id="{a3c1393b-10d7-46ed-b151-fd18817e3adf}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// 資料開始
+	Mpg_PLC_Enable AT %Q* : BOOL;
+	
+	// 資料同步脈衝
+	Mpg_PLC_Clock AT %Q* : BOOL;
+	// 資料 PIN0
+	Mpg_PLC_Data_0 AT %Q* : BOOL;
+	// 資料 PIN1
+	Mpg_PLC_Data_1 AT %Q* : BOOL;
+	// 資料 PIN2
+	Mpg_PLC_Data_2 AT %Q* : BOOL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

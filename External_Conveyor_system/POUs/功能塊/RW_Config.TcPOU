@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="RW_Config" Id="{5694198a-8adc-4218-9521-d15111448d15}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM RW_Config
+VAR
+	File_Path: STRING(INT#80) := '\Hard Disk2\Config\';
+	fb_recipemancommands:recipemancommands;
+	result: ARRAY [0..6] OF DWORD;
+	result1: BOOL;
+	boot: BOOL := true;
+	
+
+
+
+	GetTime: FB_LocalSystemTime := (bEnable := TRUE);
+	
+
+	tmr2: TON;
+	tmr3: TON;
+	
+	//	目前時間	
+	TimeNow: DATE_AND_TIME;
+	
+	strTimeNow: STRING;
+END_VAR
+
+VAR_INPUT
+	// 寫入檔案
+	Wrtie: BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[tmr2(in:=boot, PT:=T#5S);
+tmr3(in:=result1, PT:=T#1S);
+IF tmr2.Q THEN
+	result1 := fb_recipemancommands.SetStoragePath(File_Path);
+	IF  tmr3.Q THEN
+//		result[0] := fb_recipemancommands.LoadAndWriteRecipe('Config','Diff');
+//		IF result[0] <> 0 THEN
+//			result[1] := fb_recipemancommands.LoadRecipe('Config','Diff');
+//			result[2] := fb_recipemancommands.WriteRecipe('Config','Diff');
+//		END_IF
+//		result1 := FALSE;
+		boot := FALSE;
+		Wrtie := TRUE;
+	END_IF
+END_IF
+
+IF Wrtie THEN
+	result1 := fb_recipemancommands.SetStoragePath(File_Path);
+	result[3] := fb_recipemancommands.ReadRecipe('Config', 'Diff');
+	result[4] := fb_recipemancommands.SaveRecipe('Config', 'Diff');
+	result[5] := fb_recipemancommands.ReadAndSaveAs('Config','Diff');
+	result[6] := fb_recipemancommands.ReadAndSaveRecipeAs('Config', 'Diff', CONCAT(STR1:= 'config_', STR2:= strTimeNow));
+	Wrtie := FALSE;
+END_IF
+
+
+
+GetTime();
+TimeNow:=SYSTEMTIME_TO_DT(GetTime.systemTime);
+strTimeNow := CONCAT(STR1:= WORD_TO_STRING(GetTime.systemTime.wYear), STR2:='_');
+strTimeNow := CONCAT(strTimeNow ,CONCAT(STR1:= WORD_TO_STRING(GetTime.systemTime.wMonth), STR2:='_'));
+strTimeNow := CONCAT(strTimeNow ,CONCAT(STR1:= WORD_TO_STRING(GetTime.systemTime.wDay), STR2:='_'));
+strTimeNow := CONCAT(strTimeNow ,WORD_TO_STRING(GetTime.systemTime.wHour));]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

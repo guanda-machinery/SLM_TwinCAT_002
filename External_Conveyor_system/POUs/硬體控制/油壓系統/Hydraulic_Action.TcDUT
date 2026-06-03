@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="Hydraulic_Action" Id="{24e9582c-be1b-4c90-86b0-c302d09affbe}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE Hydraulic_Action :
+(
+	DoNothing	:= 0,
+	Car_2_Up	:= 1,
+	Car_2_Mid	:= 2,
+	Car_2_Dn	:= 3,
+	Pull_over	:= 4,
+	UnPull		:= 5,
+	Pull_over_Jog	:= 10
+);
+END_TYPE
+
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

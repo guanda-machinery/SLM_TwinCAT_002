@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="IO" Id="{2abc84ac-12b4-4b9b-8813-1c8ed1e59628}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+{region "============= EL1409_1 ============="}
+	//
+	i101 AT %I*: BOOL;
+	// 入料側油壓馬達過載檢知
+	i102 AT %I*: BOOL;
+	// 抽油循環馬達
+	i103 AT %I*: BOOL;
+	// 入料側油壓馬達過載檢知
+	i104 AT %I*: BOOL;
+	// 入料側橫移馬達過載1檢知
+	i105 AT %I*: BOOL;
+	// 入料側橫移馬達過載2檢知
+	i106 AT %I*: BOOL;
+	// 入料側橫移變頻器運轉
+	i107 AT %I*: BOOL;
+	// 入料側橫移變頻器無異常
+	i108 AT %I*: BOOL;
+	// 入料側上浮滾輪馬達過載1檢知
+	i109 AT %I*: BOOL;
+	// 入料側上浮滾輪馬達過載2檢知
+	i110 AT %I*: BOOL;
+	// 入料側上浮滾輪馬達過載3檢知
+	i111 AT %I*: BOOL;
+	// 入料側上浮滾輪馬達過載4檢知
+	i112 AT %I*: BOOL;
+	// 出口上浮滾輪停止
+	i113 AT %I*: BOOL;
+	// 出口有無料檢測1
+	i114 AT %I*: BOOL;
+	// 出口有無料檢測2
+	i115 AT %I*: BOOL;
+	// 
+	i116 AT %I*: BOOL;
+ {endregion}
+{region "============= EL1409_2 ============="}
+	// 入料側橫移台車升降1上限
+	i201 AT %I*: BOOL;
+	// 入料側橫移台車升降1中限
+	i202 AT %I*: BOOL;
+	// 入料側橫移台車升降1下限
+	i203 AT %I*: BOOL;
+	// 入料側橫移台車升降2上限
+	i204 AT %I*: BOOL;
+	// 入料側橫移台車升降2中限
+	i205 AT %I*: BOOL;
+	// 入料側橫移台車升降2下限
+	i206 AT %I*: BOOL;
+	// 入料側橫移台車升降3上限
+	i207 AT %I*: BOOL;
+	// 入料側橫移台車升降3中限
+	i208 AT %I*: BOOL;
+	// 入料側橫移台車升降3下限
+	i209 AT %I*: BOOL;
+	// 入料側橫移台車升降4上限
+	i210 AT %I*: BOOL;
+	// 入料側橫移台車升降4中限
+	i211 AT %I*: BOOL;
+	// 入料側橫移台車升降4下限
+	i212 AT %I*: BOOL;
+	// 入料側橫移台車原點
+	i213 AT %I*: BOOL;
+	// 
+	i214 AT %I*: BOOL;
+	// 
+	i215 AT %I*: BOOL;
+	// 
+	i216 AT %I*: BOOL;
+{endregion}
+{region "============= EL1409_3 ============="}
+	// 入料側整料圓柱1下限
+	i301 AT %I*: BOOL;
+	// 入料側整料圓柱1上限
+	i302 AT %I*: BOOL;
+	// 入料側整料圓柱1材料定位
+	i303 AT %I*: BOOL;
+	// 入料側整料圓柱2下限
+	i304 AT %I*: BOOL;
+	// 入料側整料圓柱2上限
+	i305 AT %I*: BOOL;
+	// 入料側整料圓柱2材料定位
+	i306 AT %I*: BOOL;
+	// 入料側整料圓柱3下限
+	i307 AT %I*: BOOL;
+	// 入料側整料圓柱3上限
+	i308 AT %I*: BOOL;
+	// 入料側整料圓柱3材料定位
+	i309 AT %I*: BOOL;
+	// 入料側整料圓柱4下限
+	i310 AT %I*: BOOL;
+	// 入料側整料圓柱4上限
+	i311 AT %I*: BOOL;
+	// 入料側整料圓柱4材料定位
+	i312 AT %I*: BOOL;
+	// 出口滾輪
+	i313 AT %I*: BOOL;
+	// 測高上限原點
+	i314 AT %I*: BOOL;
+	// 出料側上浮滾輪升降 上限(滾輪下)
+	i315 AT %I*: BOOL;
+	// 出料側上浮滾輪升降 下限(滾輪上)
+	i316 AT %I*: BOOL;
+ {endregion}
+{region "============= EL1409_4 ============="}
+	// 入料側靠邊1原點
+	i401 AT %I*: BOOL;
+	// 入料側靠邊1材料定位檢知
+	i402 AT %I*: BOOL;
+	// 入料側靠邊2原點
+	i403 AT %I*: BOOL;
+	// 入料側靠邊2材料定位檢知
+	i404 AT %I*: BOOL;
+	// 入料側靠邊3原點
+	i405 AT %I*: BOOL;
+	// 入料側靠邊3材料定位檢知
+	i406 AT %I*: BOOL;
+	// 入料側靠邊4原點
+	i407 AT %I*: BOOL;
+	// 入料側靠邊4材料定位檢知
+	i408 AT %I*: BOOL;
+	// 入料側滾輪1 離合器 分離
+	i409 AT %I*: BOOL;
+	// 入料側滾輪1 離合器 結合
+	i410 AT %I*: BOOL;
+	// 入料側上浮滾輪升降2 下限(滾輪上)
+	i411 AT %I*: BOOL;
+	// 入料側上浮滾輪升降2 上限(滾輪下)
+	i412 AT %I*: BOOL;
+	// 
+	i413 AT %I*: BOOL;
+	// 
+	i414 AT %I*: BOOL;
+	// 
+	i415 AT %I*: BOOL;
+	// 
+	i416 AT %I*: BOOL;
+ {endregion}
+	  
+	 
+{region "============= EL2409_7 ============="}
+	// 入料側油壓馬達啟動
+	q101 AT %Q*: BOOL;
+	// 入料側上浮滾輪(全) 反轉
+	q102 AT %Q*: BOOL;
+	// 入料側上浮滾輪(全) 正轉
+	q103 AT %Q*: BOOL;
+	// 入料側橫移台車變頻器正轉 (往靠邊)
+	q104 AT %Q*: BOOL;
+	// 入料側橫移台車變頻器反轉 (往原點)
+	q105 AT %Q*: BOOL;
+	// 入料側橫移台車變頻器多段速01
+	q106 AT %Q*: BOOL;
+	// 入料側橫移台車變頻器多段速02
+	q107 AT %Q*: BOOL;
+	// 入料側橫移台車變頻器多段速03(未設定)
+	q108 AT %Q*: BOOL;
+	// 
+	q109 AT %Q*: BOOL;
+	// 
+	q110 AT %Q*: BOOL;
+	// 
+	q111 AT %Q*: BOOL;
+	// 
+	q112 AT %Q*: BOOL;
+	// 
+	q113 AT %Q*: BOOL;
+	// 出口側上浮滾輪反轉
+	q114 AT %Q*: BOOL;
+	// 出口側上浮滾輪正轉
+	q115 AT %Q*: BOOL;
+	// 
+	q116 AT %Q*: BOOL;
+{endregion}
+{region "============= EL2409_8 ============="}
+	// 入料側橫移台車1上升
+	q201 AT %Q*: BOOL;
+	// 入料側橫移台車1下降
+	q202 AT %Q*: BOOL;
+	// 入料側橫移台車2上升
+	q203 AT %Q*: BOOL;
+	// 入料側橫移台車2下降
+	q204 AT %Q*: BOOL;
+	// 入料側橫移台車3上升
+	q205 AT %Q*: BOOL;
+	// 入料側橫移台車3下降
+	q206 AT %Q*: BOOL;
+	// 入料側橫移台車4上升
+	q207 AT %Q*: BOOL;
+	// 入料側橫移台車4下降
+	q208 AT %Q*: BOOL;
+	// 入料側整料圓柱1上升
+	q209 AT %Q*: BOOL;
+	// 入料側整料圓柱1下降
+	q210 AT %Q*: BOOL;
+	// 入料側整料圓柱2上升
+	q211 AT %Q*: BOOL;
+	// 入料側整料圓柱2下降
+	q212 AT %Q*: BOOL;
+	// 入料側整料圓柱3上升
+	q213 AT %Q*: BOOL;
+	// 入料側整料圓柱3下降
+	q214 AT %Q*: BOOL;
+	// 入料側整料圓柱4上升
+	q215 AT %Q*: BOOL;
+	// 入料側整料圓柱4下降
+	q216 AT %Q*: BOOL;
+{endregion}
+{region "============= EL2409_9 ============="}
+	// 入料側油壓總閥
+	q301 AT %Q*: BOOL;
+	// 入料側油壓靠邊閥
+	q302 AT %Q*: BOOL;
+	// 入料側測高上升
+	q303 AT %Q*: BOOL;
+	// 入料側測高下降
+	q304 AT %Q*: BOOL;
+	// 出口側出料滾輪1下降
+	q305 AT %Q*: BOOL;
+	// 出口側出料滾輪1上升
+	q306 AT %Q*: BOOL;
+	// 入料側變頻器異常清除
+	q307 AT %Q*: BOOL;
+	// 
+	q308 AT %Q*: BOOL;
+	// 入料側進料滾輪1 離合器接合
+	q309 AT %Q*: BOOL;
+	// 入料側進料滾輪1 離合器分離
+	q310 AT %Q*: BOOL;
+	// 入料側進料滾輪2 上升
+	q311 AT %Q*: BOOL;
+	// 入料側進料滾輪2 下降
+	q312 AT %Q*: BOOL;
+	// 
+	q313 AT %Q*: BOOL;
+	// 
+	q314 AT %Q*: BOOL;
+	// 
+	q315 AT %Q*: BOOL;
+	// 
+	q316 AT %Q*: BOOL;
+{endregion}
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

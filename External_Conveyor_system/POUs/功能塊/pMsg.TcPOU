@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="pMsg" Id="{7684ad6c-3919-4817-89f5-688b11f53eca}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM pMsg
+VAR
+	msg: MsgPush;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Push_Alarm" Id="{6bc02747-6728-4e1d-8f9b-d8d9f442df63}">
+      <Declaration><![CDATA[METHOD PUBLIC Push_Alarm : BOOL
+VAR_INPUT
+	STR : WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[msg.iMessageId := 0;
+msg.msgeLevel := MsgLevel.Alarm;
+msg.sMessageStr1:=STR;
+msg();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Push_Alarm_NoPause" Id="{93c2844d-3181-4b3c-8a8e-46fab90054ba}">
+      <Declaration><![CDATA[METHOD PUBLIC Push_Alarm_NoPause : BOOL
+VAR_INPUT
+	STR : WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[msg.iMessageId := 0;
+msg.msgeLevel := MsgLevel.Alarm;
+msg.sMessageStr1:=STR;
+msg();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Push_Error" Id="{f3976628-e386-43b2-9ac6-20526979b396}">
+      <Declaration><![CDATA[METHOD PUBLIC Push_Error : BOOL
+VAR_INPUT
+	STR : WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[msg.iMessageId := 0;
+msg.msgeLevel := MsgLevel.Error;
+msg.sMessageStr1:=STR;
+SystemError := TRUE;
+msg();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Push_Info" Id="{01d39928-1653-495f-8f78-34e7137ec7e7}">
+      <Declaration><![CDATA[METHOD PUBLIC Push_Info : BOOL
+VAR_INPUT
+	STR : WSTRING;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[msg.iMessageId := 0;
+msg.msgeLevel := MsgLevel.Info;
+msg.sMessageStr1:=STR;
+msg();]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

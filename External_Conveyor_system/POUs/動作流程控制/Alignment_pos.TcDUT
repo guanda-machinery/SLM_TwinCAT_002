@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="Alignment_pos" Id="{9a5457de-4485-40fb-b6f3-0f426dbff018}">
+    <Declaration><![CDATA[// 排列位置
+TYPE Alignment_pos :
+STRUCT
+	// 分料開始位置 (搬運完成但未分料位置)
+	Start : LREAL;
+	// 分料結束位置 (推至分料位置)
+	End : LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

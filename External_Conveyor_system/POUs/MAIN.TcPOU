@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="MAIN" Id="{d50f830e-466d-4675-8ef0-a322b8ff59df}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	
+	i : INT;
+
+	val: ARRAY [0..100] OF REAL;
+	
+	postmp: REAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[MaBaseState();
+
+// 測距感應器
+Sensor();
+
+// 測高機構
+HeightMeasurer();
+
+// 定位圓柱
+StopPin();
+
+AxisAction();
+
+FeedMain();
+
+// 進料滾輪
+FeedRoller();
+// 出料滾輪
+ProductRoller();
+
+Hydraulic();
+
+ReadSQLData();
+
+PullOver();
+
+MsgMain();]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

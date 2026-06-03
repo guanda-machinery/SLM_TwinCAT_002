@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <Task Name="MPG_View" Id="{83ad2d85-21a4-4c86-956e-86cacb2137ab}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>2000</CycleTime>
+    <Priority>28</Priority>
+    <PouCall>
+      <Name>MAIN</Name>
+    </PouCall>
+    <TaskFBGuid>{625dbc20-9e54-4b0c-9ffd-f6a330b700ad}</TaskFBGuid>
+    <Fb_init>{2f5f6778-8d27-475e-a0f0-6abcfe09fd37}</Fb_init>
+    <Fb_exit>{c82a037c-f7d4-49a9-9b5d-7445949ee4cf}</Fb_exit>
+    <CycleUpdate>{9fb8ae3d-6aed-4fa7-8f62-d325b87c88de}</CycleUpdate>
+    <PostCycleUpdate>{65cdcc1a-1035-4759-9331-d036e67971c8}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="Output" Id="{0df8dc8c-394a-4893-b075-65f6b67562fe}">
+    <Declaration><![CDATA[VAR_GLOBAL
+	// 進料機 動作中
+	Feed_bBuzy						AT %Q*	: BOOL;
+	// 進料機 動作完成
+	Feed_bDone 						AT %Q*	: BOOL;
+	// 進料機 發生錯誤
+	Feed_bError 					AT %Q*	: BOOL;
+	
+	// 進料材料寬度
+	Feed_Workpiace_W 				AT %Q*	: LREAL;
+	
+	// 進料材料高度
+	Feed_Workpiace_H 				AT %Q*	: LREAL;
+	
+	// 執行中的動作
+	ActionMode_Now 					AT %Q*	: UINT;
+	
+	
+	// 靠邊 動作中
+	PullOver_bBuzy					AT %Q*	: BOOL;
+	// 靠邊  動作完成
+	PullOver_bDone 					AT %Q*	: BOOL;
+	// 靠邊  發生錯誤
+	PullOver_bError 				AT %Q*	: BOOL;
+	
+	
+	// 靠邊光電感應器
+	in_Pos_sensor					AT %Q*	: WORD;
+	
+	// 靠邊光電感應器
+	Out_Pos_sensor					AT %Q*	: WORD;
+	
+	// 進料滾輪啟動
+	In_Moter_Running 				AT %Q*	: BOOL;
+	// 進料滾輪錯誤
+	In_Moter_Error 					AT %Q*	: BOOL;
+	
+	
+	// 出料滾輪啟動
+	Out_Moter_Running 				AT %Q*	: BOOL;
+	// 出料滾輪錯誤
+	Out_Moter_Error 				AT %Q*	: BOOL;
+	
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

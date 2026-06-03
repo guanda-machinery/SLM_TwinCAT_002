@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="Config" Id="{ae55ae2a-c830-4503-a0fa-9e2ce54818f0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL PERSISTENT
+	// 靠邊感應器位置 
+	SensorPos : ARRAY [0..15] OF UDINT := [2300,999999,6080,10230];
+
+(* ===============台車===============*)
+	// 台車間距
+	Car_SetupPos : ARRAY [0..15] OF UDINT := [0,3700,7450,11200];
+	
+	// 臺車搬移平台寬度 1095mm
+	FeedCar_Length : LREAL := 1095;
+	
+	// 臺車勾板寬度 25mm
+	FeedCar_Pin_Length : LREAL := 25;
+	
+	// 台車橫移的編碼器比例
+	FeedCar_Enc_Scal 			: LREAL := -0.025;
+	
+	// 臺車編碼器原點偏移 (編碼器值)
+	FeedCar_Enc_Origin_offset 	: DINT := -880;
+	
+	// 臺車移動 高速 -> 中速 距離
+	dis_to_MidSpeed : LREAL := 470;
+	
+	// 臺車移動 高速 -> 中速 距離
+	dis_to_LowSpeed : LREAL := 80;
+	
+	// 臺車勾點-整料圓柱 位置  (測量寬度用)
+	pos_CarPin_StopPoint		: LREAL := 1120;
+	
+	// 台車起點 (進料位置)
+	pos_StartPoint				: LREAL := 60;
+	
+	// 台車 等待投料位置 (排列起點)
+	pos_Workpiace_StanbyPoint	: LREAL := 1400;
+	
+	// 台車 投料位置 
+	pos_Workpiace_FeedPoint	: LREAL := 2700;
+	
+	// 材料排列 間距
+	dis_Alignment 				: LREAL := 100;
+	
+	// 材料容許誤差 倍率 (0-1 = 0 ~ 100%) 預設 10%
+	Workpiace_Err_size 				: LREAL := 0.1;
+	
+(* =============== 測高 =============== *)
+	// 高基準面位置
+	H_Measure_ZeroPoint : LREAL := 642.62;
+	
+(* =============== 測寬感應器 =============== *)
+	// 寬基準面位置
+	W_Measure_ZeroPoint : LREAL := 1253;
+	
+	
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

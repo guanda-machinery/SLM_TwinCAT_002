@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="Axis" Id="{be84231c-5f78-44e9-9a0d-8f1d369e3491}">
+    <Declaration><![CDATA[VAR_GLOBAL
+	
+// 軸控制
+// ============== 滾輪軸 ==============
+	//  進料台車IO
+	FeedCar_INV : VFD_E_IO;
+	//  進料編碼器
+	FeedCar_Enc : MM540;
+	
+	FeedCar : Axis_VFD;
+
+// ============== 測高軸 ==============
+	Axis_StepMoter: AXIS_REF;
+	
+	Axis_H_Measure: AxisBase;
+	
+	Override: LREAL := 100;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

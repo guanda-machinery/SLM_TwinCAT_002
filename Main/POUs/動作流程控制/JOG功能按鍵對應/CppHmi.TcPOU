@@ -1,0 +1,417 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="CppHmi" Id="{e29fc67b-d842-478f-b0c3-b178db1a2af2}" SpecialFunc="None">
+    <Declaration><![CDATA[(*=====================================================
+				本地端人機的動作對應
+  =====================================================*)
+PROGRAM CppHmi
+VAR_INPUT
+	bEnable: BOOL;
+END_VAR
+VAR
+	// 連練監視
+	watchdog	: REFERENCE TO BOOL;
+
+	// 模式選擇
+	Mode_MPG: REFERENCE TO BOOL;
+	Mode_JOG: REFERENCE TO BOOL;
+	Mode_AUTO: REFERENCE TO BOOL;
+	Mode_SetHome: REFERENCE TO BOOL;
+	
+	// 現在模式
+	NowMode: REFERENCE TO DINT;
+	
+	// 操作群組設定
+	Jog_Set_GroupA : REFERENCE TO BOOL;
+	Jog_Set_GroupB : REFERENCE TO BOOL;
+	Jog_Set_GroupC : REFERENCE TO BOOL;
+	Jog_Set_GroupD : REFERENCE TO BOOL;
+	Jog_Set_GroupFx : REFERENCE TO BOOL;
+	
+	// FX軸的JOG方式 6 :A+B 7:A 8:B
+	Jog_Fx_Mode: REFERENCE TO DINT;
+	
+	// HMI現在的畫面
+	Hmi_Page: DINT;
+	
+	
+	// JOG移動量
+	Jog_Mov_step: REFERENCE TO DINT;
+	
+
+	// JOG_指定移動_絕對
+	Jog_Mov_To_Mode: REFERENCE TO DINT;
+	// JOG_指定移動_執行移動
+	Jog_Mov_To_Go: REFERENCE TO BOOL;
+	
+	// Jog模式 X軸 前進
+	Jog_X_P : REFERENCE TO BOOL;
+	// Jog模式 X軸 後退
+	Jog_X_N : REFERENCE TO BOOL;
+	
+	// Jog模式 Y軸 前進
+	Jog_Y_P : REFERENCE TO BOOL;
+	// Jog模式 Y軸 後退
+	Jog_Y_N : REFERENCE TO BOOL;
+	
+	// Jog模式 Z軸 前進
+	Jog_Z_P : REFERENCE TO BOOL;
+	// Jog模式 Z軸 後退
+	Jog_Z_N : REFERENCE TO BOOL;
+	
+	// Jog模式 FX軸 前進
+	Jog_FX_P: REFERENCE TO BOOL;
+	// Jog模式 FX軸 後退
+	Jog_FX_N: REFERENCE TO BOOL;
+	
+
+	
+	// 設定原點
+	X_Set0 : REFERENCE TO BOOL;
+	X_SetMax : REFERENCE TO BOOL;
+	Y_Set0 : REFERENCE TO BOOL;
+	Y_SetMax : REFERENCE TO BOOL;
+	Z_Set0 : REFERENCE TO BOOL;
+	Z_SetMax : REFERENCE TO BOOL;
+	
+	boot_init : BOOL := TRUE;
+	
+	watchdog_tmr: TOF;
+	LDF_bEnable: F_TRIG;
+	
+
+END_VAR
+
+VAR_OUTPUT
+	
+
+	
+
+	
+	
+END_VAR
+
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF boot_init THEN
+	initAction();
+	boot_init := FALSE;
+END_IF
+
+// 
+watchdog_tmr(in := watchdog, PT:=T#1S);
+
+benable := watchdog_tmr.Q;
+
+SelectMode();
+
+SelectGroup();
+
+Output();
+
+]]></ST>
+    </Implementation>
+    <Action Name="initAction" Id="{633d50e4-56de-45fd-b6bd-c8a10a1b77df}">
+      <Implementation>
+        <ST><![CDATA[watchdog REF= G_ADS.Mbit[1001];
+// 
+Jog_Set_GroupA REF= G_ADS.Mbit[101];
+Jog_Set_GroupB REF= G_ADS.Mbit[102];
+Jog_Set_GroupC REF= G_ADS.Mbit[103];
+Jog_Set_GroupD REF= G_ADS.Mbit[104];
+Jog_Set_GroupFx  REF= G_ADS.Mbit[105];
+
+Jog_X_P REF= G_ADS.Mbit[121];
+Jog_X_N REF= G_ADS.Mbit[122];
+Jog_Y_P REF= G_ADS.Mbit[123];
+Jog_Y_N REF= G_ADS.Mbit[124];
+Jog_Z_P REF= G_ADS.Mbit[125];
+Jog_Z_N REF= G_ADS.Mbit[126];
+
+Jog_FX_P REF= G_ADS.Mbit[127];
+Jog_FX_N REF= G_ADS.Mbit[128];
+
+Jog_Mov_step	REF= G_ADS.Yint32[25];
+
+Jog_Fx_Mode		REF= G_ADS.Yint32[26];
+
+
+Jog_Mov_To_Mode	REF= G_ADS.Yint32[22];
+
+Jog_Mov_To_Go	REF= G_ADS.Mbit[151];
+
+
+// 設定HOME按鍵
+X_Set0		REF=  G_ADS.Mbit[141];
+X_SetMax	REF=  G_ADS.Mbit[142];
+Y_Set0		REF=  G_ADS.Mbit[143];
+Y_SetMax	REF=  G_ADS.Mbit[144];
+Z_Set0		REF=  G_ADS.Mbit[145];
+Z_SetMax	REF=  G_ADS.Mbit[146];
+
+// 模式選擇
+Mode_MPG		REF=  G_ADS.Mbit[1];
+Mode_JOG		REF=  G_ADS.Mbit[2];
+Mode_AUTO		REF=  G_ADS.Mbit[3];
+Mode_SetHome	REF=  G_ADS.Mbit[4];
+
+NowMode			REF=  G_ADS.Xint32[100];
+
+// 現在畫面
+Hmi_Page		:= G_ADS.Yint32[110];]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="JogButton" Id="{d44b0c1b-c305-47cd-bb39-1d2feb18bd1c}">
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Output" Id="{bc64b2a7-019f-48f4-af28-517e51089578}">
+      <Implementation>
+        <ST><![CDATA[// 本地端人機輸入
+
+watchdog := G_ADS.Mbit[1001];
+
+IF bEnable THEN
+	
+	// 位置輸出
+	G_ADS.Xfloat[1] := GaX.Pos;
+	G_ADS.Xfloat[2] := GaY.Pos;
+	G_ADS.Xfloat[3] := GaZ.Pos;
+	
+	G_ADS.Xfloat[21] := GbX.Pos;
+	G_ADS.Xfloat[22] := GbY.Pos;
+	G_ADS.Xfloat[23] := GbZ.Pos;
+	
+	G_ADS.Xfloat[41] := GcX.Pos;
+	G_ADS.Xfloat[42] := GcY.Pos;
+	G_ADS.Xfloat[43] := GcZ.Pos;
+	
+	G_ADS.Xfloat[61] := GdX.Pos;
+	G_ADS.Xfloat[62] := GdY.Pos;
+	G_ADS.Xfloat[63] := GdZ.Pos;
+	
+	G_ADS.Xfloat[81] := FxA.Pos;
+	G_ADS.Xfloat[82] := FxB.Pos;
+	
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="SelectGroup" Id="{d569b726-f331-46b4-8509-562738a63061}">
+      <Implementation>
+        <ST><![CDATA[.G_ADS.Xint32[100] := hmi.Jog_GroupSelect;
+
+IF bEnable AND NowMode <> 11 THEN
+	IF Jog_Set_GroupA THEN
+		
+		Jog_Set_GroupA := FALSE;
+		IF hmi.Jog_GroupSelect <> 1 THEN
+			hmi.Jog_GroupSelect := 1;
+		ELSE
+			hmi.Jog_GroupSelect := -1;
+		END_IF
+		
+	ELSIF Jog_Set_GroupB THEN
+		
+		Jog_Set_GroupB := FALSE;
+		IF hmi.Jog_GroupSelect <> 2 THEN
+			hmi.Jog_GroupSelect := 2;
+		ELSE
+			hmi.Jog_GroupSelect := -1;
+		END_IF
+		
+	ELSIF Jog_Set_GroupC THEN
+		
+		Jog_Set_GroupC := FALSE;
+		IF hmi.Jog_GroupSelect <> 3 THEN
+			hmi.Jog_GroupSelect := 3;
+		ELSE
+			hmi.Jog_GroupSelect := -1;
+		END_IF
+		
+	ELSIF Jog_Set_GroupD THEN
+		
+		Jog_Set_GroupD := FALSE;
+		IF hmi.Jog_GroupSelect <> 4 THEN
+			hmi.Jog_GroupSelect := 4;
+		ELSE
+			hmi.Jog_GroupSelect := -1;
+		END_IF
+		
+	ELSIF Jog_Set_GroupFx THEN
+		
+		Jog_Set_GroupFx := FALSE;
+		IF hmi.Jog_GroupSelect <> 101 THEN
+			hmi.Jog_GroupSelect := 101;
+		ELSE
+			hmi.Jog_GroupSelect := -1;
+		END_IF
+		
+	END_IF
+ELSE
+	
+	Jog_Set_GroupA := FALSE;
+	Jog_Set_GroupB := FALSE;
+	Jog_Set_GroupC := FALSE;
+	Jog_Set_GroupD := FALSE;
+	Jog_Set_GroupFx := FALSE;
+END_IF
+
+LDF_bEnable(CLK:= bEnable);
+
+IF LDF_bEnable.Q THEN
+	hmi.Jog_GroupSelect := -1;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="SelectMode" Id="{0b2cc2fe-c4e0-49d6-8e21-1ab5a8a3791a}">
+      <Implementation>
+        <ST><![CDATA[// 模式選擇
+
+IF bEnable THEN
+	IF Mode_JOG THEN
+		
+		NowMode := 1;
+		Mode_JOG := FALSE;
+		
+	ELSIF Mode_MPG THEN
+		
+		NowMode := 2;
+		Mode_MPG := FALSE;
+		
+	ELSIF Mode_AUTO THEN
+		
+		NowMode := 11;
+		Mode_AUTO := FALSE;
+		
+	ELSIF Mode_SetHome THEN
+		
+		NowMode := 101;
+		Mode_SetHome := FALSE;
+
+	END_IF
+ELSE
+	Mode_JOG := FALSE;
+	Mode_MPG := FALSE;
+	Mode_AUTO := FALSE;
+	Mode_SetHome := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="CppHmi">
+      <LineId Id="285" Count="0" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="304" Count="0" />
+      <LineId Id="299" Count="0" />
+      <LineId Id="289" Count="0" />
+      <LineId Id="288" Count="0" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="293" Count="0" />
+      <LineId Id="439" Count="1" />
+      <LineId Id="298" Count="0" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="296" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="44" Count="0" />
+    </LineIds>
+    <LineIds Name="CppHmi.initAction">
+      <LineId Id="41" Count="1" />
+      <LineId Id="2" Count="2" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="6" Count="6" />
+      <LineId Id="49" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="18" Count="2" />
+      <LineId Id="22" Count="16" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="CppHmi.JogButton">
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="CppHmi.Output">
+      <LineId Id="28" Count="4" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="73" Count="16" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="CppHmi.SelectGroup">
+      <LineId Id="16" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="58" Count="2" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="61" Count="3" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="73" Count="1" />
+      <LineId Id="65" Count="3" />
+      <LineId Id="45" Count="1" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="79" Count="1" />
+      <LineId Id="69" Count="3" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="85" Count="1" />
+      <LineId Id="81" Count="3" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="52" Count="3" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="32" Count="1" />
+    </LineIds>
+    <LineIds Name="CppHmi.SelectMode">
+      <LineId Id="63" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="20" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="27" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="57" Count="1" />
+      <LineId Id="60" Count="2" />
+      <LineId Id="3" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

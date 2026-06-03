@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="uuidv7_g" Id="{6c936147-d030-4400-b2b7-8f02f9f6304c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM uuidv7_g
+VAR
+	fbStartProcess : NT_StartProcess;
+	step: INT;
+END_VAR
+VAR_OUTPUT
+	bBuzy : BOOL;
+	bDone : BOOL;
+	bError : BOOL;
+	UUID:STRING(36);
+	ErrorID : UDINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE step OF
+	1:
+		UUID := '';
+		fbStartProcess.START := FALSE;
+		step := step + 1;
+		
+	2:
+		fbStartProcess.START := TRUE;
+		step := step + 1;
+		
+	3:
+		IF fbStartProcess.BUSY OR fbStartProcess.ERR THEN
+			step := step + 1;
+		END_IF
+		
+	4:
+		IF NOT fbStartProcess.BUSY AND NOT fbStartProcess.ERR THEN
+			fbStartProcess.START := FALSE;
+			step := step + 1;
+		ELSIF fbStartProcess.ERR THEN
+			fbStartProcess.START := FALSE;
+			ErrorID := fbStartProcess.ERRID;
+			step := step + 10000;
+		END_IF
+		
+	5:
+		IF Len(UUID) >= 36 THEN
+			bDone := TRUE;
+			step := 0;
+		END_IF
+END_CASE
+	
+
+bBuzy := step > 0 AND step < 10000;
+
+bError := step > 10000;
+
+IF bBuzy THEN
+	bDone := FALSE;
+END_IF
+
+fbStartProcess(
+		NETID := '',
+		PATHSTR := 'C:\custom\uuidv7generator_ads\uuidv7generator_ads.exe',
+		DIRNAME := 'C:\custom\uuidv7generator_ads',
+		COMNDLINE := '127.0.0.1.1.1 851 uuidv7_g.UUID',
+		TMOUT := T#1S
+	);]]></ST>
+    </Implementation>
+    <Method Name="Get" Id="{06afcddb-d339-4b90-ae0c-1cdefc26f757}">
+      <Declaration><![CDATA[METHOD Get
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 1;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

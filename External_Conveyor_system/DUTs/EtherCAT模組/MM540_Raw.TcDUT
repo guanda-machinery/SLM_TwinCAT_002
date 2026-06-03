@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="MM540_Raw" Id="{8f96a27c-7a36-43da-9bc5-952b160fb1ba}">
+    <Declaration><![CDATA[TYPE MM540_Raw :
+STRUCT
+	// 編碼器位置
+	Inc AT %I*					: DINT;
+	
+	// 編碼器重設狀態
+	Inc_Preload_Done AT %I*		: BOOL;
+	
+	// 編碼器 A相 錯誤
+	Inc_Error_A AT %I*			: BOOL;
+	
+	// 編碼器 B相 錯誤
+	Inc_Error_B AT %I*			: BOOL;
+	
+	// 編碼器 C相 錯誤
+	Inc_Error_C AT %I*			: BOOL;
+	
+	// 編碼器1 AB相 錯誤
+	Inc_Error_AB AT %I*			: BOOL;
+	
+	
+	// 編碼器設定數值
+	Inc_Preload_Value AT %Q*			: DINT;
+	(*
+	設定數值方式:
+	0: Disabled
+	1: Preload now
+	2: Preload with next 0- impulse
+	3: Preload with next DI0 rising edge
+	4: Preload with next DI1 rising edge
+	5: Preload with next DI2 rising edge
+	6: Preload with next DI3 rising edge
+	7: Preload with next DI0 falling edge
+	8: Preload with next DI1 falling edge
+	9: Preload with next DI2 falling edge
+	10: Preload with next DI3 falling edge
+	>10: Disabled
+	*)
+	// 編碼器1 設定數值方式
+	Inc_Preload_Trigger AT %Q*				: USINT;
+	
+	// 1:數據無效 0:數據有效
+	WcState AT %I*					: BOOL;
+	
+	// EtherCAT 狀態
+	State AT %I*:UINT;
+	
+	// AMS位置
+	addr 	AT %I*					: AMSADDR;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

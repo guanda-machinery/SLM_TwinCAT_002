@@ -1,0 +1,340 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="GetEtherSta" Id="{b034a793-f26e-438c-9c46-e550029cb35a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM GetEtherSta
+VAR
+	fbGetAllSlaveStates : FB_EcGetAllSlaveStates;
+    sNetId      AT %I*  : AMSNETID ;
+	sNetId2      AT %I*  : AMSNETID ;
+    bExecute            : BOOL;
+    devStates           : ARRAY[0..255] OF ST_EcSlaveState;
+	devStates2           : ARRAY[0..255] OF ST_EcSlaveState;
+    nSlaves             : UINT := 0;
+	nSlaves2             : UINT := 0;
+    nErrId              : UDINT;
+	
+	fbEcReqSlaveState : FB_EcReqSlaveState;
+	
+	fb_EcGetSlaveTopologyInfo	: FB_EcGetSlaveTopologyInfo;
+	TopologyInfo 				: ARRAY[0..255] OF ST_TopologyDataEx;
+	
+	step: INT;
+	tmr1: TON;
+	i: UINT;
+	
+	fb_EcSetSlaveState : FB_EcSetSlaveState;
+	resetSlaveNumber : INT;
+	tmr100: TON;
+	str_TmpString: WSTRING;
+	
+	
+	
+	step100: INT;
+END_VAR
+
+VAR_OUTPUT
+	bErrorGetEC: BOOL;
+
+	bBuzy: BOOL;
+	bError: BOOL;
+	bDone: BOOL;
+	iErrorId : INT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbGetAllSlaveStates();
+bErrorGetEC := fbGetAllSlaveStates.bError;
+nErrId := fbGetAllSlaveStates.nErrId;
+
+CASE step OF
+	0:
+		fb_EcGetSlaveTopologyInfo.sNetId	:= F_CreateAmsNetId(sNetId);
+		fb_EcGetSlaveTopologyInfo.pAddrBuf	:= ADR(TopologyInfo);
+		fb_EcGetSlaveTopologyInfo.cbBufLen	:= SIZEOF(TopologyInfo);
+		fb_EcGetSlaveTopologyInfo.bExecute	:= TRUE;
+		step := step + 1;
+		
+	1:
+		IF fb_EcGetSlaveTopologyInfo.bBusy OR fb_EcGetSlaveTopologyInfo.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2:
+		IF NOT fb_EcGetSlaveTopologyInfo.bBusy THEN
+			fb_EcGetSlaveTopologyInfo.bExecute := FALSE;
+			step := step + 1;
+		END_IF
+		
+	3:
+		step := 10;
+		
+		
+	10:
+		fbGetAllSlaveStates.sNetId:= F_CreateAmsNetId(sNetId);
+		fbGetAllSlaveStates.pStateBuf	:= ADR(devStates);
+		fbGetAllSlaveStates.cbBufLen	:= SIZEOF(devStates);
+		fbGetAllSlaveStates.bExecute := TRUE;
+		step := step + 1;
+		
+	11:
+		IF fbGetAllSlaveStates.bBusy OR fbGetAllSlaveStates.bError THEN
+			step := step + 1;
+		END_IF
+		
+	12:
+		IF NOT fbGetAllSlaveStates.bBusy THEN
+			fbGetAllSlaveStates.bExecute := FALSE;
+			nSlaves := fbGetAllSlaveStates.nSlaves;
+			step := step + 1;
+		END_IF
+		
+	13:
+		fbGetAllSlaveStates.sNetId		:= F_CreateAmsNetId(sNetId2);
+		fbGetAllSlaveStates.pStateBuf	:= ADR(devStates2);
+		fbGetAllSlaveStates.cbBufLen	:= SIZEOF(devStates2);
+		fbGetAllSlaveStates.bExecute := TRUE;
+		step := step + 1;
+		
+	14:
+		IF fbGetAllSlaveStates.bBusy OR fbGetAllSlaveStates.bError THEN
+			step := step + 1;
+		END_IF
+		
+	15:
+		IF NOT fbGetAllSlaveStates.bBusy THEN
+			fbGetAllSlaveStates.bExecute := FALSE;
+			nSlaves2 := fbGetAllSlaveStates.nSlaves;
+			step := step + 1;
+		END_IF
+		
+	16:
+		FOR i := 0 TO nSlaves2 DO
+			devStates[nSlaves + i] := devStates2[i];
+		END_FOR
+		step := 20;
+		
+		
+	20:
+		tmr1.in := TRUE;
+		tmr1.pt := T#5S;
+		IF tmr1.Q THEN
+			tmr1.in := FALSE;
+			step := step + 1;
+		END_IF
+		
+	21:
+		step := 10;
+			
+		
+END_CASE
+
+fb_EcGetSlaveTopologyInfo();
+
+fbEcReqSlaveState();
+
+Step100_resetECAT();
+
+tmr1();]]></ST>
+    </Implementation>
+    <Method Name="ResetECat1" Id="{1ad99f9e-78f9-4b4f-90c0-2b651e4864ba}">
+      <Declaration><![CDATA[METHOD ResetECat1 : BOOL
+VAR_INPUT
+	SlaveAddr : INT;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[resetSlaveNumber := SlaveAddr;
+fb_EcSetSlaveState.sNetId := F_CreateAmsNetId(sNetId);
+bDone := FALSE;
+step100 := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ResetECat2" Id="{95273a7e-9c48-44cc-afcb-5698b17ba1e5}">
+      <Declaration><![CDATA[METHOD ResetECat2 : BOOL
+VAR_INPUT
+	SlaveAddr : INT;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[resetSlaveNumber := SlaveAddr;
+fb_EcSetSlaveState.sNetId := F_CreateAmsNetId(sNetId2);
+bDone := FALSE;
+step100 := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Step100_resetECAT" Id="{ccad0ec0-6781-4cc2-8cb9-87b671e378d4}">
+      <Implementation>
+        <ST><![CDATA[bBuzy := step100 > 0 AND step100 < 10000;
+bError := step100 > 10000;
+
+IF (EStop OR SystemError) THEN
+	bDone := FALSE;
+	IF bBuzy THEN
+		step100 := step100  + 10000;
+	END_IF
+END_IF
+
+IF ProgramReset THEN
+	iErrorId := step;
+	step := 0;
+END_IF
+
+CASE step100 OF
+	100:
+		fb_EcSetSlaveState.bExecute := FALSE;
+		fb_EcSetSlaveState.tTimeout := T#5S;
+		step100 := step100 + 1;
+		
+	101:// 將裝置設定狀態設為init
+		fb_EcSetSlaveState.nSlaveAddr := INT_TO_UINT(resetSlaveNumber);
+		fb_EcSetSlaveState.reqState := 1;
+		fb_EcSetSlaveState.bExecute := TRUE;
+		step100 := step100 + 1;
+		
+		
+	102:
+		IF fb_EcSetSlaveState.bBusy OR fb_EcSetSlaveState.bError THEN
+			step100 := step100 + 1;
+		END_IF
+		
+	103:
+		IF fb_EcSetSlaveState.currState.deviceState = 1 THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			step100 := step100 + 1;
+		ELSIF fb_EcSetSlaveState.bError THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			str_TmpString := WCONCAT(STR1:= "設定EtherCat站號", STR2:= INT_TO_WSTRING(resetSlaveNumber));
+			str_TmpString := WCONCAT(STR1:= str_TmpString, STR2:= " 的狀態為INIT時發生錯誤");
+			pMsg.Push_Alarm(str_TmpString);
+			step100 := step100 + 10000;
+		END_IF
+	
+	104:
+		tmr100.IN:=TRUE;
+		tmr100.PT := T#500MS;
+		IF tmr100.Q THEN
+			tmr100.IN:=FALSE;
+			step100 := step100 + 1;
+		END_IF
+		
+	105:
+		step100 := 110;
+		
+		
+		
+	110:// 將裝置設定狀態設為PREOP 
+		fb_EcSetSlaveState.nSlaveAddr := INT_TO_UINT(resetSlaveNumber);
+		fb_EcSetSlaveState.reqState := 2;
+		fb_EcSetSlaveState.bExecute := TRUE;
+		step100 := step100 + 1;
+		
+	111:
+		IF fb_EcSetSlaveState.bBusy OR fb_EcSetSlaveState.bError THEN
+			step100 := step100 + 1;
+		END_IF
+		
+	112:
+		IF fb_EcSetSlaveState.currState.deviceState = 2 THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			step100 := step100 + 1;
+		ELSIF fb_EcSetSlaveState.bError THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			str_TmpString := WCONCAT(STR1:= "設定EtherCat站號", STR2:= INT_TO_WSTRING(resetSlaveNumber));
+			str_TmpString := WCONCAT(STR1:= str_TmpString, STR2:= " 的狀態為PREOP時發生錯誤");
+			pMsg.Push_Alarm(str_TmpString);
+			step100 := step100 + 10000;
+		END_IF
+		
+	113:
+		tmr100.IN:=TRUE;
+		tmr100.PT := T#500MS;
+		IF tmr100.Q THEN
+			tmr100.IN:=FALSE;
+			step100 := step100 + 1;
+		END_IF
+		
+	114:
+		step100 := 120;
+		
+		
+		
+	120:// 將裝置設定狀態設為SAFEOP
+		fb_EcSetSlaveState.nSlaveAddr := INT_TO_UINT(resetSlaveNumber);
+		fb_EcSetSlaveState.reqState := 4;
+		fb_EcSetSlaveState.bExecute := TRUE;
+		step100 := step100 + 1;
+		
+		
+	121:
+		IF fb_EcSetSlaveState.bBusy OR fb_EcSetSlaveState.bError THEN
+			step100 := step100 + 1;
+		END_IF
+		
+	122:
+		IF fb_EcSetSlaveState.currState.deviceState = 4 THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			step100 := step100 + 1;
+		ELSIF fb_EcSetSlaveState.bError THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			str_TmpString := WCONCAT(STR1:= "設定EtherCat站號", STR2:= INT_TO_WSTRING(resetSlaveNumber));
+			str_TmpString := WCONCAT(STR1:= str_TmpString, STR2:= " 的狀態為SAFEOP時發生錯誤");
+			pMsg.Push_Alarm(str_TmpString);
+			step100 := step100 + 10000;
+		END_IF
+		
+	123:
+		tmr100.IN:=TRUE;
+		tmr100.PT := T#500MS;
+		IF tmr100.Q THEN
+			tmr100.IN:=FALSE;
+			step100 := step100 + 1;
+		END_IF
+		
+	124:
+		step100 := 130;
+		
+	130:// 將裝置設定狀態設為OP
+		fb_EcSetSlaveState.nSlaveAddr := INT_TO_UINT(resetSlaveNumber);
+		fb_EcSetSlaveState.reqState := 8;
+		fb_EcSetSlaveState.bExecute := TRUE;
+		step100 := step100 + 1;
+		
+		
+	131:
+		IF fb_EcSetSlaveState.bBusy OR fb_EcSetSlaveState.bError THEN
+			step100 := step100 + 1;
+		END_IF
+		
+	132:
+		IF fb_EcSetSlaveState.currState.deviceState = 8 THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			step100 := step100 + 1;
+		ELSIF fb_EcSetSlaveState.bError THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			str_TmpString := WCONCAT(STR1:= "設定EtherCat站號", STR2:= INT_TO_WSTRING(resetSlaveNumber));
+			str_TmpString := WCONCAT(STR1:= str_TmpString, STR2:= " 的狀態為SAFEOP時發生錯誤");
+			pMsg.Push_Alarm(str_TmpString);
+			step100 := step100 + 10000;
+		END_IF
+		
+	133:
+		tmr100.IN:=TRUE;
+		tmr100.PT := T#500MS;
+		IF tmr100.Q THEN
+			tmr100.IN:=FALSE;
+			step100 := step100 + 1;
+		END_IF
+		
+	134:
+		bDone := TRUE;
+		step100 := 0;
+		
+END_CASE
+
+tmr100();
+fb_EcSetSlaveState();]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

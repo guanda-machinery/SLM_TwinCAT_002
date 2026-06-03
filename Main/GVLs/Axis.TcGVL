@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="Axis" Id="{02df7f94-b924-4acd-8fd6-28024fa7ca67}">
+    <Declaration><![CDATA[{attribute 'TcContextName':='PlcTask'}
+VAR_GLOBAL
+// 軸控制
+// ============== 滾輪軸 ==============
+	//  前
+	Axis_FX1: AXIS_REF;
+	//  後
+	Axis_FX2: AXIS_REF;
+	
+	Fx : AxisFx;
+	
+	
+// ============== A ==============
+	
+	// X軸
+	Axis_AX: AXIS_REF;
+	
+	// Y軸
+	Axis_AY: AXIS_REF;
+	// Z軸
+	Axis_AZ1: AXIS_REF;
+	Axis_AZ2: AXIS_REF;
+	
+	GaX : AxisBase;
+	GaY : AxisBase;
+	GaZ : MultipleAxisBase;
+	
+
+	
+// ============== B ==============
+	// X軸
+	Axis_BX: AXIS_REF;
+	// Y軸
+	Axis_BY1: AXIS_REF;
+	Axis_BY2: AXIS_REF;
+	// Z軸
+	Axis_BZ: AXIS_REF;
+	
+	GbX : AxisBase;
+	GbY : MultipleAxisBase;
+	GbZ : AxisBase;
+	
+// ============== C ==============
+	// X軸
+	Axis_CX: AXIS_REF;
+	// Y軸
+	Axis_CY: AXIS_REF;
+	// Z軸
+	Axis_CZ1: AXIS_REF;
+	Axis_CZ2: AXIS_REF;
+	
+	GcX : AxisBase;
+	GcY : AxisBase;
+	GcZ : MultipleAxisBase;
+	
+// ============== D ==============
+	// X軸
+	Axis_DX: AXIS_REF;
+	// Y軸
+	Axis_DY: AXIS_REF;
+	// Z軸
+	Axis_DZ: AXIS_REF;
+	
+	GdX : AxisBase;
+	GdY : AxisBase;
+	GdZ : AxisBase;
+
+
+//  ============== 整體軸速度 ==============	
+	Override: LREAL := 100;
+	bIsHome: BOOL;
+	bPower: BOOL;
+	
+{region "============= 編碼器  ============="}
+	Encoder_FxA_PosEnc	:	MDP5001_511_5ED3066D;
+	Encoder_FxB_PosEnc	:	MDP5001_511_5ED3066D;
+		 
+	Encoder_FxA_Clamp	:	MDP5001_511_5ED3066D;
+	Encoder_FxB_Clamp	:	MDP5001_511_5ED3066D;
+		 
+	Encoder_FxA_ExPosEnc	:	MDP5001_511_5ED3066D;
+	Encoder_FxB_ExPosEnc	:	MDP5001_511_5ED3066D;
+	
+	// FxA外部位置
+	FxA_Exp_Pos				: LREAL;
+	// FxB外部位置
+	FxB_Exp_Pos				: LREAL;
+	
+	// Fx整合位置
+	Fx_Exp_Pos				: LREAL;
+{endregion}
+	
+
+	id: INT;
+	
+	
+END_VAR
+
+
+VAR_GLOBAL PERSISTENT
+	// Gax軸 移動距離
+	GaX_total_Move: LREAL;
+	// Gay軸 移動距離
+	GaY_total_Move: LREAL;
+	// Gaz軸 移動距離
+	GaZ_total_Move: LREAL;
+	
+	// Gax軸 移動距離
+	GbX_total_Move: LREAL;
+	// Gay軸 移動距離
+	GbY_total_Move: LREAL;
+	// Gaz軸 移動距離
+	GbZ_total_Move: LREAL;
+	
+	// Gax軸 移動距離
+	GcX_total_Move: LREAL;
+	// Gay軸 移動距離
+	GcY_total_Move: LREAL;
+	// Gaz軸 移動距離
+	GcZ_total_Move: LREAL;
+	
+	// Gax軸 移動距離
+	GdX_total_Move: LREAL;
+	// Gay軸 移動距離
+	GdY_total_Move: LREAL;
+	// Gaz軸 移動距離
+	GdZ_total_Move: LREAL;
+	
+	// Gax軸 移動距離
+	GaX_Last_Oil: LREAL;
+	// Gay軸 移動距離
+	GaY_Last_Oil: LREAL;
+	// Gaz軸 移動距離
+	GaZ_Last_Oil: LREAL;
+	
+	// Gax軸 移動距離
+	GbX_Last_Oil: LREAL;
+	// Gay軸 移動距離
+	GbY_Last_Oil: LREAL;
+	// Gaz軸 移動距離
+	GbZ_Last_Oil: LREAL;
+	
+	// Gax軸 移動距離
+	GcX_Last_Oil: LREAL;
+	// Gay軸 移動距離
+	GcY_Last_Oil: LREAL;
+	// Gaz軸 移動距離
+	GcZ_Last_Oil: LREAL;
+	
+	// Gax軸 移動距離
+	GdX_Last_Oil: LREAL;
+	// Gay軸 移動距離
+	GdY_Last_Oil: LREAL;
+	// Gaz軸 移動距離
+	GdZ_Last_Oil: LREAL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

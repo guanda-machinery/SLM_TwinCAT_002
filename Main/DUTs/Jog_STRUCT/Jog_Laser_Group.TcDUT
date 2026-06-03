@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="Jog_Laser_Group" Id="{ddb89aa1-ad05-4c4c-ae37-5b4bd4277bcf}">
+    <Declaration><![CDATA[TYPE Jog_Laser_Group :
+STRUCT
+	// 位置	
+	Pos : XYZ_Point;
+	
+	// Jog模式 X軸 前進
+	X_P_S : BOOL;
+	// Jog模式 X軸 後退
+	X_N_S : BOOL;
+	
+	// Jog模式 Y軸 前進
+	Y_P_S : BOOL;
+	// Jog模式 Y軸 後退
+	Y_N_S : BOOL;
+	
+	// Jog模式 Z軸 前進
+	Z_P_S : BOOL;
+	// Jog模式 Z軸 後退
+	Z_N_S : BOOL;
+
+	// Jog模式 X軸 前進
+	X_P : BOOL;
+	// Jog模式 X軸 後退
+	X_N : BOOL;
+	
+	// Jog模式 Y軸 前進
+	Y_P : BOOL;
+	// Jog模式 Y軸 後退
+	Y_N : BOOL;
+	
+	// Jog模式 Z軸 前進
+	Z_P : BOOL;
+	// Jog模式 Z軸 後退
+	Z_N : BOOL;
+	
+	
+	// 雷射吹氣_狀態
+	Laser_Blow_s : BOOL;
+	// 雷射護蓋_狀態
+	Laser_Cover_s : BOOL;
+	
+
+	// 雷射吹氣
+	Laser_Blow : BOOL;
+	// 雷射護蓋
+	Laser_Cover : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

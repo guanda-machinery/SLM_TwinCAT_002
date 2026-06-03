@@ -1,0 +1,490 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Jog_MPG" Id="{f50b69da-6e19-4cdf-bbb9-0245c75bdcf6}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Jog_MPG
+VAR
+	AxisMPG : AXIS_REF;
+	
+	step: INT;
+
+	
+	in_iAxisGroup : dINT;
+	
+	in_bSpeedSelect1: BOOL;
+	in_bSpeedSelect2: BOOL;
+	
+	in_bAxisSelect1 : BOOL;
+	in_bAxisSelect2 : BOOL;
+	in_bAxisSelect3 : BOOL;
+	
+	SpeedSelect: WORD;
+	AxisSelect: WORD;
+	AxisSelect_old: WORD;
+	
+	Estop_Trig : R_TRIG;
+	
+	
+(* ============== 軸耦合 功能塊 ==============*)
+	AxisGearIn				: MC_GearInDyn;
+	AxisMpg_WriteParameter	: MC_WriteParameter;
+	AxisMpg_WriteBoolParameter	: MC_WriteBoolParameter;
+	AxisReadError			: MC_ReadAxisError;
+	AxisReset				: MC_Reset;
+	
+(* ============== 耦合的軸 ==============*)
+	Axis1: POINTER TO AXIS_REF;
+	
+	i_AxisConrtol : I_Axis;
+	
+	AxisS			: Sub_Step;
+	
+	AxisState : ST_AxisStatus;
+	
+	Speed: LREAL;
+	AxisGroup: WORD;
+	tmr01: TON;
+	
+	
+	P_Limite: POINTER TO BOOL;
+	P_Limite_R_Trig: R_TRIG;
+	P_Limite_F_Trig: F_TRIG;
+	
+	N_Limite: POINTER TO BOOL;
+	N_Limite_R_Trig: R_TRIG;
+	N_Limite_F_Trig: F_TRIG;
+END_VAR
+
+VAR_OUTPUT
+	Active  : BOOL;
+	// 錯誤步驟
+	iErrorID	: INT;
+END_VAR
+
+VAR CONSTANT
+	// // 軸名稱
+	scAxisName: WSTRING := "MPG軸";
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[_IO();
+
+speed :=  0.01 * EXPT(10,SpeedSelect);
+		
+AxisGroup := DINT_TO_WORD(in_iAxisGroup * 16#10);
+
+AxisSelect := AxisSelect + AxisGroup;
+
+Active := step > 0 AND step < 10000;
+
+Estop_Trig(CLK:= SystemError);
+
+IF Estop_Trig.Q THEN
+	step:=100;
+END_IF
+
+IF ProgramReset THEN
+	step := 0;
+END_IF
+
+AxisMPG.ReadStatus();
+
+IF i_AxisConrtol <> 0 THEN
+	AxisState := i_AxisConrtol.Axis_States;
+END_IF
+
+_Step0();
+
+
+
+AxisGearIn.GearRatio := Speed;
+
+
+
+_MC_FB();
+tmr01();]]></ST>
+    </Implementation>
+    <Action Name="_AxisSet" Id="{bac92751-34ec-4303-b98c-2faef400bd3e}">
+      <Implementation>
+        <ST><![CDATA[CASE AxisSelect OF
+// =============== 軸群組A ===============
+	16#11:
+		i_AxisConrtol := GaX;
+		Axis1 := ADR(Axis.Axis_AX);
+		
+	16#12:
+		i_AxisConrtol := GaY;
+		Axis1 := ADR(Axis.Axis_AY);
+		
+	16#13:
+		i_AxisConrtol := GaZ;
+		Axis1 := ADR(Axis.Axis_AZ1);
+		
+// =============== 軸群組B ===============
+	16#21:
+		i_AxisConrtol := GbX;
+		Axis1 := ADR(Axis.Axis_BX);
+		
+	16#22:
+		i_AxisConrtol := GbY;
+		Axis1 := ADR(Axis.Axis_BY1);
+		
+	16#23:
+		i_AxisConrtol := GbZ;
+		Axis1 := ADR(Axis.Axis_BZ);
+		
+// =============== 軸群組C ===============
+	16#31:
+		i_AxisConrtol := GcX;
+		Axis1 := ADR(Axis.Axis_CX);
+		
+	16#32:
+		i_AxisConrtol := GcY;
+		Axis1 := ADR(Axis.Axis_CY);
+		
+	16#33:
+		i_AxisConrtol := GcZ;
+		Axis1 := ADR(Axis.Axis_CZ1);
+		
+// =============== 軸群組D ===============
+	16#41:
+		i_AxisConrtol := GdX;
+		Axis1 := ADR(Axis.Axis_DX);
+		
+	16#42:
+		i_AxisConrtol := GdY;
+		Axis1 := ADR(Axis.Axis_DY);
+		
+	16#43:
+		i_AxisConrtol := GdZ;
+		Axis1 := ADR(Axis.Axis_DZ);
+		
+	ELSE
+		Axis1 := 0;
+		P_Limite := ADR(GaX.OutLimiter);
+		N_Limite := ADR(GaX.inLimiter);
+END_CASE
+	
+		]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="_IO" Id="{36859081-3387-412d-81a5-84585943c546}">
+      <Implementation>
+        <ST><![CDATA[in_bSpeedSelect1 := IO.i604;
+in_bSpeedSelect2 := IO.i605;
+
+in_bAxisSelect1 := IO.i601;
+in_bAxisSelect2 := IO.i602;
+in_bAxisSelect3 := IO.i603;
+
+in_iAxisGroup := Hmi_Web.Jog_GroupSelect;
+
+
+
+SpeedSelect.0:= in_bSpeedSelect1;
+SpeedSelect.1:= in_bSpeedSelect2;
+
+
+
+AxisSelect := 0;
+AxisSelect.0 := in_bAxisSelect1;
+AxisSelect.1 := in_bAxisSelect2;
+AxisSelect.2 := in_bAxisSelect3;
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="_MC_FB" Id="{7be7f28c-6247-489c-8f4c-f7221d60b0ee}">
+      <Implementation>
+        <ST><![CDATA[IF Axis1 > 0 THEN
+	AxisGearIn(master := AxisMPG, slave := Axis1^);
+END_IF
+
+AxisMpg_WriteParameter(Axis:= AxisMPG);
+
+AxisMpg_WriteBoolParameter(Axis := AxisMPG);
+
+AxisReset(Axis:= AxisMPG);
+
+AxisReadError(Enable:=(step > 0),	Axis := AxisMPG);]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="_Step0" Id="{4d37975e-4046-42bd-92d5-e2c6621b1af9}">
+      <Implementation>
+        <ST><![CDATA[IF P_Limite > 0 AND N_Limite > 0 THEN
+	P_Limite_R_Trig(clk := P_Limite^);
+	P_Limite_F_Trig(clk := P_Limite^);
+	N_Limite_R_Trig(clk := N_Limite^);
+	N_Limite_F_Trig(clk := N_Limite^);
+END_IF
+
+CASE step OF
+	1:
+		AxisReset.Execute := FALSE;
+		IF AxisGearIn.Enable OR AxisGearIn.Active THEN
+			step := 200;
+		ELSE
+			step := step + 1;
+		END_IF
+
+
+(* ===================== MPG軸的錯誤重置 ===================== *)
+	2:
+		IF AxisMPG.Status.Error THEN
+			step := step + 1;
+		ELSE
+			step := 10;
+		END_IF
+		
+	3:
+		AxisReset.Execute :=TRUE;
+		step := step + 1;
+		
+	4:
+		tmr01.pt := T#500MS;
+		tmr01.in := TRUE;
+		IF tmr01.q THEN
+			tmr01.in := FALSE;
+			step := step + 1;
+		END_IF
+		
+	5:
+		IF NOT AxisMPG.Status.Error AND AxisReset.Done THEN
+			AxisReset.Execute :=FALSE;
+			step := 10;
+		ELSIF AxisReset.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ": MPG無法重置", ErrorCode:= AxisReset.ErrorID)
+			);
+			AxisReset.Execute :=FALSE;
+			step:=step + 10000;
+		END_IF
+		
+		
+(* ===================== 映射要操作的軸 ===================== *)
+	10: // 設定要操作的軸
+		_AxisSet();
+		step := step + 1;
+		
+	11:
+		tmr01.pt := T#100MS;
+		tmr01.in := TRUE;
+		IF tmr01.q THEN
+			tmr01.in := FALSE;
+			step := step + 1;
+		END_IF
+		
+	12: // 確認軸已被設定
+		IF i_AxisConrtol <> 0 THEN
+			step := step + 1;
+		ELSE
+			step := 40;
+		END_IF
+		
+	13: // 啟動軸電源
+		i_AxisConrtol.PowerOn();
+		step := step + 1;
+		
+	14: // 確認軸啟動狀態
+		IF AxisState.Operational THEN
+			step := step + 1;
+		ELSIF Axis1^.Status.Error THEN
+			Hmi.MPG_Mode := FALSE;
+			step := 0;
+		END_IF
+		
+	
+	15:
+		step := 20;
+		
+		
+(* ===================== MPG軸 與 選擇的軸 連接 ===================== *)		
+	20:
+//		AxisGearIn.Acceleration := 100;
+		AxisGearIn.Enable :=TRUE;
+		step := step + 1;
+		
+	21:
+		IF AxisGearIn.Active THEN
+			step := step + 1;
+		END_IF
+		
+	22:
+		step := 30;
+		
+		
+(* ===================== 檢查選擇的軸是否有變更 ===================== *)
+	30:
+		IF AxisSelect <> AxisSelect_old THEN
+		 	step := step + 10;
+		ELSIF AxisGearIn.Error THEN
+			step := 100;
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ": GearIn發生錯誤", ErrorCode:= AxisGearIn.ErrorID)
+			);
+		ELSIF AxisReadError.Valid AND AxisReadError.AxisErrorID > 0 THEN
+			IF AxisReadError.AxisErrorID = 16#42A0 THEN
+				pMsg.Push_Alarm_NoPause(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 驅動軸到達極限位置", ErrorCode:= AxisReadError.ErrorID)
+				);
+				step := step + 1;
+			ELSIF AxisReadError.AxisErrorID = 16#4462 THEN
+				pMsg.Push_Alarm_NoPause(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 驅動軸到負極限開關", ErrorCode:= AxisReadError.ErrorID)
+				);
+				step := step + 1;
+			ELSIF AxisReadError.AxisErrorID = 16#4463 THEN
+				pMsg.Push_Alarm_NoPause(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 驅動軸到正極限開關", ErrorCode:= AxisReadError.ErrorID)
+				);
+				step := step + 1;
+			ELSE
+				pMsg.Push_Alarm_NoPause(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 軸發生錯誤", ErrorCode:= AxisReadError.ErrorID)
+				);
+				step := 200;
+			END_IF
+			
+		END_IF
+		
+	31:
+		tmr01.pt := T#1S;
+		tmr01.in := TRUE;
+		IF tmr01.q THEN
+			tmr01.in := FALSE;
+			step := 200;
+		END_IF
+		
+
+(* ===================== 選擇的軸變更 ===================== *)
+	40:
+		tmr01.pt := T#250MS;
+		tmr01.in := TRUE;
+		IF tmr01.q THEN
+			tmr01.in := FALSE;
+			step := step + 1;
+		END_IF
+		
+	41:
+		IF AxisSelect <> AxisSelect_old THEN
+			AxisSelect_old := AxisSelect;
+			step := 200;
+		ELSIF Axis1 = 0 THEN
+			step := 100;
+		ELSE
+			step := 30;
+		END_IF
+			
+		
+		
+		
+	
+		
+	100: // 解耦 檢查參考是否可用
+		IF i_AxisConrtol <> 0 THEN
+			step := step + 1;
+		ELSE
+			step := 0;
+		END_IF
+		
+	101:// 停止軸
+		IF Axis1 = 0 THEN
+			step := 0;
+		ELSE
+			AxisGearIn.Enable := FALSE;
+			step := step + 1;
+		END_IF
+		
+	102:
+		i_AxisConrtol.Stop();
+		step := step + 1;
+		
+	103:
+		IF AxisS.bBuzy OR AxisS.bError THEN
+			step := step + 1;
+		END_IF
+		
+	104:
+		IF AxisState.NotMoving THEN
+			step := 0;
+		ELSE
+			step := step + 10000;
+		END_IF
+		
+		
+		
+		
+		
+	200: // 切換軸
+		IF i_AxisConrtol <> 0 THEN
+			step := step + 1;
+		ELSE
+			step := 0;
+		END_IF
+	
+	201:
+		IF Axis1 = 0 THEN
+			step := 0;
+		ELSE
+			AxisGearIn.Enable := FALSE;
+			step := step + 1;
+		END_IF
+		
+	202:
+		i_AxisConrtol.Stop();
+		step := step + 1;
+		
+	203:
+		IF AxisS.bBuzy OR AxisS.bError THEN
+			step := step + 1;
+		END_IF
+		
+	204:
+		IF AxisState.NotMoving THEN
+			step := step + 1;
+		ELSIF AxisS.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	205:
+		Axis1 := 0;
+		step := step + 1;
+		
+	206:
+		tmr01.pt := T#150MS;
+		tmr01.in := TRUE;
+		IF tmr01.q THEN
+			tmr01.in := FALSE;
+			step := step + 1;
+		END_IF
+		
+	207:
+		IF NOT Safety.SystemError AND (AxisSelect MOD 16) <> 0 THEN
+			step := 1;
+		END_IF
+		
+	
+END_CASE
+
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Start" Id="{e6f47e66-68e0-4365-8b56-46dd1f493e85}">
+      <Declaration><![CDATA[METHOD Start : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 1;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Stop" Id="{eb323293-a2cb-45a1-8df0-75cfd5046d2f}">
+      <Declaration><![CDATA[METHOD Stop : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 100;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,789 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4026.19" ClassName="CNestedPlcProjDef">
+	<DataTypes>
+		<DataType>
+			<Name GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}" IecBaseType="true" AutoDeleteType="true">ARRAY [1..16] OF BOOL</Name>
+			<BitSize>128</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>1</LBound>
+				<Elements>16</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{A7C10B26-E700-C197-B6B7-537024BE1485}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..7] OF USINT</Name>
+			<BitSize>64</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000002}">USINT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>8</Elements>
+			</ArrayInfo>
+		</DataType>
+	</DataTypes>
+	<Project GUID="{C7BEA9E2-4864-48AC-A671-1778B5858C50}" Name="IO_Main_Task" PrjFilePath="..\..\IO_Main_Task\IO_Main_Task.plcproj" TmcFilePath="..\..\IO_Main_Task\IO_Main_Task.tmc" ReloadTmc="true" AmsPort="853" FileArchiveSettings="#x000e" SymbolicMapping="true">
+		<Instance Id="#x08502080" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{AD3A05B2-0F26-A067-D8E7-938B8BEE2A9D}" TmcPath="IO_Main_Task\IO_Main_Task.tmc">
+			<Name>IO_Main_Task Instance</Name>
+			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+			<Vars VarGrpType="2" AreaNo="1">
+				<Name>IO_Task Outputs</Name>
+				<Var>
+					<Name>EtherCAT.MainMod_7.Output</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_8.Output</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_9.Output</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.Murr_Mod.Output</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO101.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO102.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO103.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO104.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO105.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO106.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO401.In</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+			</Vars>
+			<Vars VarGrpType="1">
+				<Name>IO_Task Inputs</Name>
+				<Var>
+					<Name>EtherCAT.MainMod_1.Input</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_1.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_1.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_1.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_2.Input</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_2.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_2.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_2.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_3.Input</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_3.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_3.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_3.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_4.Input</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_4.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_4.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_4.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_5.Input</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_5.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_5.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_5.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_6.Input</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_6.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_6.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_6.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_7.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_7.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_8.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_8.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_9.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.MainMod_9.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.Murr_Mod.Input</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.Murr_Mod.Io_State</Name>
+					<Type GUID="{A7C10B26-E700-C197-B6B7-537024BE1485}">ARRAY [0..7] OF USINT</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.Murr_Mod.WcState</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.Murr_Mod.InputToggle</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>EtherCAT.Murr_Mod.State</Name>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO107.Out</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO108.Out</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+				<Var>
+					<Name>MainIO.IO109.Out</Name>
+					<Type GUID="{46C950DA-5D6E-6516-D69B-F24F38546D38}">ARRAY [1..16] OF BOOL</Type>
+				</Var>
+			</Vars>
+			<UnrestoredVarLinks ImportTime="2025-06-24T10:27:52">
+				<OwnerA Name="InputDst" Prefix="TIPC^IO_Task^IO_Task Instance" Type="1">
+					<OwnerB Name="TIID^Device 4 (EtherCAT)^Box 12 (AMAX-4870)^Box 13 (AMAX-4870)^Box 49 (54632)">
+						<Link VarA="MAIN.sensor1.in_RawData[0]" TypeA="USINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000002}" VarB="Module 1 (IOL_4/4_I/O-Bytes)^TxPDO^input byte 0" RestoreInfo="ANotFound"/>
+						<Link VarA="MAIN.sensor1.in_RawData[1]" TypeA="USINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000002}" VarB="Module 1 (IOL_4/4_I/O-Bytes)^TxPDO^input byte 1" RestoreInfo="ANotFound"/>
+						<Link VarA="MAIN.sensor1.in_RawData[2]" TypeA="USINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000002}" VarB="Module 1 (IOL_4/4_I/O-Bytes)^TxPDO^input byte 2" RestoreInfo="ANotFound"/>
+						<Link VarA="MAIN.sensor1.in_RawData[3]" TypeA="USINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000002}" VarB="Module 1 (IOL_4/4_I/O-Bytes)^TxPDO^input byte 3" RestoreInfo="ANotFound"/>
+					</OwnerB>
+				</OwnerA>
+			</UnrestoredVarLinks>
+			<UnrestoredVarLinks ImportTime="2025-10-11T13:18:14">
+				<OwnerA Name="InputDst" Prefix="TIPC^IO_Main_Task^IO_Main_Task Instance" Type="1">
+					<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 2 (EL1409)">
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[10]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 10" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[11]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 11" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[12]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 12" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[13]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 13" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[14]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 14" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[15]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 15" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[16]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 16" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[1]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 1" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[2]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 2" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[3]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 3" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[4]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 4" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[5]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 5" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[6]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 6" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[7]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 7" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[8]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 8" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_1.Input[9]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 9" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+					<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 3 (EL1409)">
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[10]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 10" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[11]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 11" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[12]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 12" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[13]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 13" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[14]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 14" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[15]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 15" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[16]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 16" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[1]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 1" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[2]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 2" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[3]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 3" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[4]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 4" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[5]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 5" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[6]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 6" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[7]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 7" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[8]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 8" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_2.Input[9]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 9" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+					<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 4 (EL1409)">
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[10]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 10" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[11]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 11" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[12]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 12" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[13]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 13" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[14]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 14" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[15]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 15" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[16]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 16" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[1]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 1" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[2]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 2" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[3]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 3" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[4]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 4" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[5]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 5" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[6]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 6" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[7]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 7" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[8]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 8" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_3.Input[9]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 9" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+					<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 5 (EL1409)">
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[10]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 10" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[11]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 11" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[12]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 12" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[13]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 13" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[14]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 14" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[15]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 15" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[16]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 16" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[1]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 1" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[2]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 2" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[3]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 3" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[4]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 4" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[5]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 5" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[6]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 6" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[7]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 7" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[8]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 8" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_4.Input[9]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 9" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+					<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 6 (EL1409)">
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[10]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 10" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[11]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 11" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[12]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 12" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[13]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 13" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[14]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 14" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[15]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 15" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[16]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 16" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[1]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 1" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[2]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 2" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[3]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 3" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[4]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 4" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[5]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 5" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[6]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 6" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[7]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 7" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[8]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 8" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_5.Input[9]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 9" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+					<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 7 (EL1409)">
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[10]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 10" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[11]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 11" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[12]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 12" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[13]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 13" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[14]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 14" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[15]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 15" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[16]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 16" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[1]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 1" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[2]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 2" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[3]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 3" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[4]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 4" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[5]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 5" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[6]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 6" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[7]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 7" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[8]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 8" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_6.Input[9]" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="DIP Inputs^Input Channel 9" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+				</OwnerA>
+				<OwnerA Name="OutputSrc" Prefix="TIPC^IO_Main_Task^IO_Main_Task Instance" Type="2">
+					<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 10 (EL2409)">
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[10]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 10^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[11]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 11^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[12]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 12^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[13]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 13^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[14]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 14^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[15]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 15^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[16]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 16^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[1]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 1^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[2]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 2^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[3]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 3^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[4]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 4^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[5]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 5^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[6]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 6^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[7]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 7^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[8]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 8^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_9.Output[9]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 9^Output" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+					<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 8 (EL2409)">
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[10]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 10^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[11]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 11^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[12]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 12^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[13]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 13^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[14]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 14^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[15]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 15^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[16]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 16^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[1]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 1^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[2]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 2^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[3]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 3^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[4]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 4^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[5]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 5^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[6]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 6^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[7]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 7^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[8]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 8^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_7.Output[9]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 9^Output" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+					<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 9 (EL2409)">
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[10]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 10^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[11]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 11^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[12]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 12^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[13]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 13^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[14]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 14^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[15]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 15^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[16]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 16^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[1]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 1^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[2]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 2^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[3]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 3^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[4]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 4^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[5]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 5^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[6]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 6^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[7]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 7^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[8]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 8^Output" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="EtherCAT.LoadMainMod_8.Output[9]" TypeA="BOOL" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Channel 9^Output" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+				</OwnerA>
+			</UnrestoredVarLinks>
+			<Contexts>
+				<Context>
+					<Id>0</Id>
+					<Name>IO_Task</Name>
+					<ManualConfig>
+						<OTCID>#x02010080</OTCID>
+					</ManualConfig>
+					<Priority>6</Priority>
+					<CycleTime>2000000</CycleTime>
+				</Context>
+			</Contexts>
+			<TaskPouOids>
+				<TaskPouOid Prio="6" OTCID="#x08502081"/>
+			</TaskPouOids>
+		</Instance>
+	</Project>
+	<Mappings>
+		<OwnerA Name="IO_Main_Task Instance">
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 10 (EL2409)">
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_9.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_9.WcState" VarB="WcState^WcState" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[10]" VarB="Channel 10^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[11]" VarB="Channel 11^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[12]" VarB="Channel 12^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[13]" VarB="Channel 13^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[14]" VarB="Channel 14^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[15]" VarB="Channel 15^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[16]" VarB="Channel 16^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[1]" VarB="Channel 1^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[2]" VarB="Channel 2^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[3]" VarB="Channel 3^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[4]" VarB="Channel 4^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[5]" VarB="Channel 5^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[6]" VarB="Channel 6^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[7]" VarB="Channel 7^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[8]" VarB="Channel 8^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_9.Output[9]" VarB="Channel 9^Output" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 2 (EL1409)">
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[10]" VarB="DIP Inputs^Input Channel 10" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[11]" VarB="DIP Inputs^Input Channel 11" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[12]" VarB="DIP Inputs^Input Channel 12" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[13]" VarB="DIP Inputs^Input Channel 13" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[14]" VarB="DIP Inputs^Input Channel 14" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[15]" VarB="DIP Inputs^Input Channel 15" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[16]" VarB="DIP Inputs^Input Channel 16" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[1]" VarB="DIP Inputs^Input Channel 1" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[2]" VarB="DIP Inputs^Input Channel 2" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[3]" VarB="DIP Inputs^Input Channel 3" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[4]" VarB="DIP Inputs^Input Channel 4" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[5]" VarB="DIP Inputs^Input Channel 5" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[6]" VarB="DIP Inputs^Input Channel 6" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[7]" VarB="DIP Inputs^Input Channel 7" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[8]" VarB="DIP Inputs^Input Channel 8" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.Input[9]" VarB="DIP Inputs^Input Channel 9" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_1.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 3 (EL1409)">
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[10]" VarB="DIP Inputs^Input Channel 10" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[11]" VarB="DIP Inputs^Input Channel 11" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[12]" VarB="DIP Inputs^Input Channel 12" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[13]" VarB="DIP Inputs^Input Channel 13" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[14]" VarB="DIP Inputs^Input Channel 14" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[15]" VarB="DIP Inputs^Input Channel 15" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[16]" VarB="DIP Inputs^Input Channel 16" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[1]" VarB="DIP Inputs^Input Channel 1" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[2]" VarB="DIP Inputs^Input Channel 2" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[3]" VarB="DIP Inputs^Input Channel 3" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[4]" VarB="DIP Inputs^Input Channel 4" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[5]" VarB="DIP Inputs^Input Channel 5" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[6]" VarB="DIP Inputs^Input Channel 6" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[7]" VarB="DIP Inputs^Input Channel 7" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[8]" VarB="DIP Inputs^Input Channel 8" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.Input[9]" VarB="DIP Inputs^Input Channel 9" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_2.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 4 (EL1409)">
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[10]" VarB="DIP Inputs^Input Channel 10" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[11]" VarB="DIP Inputs^Input Channel 11" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[12]" VarB="DIP Inputs^Input Channel 12" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[13]" VarB="DIP Inputs^Input Channel 13" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[14]" VarB="DIP Inputs^Input Channel 14" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[15]" VarB="DIP Inputs^Input Channel 15" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[16]" VarB="DIP Inputs^Input Channel 16" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[1]" VarB="DIP Inputs^Input Channel 1" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[2]" VarB="DIP Inputs^Input Channel 2" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[3]" VarB="DIP Inputs^Input Channel 3" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[4]" VarB="DIP Inputs^Input Channel 4" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[5]" VarB="DIP Inputs^Input Channel 5" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[6]" VarB="DIP Inputs^Input Channel 6" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[7]" VarB="DIP Inputs^Input Channel 7" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[8]" VarB="DIP Inputs^Input Channel 8" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.Input[9]" VarB="DIP Inputs^Input Channel 9" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_3.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 5 (EL1409)">
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[10]" VarB="DIP Inputs^Input Channel 10" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[11]" VarB="DIP Inputs^Input Channel 11" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[12]" VarB="DIP Inputs^Input Channel 12" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[13]" VarB="DIP Inputs^Input Channel 13" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[14]" VarB="DIP Inputs^Input Channel 14" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[15]" VarB="DIP Inputs^Input Channel 15" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[16]" VarB="DIP Inputs^Input Channel 16" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[1]" VarB="DIP Inputs^Input Channel 1" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[2]" VarB="DIP Inputs^Input Channel 2" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[3]" VarB="DIP Inputs^Input Channel 3" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[4]" VarB="DIP Inputs^Input Channel 4" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[5]" VarB="DIP Inputs^Input Channel 5" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[6]" VarB="DIP Inputs^Input Channel 6" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[7]" VarB="DIP Inputs^Input Channel 7" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[8]" VarB="DIP Inputs^Input Channel 8" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.Input[9]" VarB="DIP Inputs^Input Channel 9" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_4.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 6 (EL1409)">
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[10]" VarB="DIP Inputs^Input Channel 10" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[11]" VarB="DIP Inputs^Input Channel 11" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[12]" VarB="DIP Inputs^Input Channel 12" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[13]" VarB="DIP Inputs^Input Channel 13" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[14]" VarB="DIP Inputs^Input Channel 14" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[15]" VarB="DIP Inputs^Input Channel 15" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[16]" VarB="DIP Inputs^Input Channel 16" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[1]" VarB="DIP Inputs^Input Channel 1" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[2]" VarB="DIP Inputs^Input Channel 2" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[3]" VarB="DIP Inputs^Input Channel 3" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[4]" VarB="DIP Inputs^Input Channel 4" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[5]" VarB="DIP Inputs^Input Channel 5" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[6]" VarB="DIP Inputs^Input Channel 6" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[7]" VarB="DIP Inputs^Input Channel 7" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[8]" VarB="DIP Inputs^Input Channel 8" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.Input[9]" VarB="DIP Inputs^Input Channel 9" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_5.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 7 (EL1409)">
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[10]" VarB="DIP Inputs^Input Channel 10" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[11]" VarB="DIP Inputs^Input Channel 11" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[12]" VarB="DIP Inputs^Input Channel 12" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[13]" VarB="DIP Inputs^Input Channel 13" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[14]" VarB="DIP Inputs^Input Channel 14" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[15]" VarB="DIP Inputs^Input Channel 15" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[16]" VarB="DIP Inputs^Input Channel 16" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[1]" VarB="DIP Inputs^Input Channel 1" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[2]" VarB="DIP Inputs^Input Channel 2" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[3]" VarB="DIP Inputs^Input Channel 3" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[4]" VarB="DIP Inputs^Input Channel 4" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[5]" VarB="DIP Inputs^Input Channel 5" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[6]" VarB="DIP Inputs^Input Channel 6" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[7]" VarB="DIP Inputs^Input Channel 7" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[8]" VarB="DIP Inputs^Input Channel 8" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.Input[9]" VarB="DIP Inputs^Input Channel 9" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_6.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 8 (EL2409)">
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_7.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_7.WcState" VarB="WcState^WcState" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[10]" VarB="Channel 10^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[11]" VarB="Channel 11^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[12]" VarB="Channel 12^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[13]" VarB="Channel 13^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[14]" VarB="Channel 14^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[15]" VarB="Channel 15^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[16]" VarB="Channel 16^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[1]" VarB="Channel 1^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[2]" VarB="Channel 2^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[3]" VarB="Channel 3^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[4]" VarB="Channel 4^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[5]" VarB="Channel 5^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[6]" VarB="Channel 6^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[7]" VarB="Channel 7^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[8]" VarB="Channel 8^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_7.Output[9]" VarB="Channel 9^Output" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 1 (EtherCAT)^Term 1 (EK1200)^Term 9 (EL2409)">
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_8.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.MainMod_8.WcState" VarB="WcState^WcState" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[10]" VarB="Channel 10^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[11]" VarB="Channel 11^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[12]" VarB="Channel 12^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[13]" VarB="Channel 13^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[14]" VarB="Channel 14^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[15]" VarB="Channel 15^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[16]" VarB="Channel 16^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[1]" VarB="Channel 1^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[2]" VarB="Channel 2^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[3]" VarB="Channel 3^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[4]" VarB="Channel 4^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[5]" VarB="Channel 5^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[6]" VarB="Channel 6^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[7]" VarB="Channel 7^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[8]" VarB="Channel 8^Output" Size="1"/>
+				<Link VarA="IO_Task Outputs^EtherCAT.MainMod_8.Output[9]" VarB="Channel 9^Output" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 2 (AMAX-4870)^Box 14 (54632)">
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.Input" VarB="TxPDO Mapping of Digital Inputs^PD (I/Q Pin2 + C/Q Pin4)"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.InputToggle" VarB="WcState^InputToggle" Size="1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.Io_State[0]" VarB="TxPDO Mapping of Status Data^State of IO-Link Port X0"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.Io_State[1]" VarB="TxPDO Mapping of Status Data^State of IO-Link Port X1"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.Io_State[2]" VarB="TxPDO Mapping of Status Data^State of IO-Link Port X2"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.Io_State[3]" VarB="TxPDO Mapping of Status Data^State of IO-Link Port X3"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.Io_State[4]" VarB="TxPDO Mapping of Status Data^State of IO-Link Port X4"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.Io_State[5]" VarB="TxPDO Mapping of Status Data^State of IO-Link Port X5"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.Io_State[6]" VarB="TxPDO Mapping of Status Data^State of IO-Link Port X6"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.Io_State[7]" VarB="TxPDO Mapping of Status Data^State of IO-Link Port X7"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.State" VarB="InfoData^State"/>
+				<Link VarA="IO_Task Inputs^EtherCAT.Murr_Mod.WcState" VarB="WcState^WcState" Size="1"/>
+			</OwnerB>
+			<OwnerB Name="TIPC^Main^Main Instance">
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[10]" VarB="PlcTask Outputs^IO.q110"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[11]" VarB="PlcTask Outputs^IO.q111"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[12]" VarB="PlcTask Outputs^IO.q112"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[13]" VarB="PlcTask Outputs^IO.q113"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[14]" VarB="PlcTask Outputs^IO.q114"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[15]" VarB="PlcTask Outputs^IO.q115"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[16]" VarB="PlcTask Outputs^IO.q116"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[1]" VarB="PlcTask Outputs^IO.q101"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[2]" VarB="PlcTask Outputs^IO.q102"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[3]" VarB="PlcTask Outputs^IO.q103"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[4]" VarB="PlcTask Outputs^IO.q104"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[5]" VarB="PlcTask Outputs^IO.q105"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[6]" VarB="PlcTask Outputs^IO.q106"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[7]" VarB="PlcTask Outputs^IO.q107"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[8]" VarB="PlcTask Outputs^IO.q108"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO107.Out[9]" VarB="PlcTask Outputs^IO.q109"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[10]" VarB="PlcTask Outputs^IO.q210"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[11]" VarB="PlcTask Outputs^IO.q211"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[12]" VarB="PlcTask Outputs^IO.q212"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[13]" VarB="PlcTask Outputs^IO.q213"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[14]" VarB="PlcTask Outputs^IO.q214"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[15]" VarB="PlcTask Outputs^IO.q215"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[16]" VarB="PlcTask Outputs^IO.q216"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[1]" VarB="PlcTask Outputs^IO.q201"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[2]" VarB="PlcTask Outputs^IO.q202"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[3]" VarB="PlcTask Outputs^IO.q203"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[4]" VarB="PlcTask Outputs^IO.q204"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[5]" VarB="PlcTask Outputs^IO.q205"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[6]" VarB="PlcTask Outputs^IO.q206"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[7]" VarB="PlcTask Outputs^IO.q207"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[8]" VarB="PlcTask Outputs^IO.q208"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO108.Out[9]" VarB="PlcTask Outputs^IO.q209"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[10]" VarB="PlcTask Outputs^IO.q310"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[11]" VarB="PlcTask Outputs^IO.q311"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[12]" VarB="PlcTask Outputs^IO.q312"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[13]" VarB="PlcTask Outputs^IO.q313"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[14]" VarB="PlcTask Outputs^IO.q314"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[15]" VarB="PlcTask Outputs^IO.q315"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[16]" VarB="PlcTask Outputs^IO.q316"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[1]" VarB="PlcTask Outputs^IO.q301"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[2]" VarB="PlcTask Outputs^IO.q302"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[3]" VarB="PlcTask Outputs^IO.q303"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[4]" VarB="PlcTask Outputs^IO.q304"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[5]" VarB="PlcTask Outputs^IO.q305"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[6]" VarB="PlcTask Outputs^IO.q306"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[7]" VarB="PlcTask Outputs^IO.q307"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[8]" VarB="PlcTask Outputs^IO.q308"/>
+				<Link VarA="IO_Task Inputs^MainIO.IO109.Out[9]" VarB="PlcTask Outputs^IO.q309"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[10]" VarB="PlcTask Inputs^IO.i110"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[11]" VarB="PlcTask Inputs^IO.i111"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[12]" VarB="PlcTask Inputs^IO.i112"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[13]" VarB="PlcTask Inputs^IO.i113"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[14]" VarB="PlcTask Inputs^IO.i114"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[15]" VarB="PlcTask Inputs^IO.i115"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[16]" VarB="PlcTask Inputs^IO.i116"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[1]" VarB="PlcTask Inputs^IO.i101"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[2]" VarB="PlcTask Inputs^IO.i102"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[3]" VarB="PlcTask Inputs^IO.i103"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[4]" VarB="PlcTask Inputs^IO.i104"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[5]" VarB="PlcTask Inputs^IO.i105"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[6]" VarB="PlcTask Inputs^IO.i106"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[7]" VarB="PlcTask Inputs^IO.i107"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[8]" VarB="PlcTask Inputs^IO.i108"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO101.In[9]" VarB="PlcTask Inputs^IO.i109"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[10]" VarB="PlcTask Inputs^IO.i210"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[11]" VarB="PlcTask Inputs^IO.i211"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[12]" VarB="PlcTask Inputs^IO.i212"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[13]" VarB="PlcTask Inputs^IO.i213"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[14]" VarB="PlcTask Inputs^IO.i214"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[15]" VarB="PlcTask Inputs^IO.i215"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[16]" VarB="PlcTask Inputs^IO.i216"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[1]" VarB="PlcTask Inputs^IO.i201"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[2]" VarB="PlcTask Inputs^IO.i202"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[3]" VarB="PlcTask Inputs^IO.i203"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[4]" VarB="PlcTask Inputs^IO.i204"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[5]" VarB="PlcTask Inputs^IO.i205"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[6]" VarB="PlcTask Inputs^IO.i206"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[7]" VarB="PlcTask Inputs^IO.i207"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[8]" VarB="PlcTask Inputs^IO.i208"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO102.In[9]" VarB="PlcTask Inputs^IO.i209"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[10]" VarB="PlcTask Inputs^IO.i310"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[11]" VarB="PlcTask Inputs^IO.i311"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[12]" VarB="PlcTask Inputs^IO.i312"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[13]" VarB="PlcTask Inputs^IO.i313"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[14]" VarB="PlcTask Inputs^IO.i314"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[15]" VarB="PlcTask Inputs^IO.i315"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[16]" VarB="PlcTask Inputs^IO.i316"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[1]" VarB="PlcTask Inputs^IO.i301"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[2]" VarB="PlcTask Inputs^IO.i302"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[3]" VarB="PlcTask Inputs^IO.i303"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[4]" VarB="PlcTask Inputs^IO.i304"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[5]" VarB="PlcTask Inputs^IO.i305"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[6]" VarB="PlcTask Inputs^IO.i306"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[7]" VarB="PlcTask Inputs^IO.i307"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[8]" VarB="PlcTask Inputs^IO.i308"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO103.In[9]" VarB="PlcTask Inputs^IO.i309"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[10]" VarB="PlcTask Inputs^IO.i410"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[11]" VarB="PlcTask Inputs^IO.i411"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[12]" VarB="PlcTask Inputs^IO.i412"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[13]" VarB="PlcTask Inputs^IO.i413"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[14]" VarB="PlcTask Inputs^IO.i414"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[15]" VarB="PlcTask Inputs^IO.i415"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[16]" VarB="PlcTask Inputs^IO.i416"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[1]" VarB="PlcTask Inputs^IO.i401"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[2]" VarB="PlcTask Inputs^IO.i402"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[3]" VarB="PlcTask Inputs^IO.i403"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[4]" VarB="PlcTask Inputs^IO.i404"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[5]" VarB="PlcTask Inputs^IO.i405"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[6]" VarB="PlcTask Inputs^IO.i406"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[7]" VarB="PlcTask Inputs^IO.i407"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[8]" VarB="PlcTask Inputs^IO.i408"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO104.In[9]" VarB="PlcTask Inputs^IO.i409"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[10]" VarB="PlcTask Inputs^IO.i510"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[11]" VarB="PlcTask Inputs^IO.i511"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[12]" VarB="PlcTask Inputs^IO.i512"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[13]" VarB="PlcTask Inputs^IO.i513"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[14]" VarB="PlcTask Inputs^IO.i514"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[15]" VarB="PlcTask Inputs^IO.i515"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[16]" VarB="PlcTask Inputs^IO.i516"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[1]" VarB="PlcTask Inputs^IO.i501"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[2]" VarB="PlcTask Inputs^IO.i502"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[3]" VarB="PlcTask Inputs^IO.i503"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[4]" VarB="PlcTask Inputs^IO.i504"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[5]" VarB="PlcTask Inputs^IO.i505"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[6]" VarB="PlcTask Inputs^IO.i506"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[7]" VarB="PlcTask Inputs^IO.i507"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[8]" VarB="PlcTask Inputs^IO.i508"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO105.In[9]" VarB="PlcTask Inputs^IO.i509"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[10]" VarB="PlcTask Inputs^IO.i610"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[11]" VarB="PlcTask Inputs^IO.i611"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[12]" VarB="PlcTask Inputs^IO.i612"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[13]" VarB="PlcTask Inputs^IO.i613"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[14]" VarB="PlcTask Inputs^IO.i614"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[15]" VarB="PlcTask Inputs^IO.i615"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[16]" VarB="PlcTask Inputs^IO.i616"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[1]" VarB="PlcTask Inputs^IO.i601"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[2]" VarB="PlcTask Inputs^IO.i602"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[3]" VarB="PlcTask Inputs^IO.i603"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[4]" VarB="PlcTask Inputs^IO.i604"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[5]" VarB="PlcTask Inputs^IO.i605"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[6]" VarB="PlcTask Inputs^IO.i606"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[7]" VarB="PlcTask Inputs^IO.i607"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[8]" VarB="PlcTask Inputs^IO.i608"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO106.In[9]" VarB="PlcTask Inputs^IO.i609"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[10]" VarB="PlcTask Inputs^IO.i710"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[11]" VarB="PlcTask Inputs^IO.i711"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[12]" VarB="PlcTask Inputs^IO.i712"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[13]" VarB="PlcTask Inputs^IO.i713"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[14]" VarB="PlcTask Inputs^IO.i714"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[15]" VarB="PlcTask Inputs^IO.i715"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[16]" VarB="PlcTask Inputs^IO.i716"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[1]" VarB="PlcTask Inputs^IO.i701"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[2]" VarB="PlcTask Inputs^IO.i702"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[3]" VarB="PlcTask Inputs^IO.i703"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[4]" VarB="PlcTask Inputs^IO.i704"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[5]" VarB="PlcTask Inputs^IO.i705"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[6]" VarB="PlcTask Inputs^IO.i706"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[7]" VarB="PlcTask Inputs^IO.i707"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[8]" VarB="PlcTask Inputs^IO.i708"/>
+				<Link VarA="IO_Task Outputs^MainIO.IO401.In[9]" VarB="PlcTask Inputs^IO.i709"/>
+			</OwnerB>
+		</OwnerA>
+	</Mappings>
+</TcSmItem>

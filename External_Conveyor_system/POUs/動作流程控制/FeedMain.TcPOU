@@ -1,0 +1,2092 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="FeedMain" Id="{553def90-0e8b-4d3a-bd25-1c6009fe4adf}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM FeedMain
+VAR
+	step: UINT;
+	
+	tmr01: TON;
+	tmr8000: TON;
+	
+	tmr_ErrorReset: TON;
+	
+	
+	// 註冊料總寬度
+	Wide_Size : LREAL;
+	
+	// 容許誤差
+	Wide_Max : LREAL;
+	Wide_Min : LREAL;
+	// 進料寬度檢測通過
+	Wide_Check_Pass : BOOL;
+	// 進料數量
+	inputNumber : int;
+	
+	// 分料位置 計算結果 (有分料的起始位置 與 分料的停止位置)
+	AlignmentPosArr : ARRAY [0..10] OF Alignment_pos;
+	// 分料數量
+	AlignmentCount : INT; 
+	
+	
+	// 投料搬移 搬移次數
+	feed_MoveCycle: DINT;
+	// 投料搬移 起始距離
+	feed_MoveStartPos: LREAL; 
+	// 投料搬移 最後一次位置
+	feed_MoveLastPos: LREAL;
+	
+	// 進料數量
+	FeedNumber : INT;
+	
+	// 已就緒
+	bReady : BOOL;
+	
+	i1: INT;
+	i2: INT;
+	dint_tmp1 : DINT;
+	dint_tmp2 : DINT;
+	lreal_tmp1 : LREAL;
+	
+	// 台車位置紀錄
+	Jog_car_at : INT;
+	// 啟動的模式
+	StartMode: INT;
+	
+	StrMem : WStrMem;
+END_VAR
+
+VAR_OUTPUT
+	bBuzy: BOOL;
+	bError: BOOL;
+	bDone: BOOL;
+	iErrorId : DINT;
+END_VAR
+
+VAR RETAIN PERSISTENT
+	// 輸入的寬度暫存 (防止運作中輸入質發生變動)
+	Workpiece_Width_array_tmp: ARRAY [0..10] OF LREAL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (EStop OR SystemError OR Input.Feed_Reset) AND bBuzy THEN
+	IF bBuzy THEN
+		step := step  + 10000;
+	END_IF
+END_IF
+
+bBuzy := (step >= 1 AND step < 10000);
+bError := (step >= 10000);
+
+// tmr_ErrorReset(in:= bError, PT:=T#1S);
+// IF tmr_ErrorReset.Q THEN
+// 	iErrorId := step - 10000;
+// 	step := 0;
+// END_IF
+
+IF (Safety.SystemError) AND bError THEN
+	bReady := FALSE;
+END_IF
+
+IF step <> 0 AND Feed_Reset THEN
+	iErrorId := step - 10000;
+	step := 0;
+END_IF
+
+IF Input.Feed_Start AND (step > 10000 OR  Safety.SystemError) THEN
+	Safety.SystemError := FALSE;
+	step := 0;
+END_IF
+
+IF Pause THEN
+	RETURN;
+END_IF
+
+Step_0_Main();
+
+
+Timer();
+
+Output.ActionMode_Now := step;
+
+Output.in_Pos_sensor := 0;
+Output.in_Pos_sensor.0 := IO.i402;
+Output.in_Pos_sensor.1 := IO.i404;
+Output.in_Pos_sensor.2 := IO.i406;
+Output.in_Pos_sensor.3 := IO.i408;
+
+Output.Out_Pos_sensor := 0;
+
+Output.Out_Pos_sensor.0 := IO.i113;
+Output.Out_Pos_sensor.1 := IO.i114;
+Output.Out_Pos_sensor.2 := IO.i115;
+]]></ST>
+    </Implementation>
+    <Folder Name="計算" Id="{726b3d5b-38e5-45d2-a148-b30f1140fe79}" />
+    <Method Name="Alignment_End_Pos" Id="{c5ea3348-c10d-49d6-9cf0-2fdbd941be56}" FolderPath="計算\">
+      <Declaration><![CDATA[// 計算分料的起始位置
+METHOD INTERNAL Alignment_End_Pos : LREAL
+
+
+VAR_INPUT
+	NumberOfArray : INT;
+END_VAR
+
+VAR
+	i : INT;
+	tmp1 : LREAL;
+	tmp2 : LREAL;
+	tmp3 : LREAL;
+	tmp4 : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// 第二支料分離結束位置 =  工件待命位置 + 臺車寬度 - (第一支料寬 + 第二支料寬 + 材料排列間距)
+
+// 工件待命位置 + 臺車寬度
+tmp1 := Config.pos_Workpiace_StanbyPoint + Config.FeedCar_Length;
+
+// 輸入不為0時
+IF NumberOfArray >= 0 THEN
+	tmp2 := 0;
+
+	IF NumberOfArray > 0 THEN
+		FOR i := 0 TO NumberOfArray - 1 DO
+			// 料寬 + 材料排列間距 的累計
+			tmp2 := tmp2 + Workpiece_Width_array_tmp[i] + Config.dis_Alignment;
+		END_FOR
+	END_IF
+	
+	tmp3 := Workpiece_Width_array_tmp[NumberOfArray];
+	
+	tmp4 := tmp1 - (tmp2 + tmp3);
+ELSE
+	tmp4 := 0;
+END_IF
+
+Alignment_End_Pos := tmp4;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Alignment_Start_Pos" Id="{8389cec4-17c5-43c6-beba-3f862f370d48}" FolderPath="計算\">
+      <Declaration><![CDATA[// 計算分料的起始位置
+METHOD INTERNAL Alignment_Start_Pos : LREAL
+
+
+VAR_INPUT
+	NumberOfArray : INT;
+END_VAR
+
+VAR
+	i : INT;
+	tmp1 : LREAL;
+	tmp2 : LREAL;
+	tmp3 : LREAL;
+	tmp4 : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// 工件待命位置 + 臺車寬度
+tmp1 := Config.pos_Workpiace_StanbyPoint + Config.FeedCar_Length;
+
+// 輸入不為0時
+IF NumberOfArray >= 0 THEN
+	tmp2 := 0;
+	
+	IF NumberOfArray > 0 THEN
+		FOR i := 0 TO NumberOfArray - 1 DO
+			// 料寬累計
+			tmp2 := tmp2 + Workpiece_Width_array_tmp[i];
+		END_FOR
+	END_IF
+	
+	tmp3 := (Workpiece_Width_array_tmp[NumberOfArray] / 2);
+	
+	tmp4 := tmp1 - (tmp2 + tmp3);
+	
+ELSE
+	
+	tmp4 := 0;
+	
+END_IF
+
+Alignment_Start_Pos := tmp4;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Feed_Start_Pos" Id="{4b780cd3-4d40-4499-b81a-951fb8de3322}" FolderPath="計算\">
+      <Declaration><![CDATA[// 計算分料的起始位置
+METHOD INTERNAL Feed_Start_Pos : LREAL
+
+
+VAR_INPUT
+	NumberOfArray : INT;
+END_VAR
+
+VAR
+	i : INT;
+	tmp1 : LREAL;
+	tmp2 : LREAL;
+	tmp3 : LREAL;
+	tmp4 : LREAL;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[// 第一支進料移動起始位置 =  工件待命位置 + 臺車寬度 - (第一支料寬 + 材料排列間距)
+
+// 工件待命位置 + 臺車寬度
+tmp1 := Config.pos_Workpiace_StanbyPoint + Config.FeedCar_Length;
+
+FOR i := 0 TO NumberOfArray - 1 DO
+	// // 料寬 + 材料排列間距 的累計
+	tmp2 := tmp2 + Workpiece_Width_array_tmp[i] + Config.dis_Alignment;
+END_FOR
+
+tmp3 := Workpiece_Width_array_tmp[i] + (Config.dis_Alignment / 2);
+
+tmp4 := tmp1 - (tmp2 + tmp3);
+
+Feed_Start_Pos := tmp4;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Step_0_Main" Id="{ce8fe34c-a128-4981-9340-c97adcbb4036}">
+      <Implementation>
+        <ST><![CDATA[(*======================================
+		確認起動條件&回原點
+  ======================================*)
+
+// 處裡緊急停止訊號
+
+output.Feed_bBuzy := bbuzy;
+output.Feed_bdone := bdone;
+Output.Feed_bError := bError;
+Output.Feed_Workpiace_H := Sensor.MeasureValue;
+Output.Feed_Workpiace_W := HeightMeasurer.MeasureValue;
+
+step_0100_Homming();
+step_0400_input();
+step_0600_Alignment();
+step_0800_Feeding();
+step_1000_DB_Data_Change();
+step_2000_Push_site();
+
+step_3400_input_WeightError();
+Step_8000_Jog_Start();
+
+CASE step OF
+	0:
+		IF Input.Feed_Start THEN
+			step := 1;
+			StartMode := Input.Feed_Mode;
+		END_IF
+		
+	
+	1:
+		bDone := FALSE;
+		IF StartMode = 8000 THEN
+			step := 8000;
+		ELSIF StartMode = 8001 THEN
+			step := 0;
+		ELSIF StartMode = 2000 THEN
+			step := 2000;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	2: // 沒就緒狀態，先歸零
+		IF NOT bReady OR StartMode = 100 THEN
+			step := 100;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	3:
+		step := 10;
+		
+(*	================================
+			從資料庫取得資料
+	================================	*)
+	10:
+		ReadSQLData.Get_WorkkOrder();
+		step := step + 1;
+		
+	11:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	12:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	13:
+		step := 20;
+		
+(*	================================
+			確認要執行的動作
+	================================	*)
+	20: // 檢查待命區是否還有料
+		IF ProjectData.WorkOrder_Nunber_At_waitLoading > 0 THEN
+			IF StartMode = 400 THEN
+				bDone := TRUE;
+				step := 0;
+			ELSE
+				step := 800;
+			END_IF
+		ELSIF ProjectData.WorkOrder_Nunber_At_holding > 0 THEN
+			step := 400;
+		ELSE
+			pMsg.Push_Alarm_NoPause(STR := WStrConcat(
+				"FeedMain:沒有狀態是 暫存中(holding)　或　等待上料(waitLoading) 的料(",
+				TO_WSTRING(step),
+				")"
+			));
+			step := 0;
+		END_IF
+	
+		
+END_CASE
+
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0100_Homming" Id="{53f54270-45dd-4534-b02d-9f7c5f419135}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	100:// 復歸定位圓柱、台車升降、測高
+		Hydraulic.CarLift_Down(0);
+		StopPin.Down(0);
+		HeightMeasurer.Homing();
+		step := step + 1;
+		
+	101:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) AND (StopPin.bBuzy OR StopPin.bError)
+			AND (HeightMeasurer.bBuzy OR HeightMeasurer.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	102:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	103:
+		step := 110;
+	
+	110:
+		IF FeedCar.bHome AND StartMode = 0 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	111:
+		FeedCar.Homing();
+		step := step + 1;
+		
+	112:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	113:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	114:
+		step := 120;
+		
+	120:
+		FeedCar.AbsMove(0,0);
+		step := step + 1;
+		
+	121:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	122:
+		IF FeedCar.bDone AND StopPin.bDone AND HeightMeasurer.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	123:
+		step := 130;
+		
+	130:
+		FeedCar.AbsMove(config.pos_StartPoint, 0);
+		step := step + 1;
+		
+	131:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	132:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	133:
+		step := 140;
+		
+	140:
+		bReady := TRUE;
+		step := step + 1;
+		
+	141:
+		IF StartMode = 0 THEN
+			step := 10;
+		ELSE
+			bDone := TRUE;
+			step := 0;
+		END_IF
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0400_input" Id="{f795d4d4-2d8c-4b13-8b2d-73be8f45a76f}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+(*	============================================
+			從資料庫取得吊掛區的註冊工件
+	============================================*)
+	400:
+		step := step + 1;
+		
+	401:
+		ReadSQLData.Get_WorkkOrder();
+		step := step + 1;
+		
+	402:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	403:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+
+	404:
+		IF ProjectData.WorkOrder_Nunber_At_waitLoading > 0 THEN
+ 			step := 790;
+		ELSIF ProjectData.WorkOrder_Nunber_At_holding > 0 THEN
+			step := step + 1;
+		ELSE
+			pMsg.Push_Alarm_NoPause(STR := WStrConcat(
+				"FeedMain:沒有狀態是 暫存中(holding) 的料(",
+				TO_WSTRING(step),
+				")"
+			));
+			step := 0;
+		END_IF
+
+	405:
+		step := 410;
+			
+		
+(*	============================================
+					計算總寬度
+	============================================*)
+	410: // 資料初始化				
+		FOR i1 := 0 TO 10 DO
+			Workpiece_Width_array_tmp[i1] := ProjectData.WorkOrder_At_holding[i1].Height;
+		END_FOR
+		
+		Wide_Size := 0;
+		step := step + 1;
+		
+	411: // 加總所有吊掛區的工件寬度
+		FOR i1 := 0 TO ProjectData.WorkOrder_Nunber_At_holding - 1 DO
+			Wide_Size := Wide_Size + Workpiece_Width_array_tmp[i1];
+		END_FOR
+		step := step + 1;
+		
+	412:
+		step := 420;
+
+(*	============================================
+			開始整直 與 驗證註冊資料是否正確
+	============================================*)
+	420:// 臺車下降、定位圓柱升起
+		Hydraulic.CarLift_Down();
+		StopPin.up();
+		step := step + 1;
+		
+	421:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) AND (StopPin.bBuzy OR StopPin.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	422:
+		IF Hydraulic.bDone AND StopPin.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError OR StopPin.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	423:
+		step := 430;
+		
+	430: // 臺車 移動到 搬移起始點
+		FeedCar.AbsMove(0);
+		step := step + 1;
+		
+	431:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	432:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	433:
+		step := 440;
+		
+	440:// 臺車 上升到中位
+		Hydraulic.CarLift_Mid();
+		step := step + 1;
+		
+	441:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	442:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			pMsg.Push_Alarm_NoPause(STR := WStrConcat(
+				"FeedMain:執行整料動作時發生錯誤(",
+				TO_WSTRING(step),
+				")"
+			));
+		END_IF
+		
+	443:
+		step := 450;
+		
+	450:// 臺車 做寬度測量
+		FeedCar.Find();
+		step := step + 1;
+		
+	451:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	452:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	453: // 驗證註冊資料
+		Wide_Check_Pass := FALSE;
+		// 誤差上限
+		Wide_Max := Wide_Size + (Wide_Size * config.Workpiace_Err_size);
+		// 誤差下限
+		Wide_Min := Wide_Size - (Wide_Size * config.Workpiace_Err_size);
+		
+		// 判斷寬度是否在誤差範圍內
+		Wide_Check_Pass := Wide_Min < FeedCar.rFindPos AND Wide_Max > FeedCar.rFindPos;
+		
+		step := step + 1;
+		
+	454:
+		step := 460;
+		
+	460:// 臺車下降，定位圓柱下降
+		StopPin.Down();
+		step := step + 1;
+		
+	461:
+		IF (StopPin.bBuzy OR StopPin.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	462:
+		step := 470;
+		
+	470:
+		IF Wide_Check_Pass THEN
+			// 通過寬度檢測
+			step := step + 1;
+		ELSE
+			// 寬度檢測失敗
+			step := 3400;
+		END_IF
+		
+	471:
+		step := 480;
+	
+	480:
+		FeedCar.AbsMove(config.pos_StartPoint, 1);
+		step := step + 1;
+		
+	481:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	482:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	483:
+		step := 490;
+		
+	490:
+		Hydraulic.CarLift_Up(0);
+		step := step + 1;
+		
+	491:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	492:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	493:
+		FeedCar.AbsMove(FeedCar.Pos - 10);
+		step := step + 1;
+		
+	494:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	495:
+		IF FeedCar.bDone AND StopPin.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError OR StopPin.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	496:
+		step := 500;
+		
+	500:
+		FeedCar.AbsMove(config.pos_Workpiace_StanbyPoint, 1);
+		step := step + 1;
+		
+	501:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	502:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	503:
+		step := 510;
+		
+	510: // 臺車下降
+		Hydraulic.CarLift_Down();
+		step := step + 1;
+		
+	511:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	512:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	513:
+		step := 600;
+		
+		
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0600_Alignment" Id="{45dac2be-e6bd-4c8f-b1c6-255ccb08e1fd}">
+      <Implementation>
+        <ST><![CDATA[(*
+	1.取出
+*)
+
+CASE step OF
+	600: // 判斷是否需要執行分料動作
+		inputNumber := TO_INT(ProjectData.WorkOrder_Nunber_At_holding);
+		IF inputNumber > 1 THEN
+			step := step + 1;
+		ELSE
+			step := 700; 
+		END_IF
+		
+	601: // 計算分隔距離與台車移動的距離
+		FOR i1 := 0 TO 10 DO
+			IF i1 <= inputNumber THEN
+				AlignmentPosArr[i1].Start := Alignment_Start_Pos(i1);
+				AlignmentPosArr[i1].End := Alignment_End_Pos(i1);
+			ELSE
+				AlignmentPosArr[i1].Start := 0;
+				AlignmentPosArr[i1].End := 0;
+			END_IF
+		END_FOR
+		step := step + 1;
+		
+	602:
+		i2 := inputNumber - 1;
+		step := step + 1;
+		
+	603:
+		step := 610;
+		
+	610: // 臺車 移動到 材料 分離起始位置
+		FeedCar.AbsMove(AlignmentPosArr[i2].Start, 1);
+		step := step + 1;
+		
+	611:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	612:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	613:
+		step := 620;
+		
+	620: // 台車 升到 中位
+		Hydraulic.CarLift_Mid(0);
+		step := step + 1;
+		
+	621:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	622:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	623:
+		step := 630;
+		
+	630: // 臺車 移動到 材料分離位置
+		FeedCar.AbsMove(AlignmentPosArr[i2].End, 0);
+		step := step + 1;
+		
+	631:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	632:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	633:
+		step := 640;
+		
+	640: // 台車 降到 低位
+		Hydraulic.CarLift_Down(0);
+		step := step + 1;
+		
+	641:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	642:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	643:
+		step := 650;
+		
+	650:
+		// 待分離數量 -1
+		i2 := i2 - 1;
+		IF i2 > 0 THEN
+			step := 610;
+// 			step := 652;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	651:// 歸零已給料數量
+		step := 700;
+		
+		
+	700:
+		FeedNumber := 0;
+		i1 := 0;
+		step := step + 1;
+		
+	701:
+		// 將放置(搬移起始)位置寫入資料庫
+		ReadSQLData.Set_Work_Order_WaitLoading_Pos( 
+			id := i1,
+			Pos := Feed_Start_Pos(i1)
+			);
+		step := step + 1;
+		
+	702:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	703:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	704:
+		i1 := i1 + 1;
+		IF i1 < ProjectData.WorkOrder_Nunber_At_holding THEN
+			step := 701;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	705:
+		step := 710;
+		
+	710:
+		// 將放置(搬移起始)位置寫入資料庫
+		ReadSQLData.Get_WorkkOrder();
+		step := step + 1;
+		
+	711:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	712:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	713:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	714:
+		step := 790;
+		
+	
+	790:
+		i2 := 0;
+		step := step + 1;
+		
+	791:
+		ReadSQLData.Set_Work_Order_2_waitLoading(i2);
+		step := step + 1;
+		
+	792:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	793:
+		IF ReadSQLData.bDone OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	794:
+		i2 := i2 + 1;
+		IF i2 < ProjectData.WorkOrder_Nunber_At_holding THEN 
+			step := 791;
+		ELSE
+			step := 795;
+		END_IF 
+		
+		
+	795:
+		IF StartMode = 400 OR NOT Feed_Enable OR IO.i402 OR IO.i404 THEN
+			bDone := TRUE;
+			step := 0;
+		ELSIF  ProjectData.WorkOrder_Nunber_At_waitLoading = 1 THEN
+			step := 890;
+		ELSE
+			step := 800;
+		END_IF
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0800_Feeding" Id="{6050812a-3839-4067-9e2a-ebdc1f89f341}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	800:
+		ReadSQLData.Get_WorkkOrder();
+		step := step + 1;
+		
+	801:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	802:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	803:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+		
+	804: // 確定有等待進料的料
+		IF  ProjectData.WorkOrder_Nunber_At_waitLoading > 0 AND ProjectData.WorkOrder_Nunber_At_Machining <= 0 THEN
+			step := step + 1;
+		ELSE
+			IF ProjectData.WorkOrder_Nunber_At_waitLoading <= 0 THEN
+				// 等待投料位置的原料數為0
+				pMsg.Push_Error(WStrConcat(
+					"FeedMain: 等待投料位置的原料數為0"
+					));
+			ELSE
+				// 有料正在加工中
+				pMsg.Push_Error(WStrConcat(
+					"FeedMain: 有料正在加工中"
+					));
+			END_IF
+			step := step + 10000;
+		END_IF
+		
+		
+		
+	805: // 檢查等待進料的料位置是否正確
+		IF ProjectData.WorkOrder_At_waitLoading[0].waitLoading_pos > Config.pos_CarPin_StopPoint AND	// 位置大於 定位PIN()
+			ProjectData.WorkOrder_At_waitLoading[0].waitLoading_pos < Config.pos_Workpiace_FeedPoint THEN	// 位置小於 投料位置(2700) - 台車平台大小(1080)
+			step := step + 1;
+		ELSE
+			pMsg.Push_Error(WStrConcat(
+				"FeedMain: ",
+				WLEFT(STR:= TO_WSTRING(ProjectData.WorkOrder_At_waitLoading[0].steel_id), SIZE:= 8),
+				" :的待命位置錯誤: ",
+				TO_WSTRING(ProjectData.WorkOrder_At_waitLoading[0].waitLoading_pos)
+				));
+			step := step + 10000;
+		END_IF
+		
+	806:
+		IF Feed_Enable OR NOT NOT IO.i402 OR NOT IO.i404 THEN
+			step := 810;
+		END_IF
+		
+
+	810: 
+		step := step + 1;
+		
+	811: // 計算搬移次數
+		// 料移動起始位置
+		dint_tmp1 := TO_DINT(ProjectData.WorkOrder_At_waitLoading[0].waitLoading_pos);
+		
+		// 移動距離 = 投料位置 - 第一支進料移動起始位置
+		dint_tmp2 := TO_DINT( config.pos_Workpiace_FeedPoint) - dint_tmp1;
+		
+		IF dint_tmp2 > 0 THEN // 當可移動距離 < 台車寬度
+			lreal_tmp1 := (config.FeedCar_Length - (ProjectData.WorkOrder_At_waitLoading[0].Height + 50)) / dint_tmp2;
+			
+			IF lreal_tmp1 >= 1 THEN
+				feed_MoveCycle := TO_INT(TO_STRING(lreal_tmp1));
+			ELSE
+				feed_MoveCycle := 0;
+			END_IF
+			
+			feed_MoveStartPos := dint_tmp1;		// 次數內的 搬移起始位置
+			
+			// 最後一次的搬移起始位置
+			feed_MoveLastPos := config.pos_Workpiace_FeedPoint - 
+									(Config.FeedCar_Length - (ProjectData.WorkOrder_At_waitLoading[0].Height + 50)) +
+									(dint_tmp2 * feed_MoveCycle);
+			
+			step := step + 1;
+		ELSE // 當可移動距離 > 台車寬度
+			
+			// 重複移動次數 0
+			feed_MoveCycle := 0; 
+			// 搬移 起始位置
+			feed_MoveStartPos := dint_tmp1;
+			// 最後一次的搬移 起始位置 = 投料位置 - (臺車寬度 - (工件寬度 + 50))
+			feed_MoveLastPos := config.pos_Workpiace_FeedPoint - 
+									(Config.FeedCar_Length - (ProjectData.WorkOrder_At_waitLoading[0].Height + 50));
+			step := step + 1;
+		END_IF
+		
+	812:
+		IF NOT HeightMeasurer.bBuzy THEN
+			IF NOT io.i314 THEN
+				// 測高機構不再原點，會導致撞機
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+		END_IF
+		
+	813:
+		step := 820;
+		
+		
+	820: // 降下台車
+		Hydraulic.CarLift_Down(0);
+		step := step + 1;
+		
+	821:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	822:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	823:
+		step := 830;
+		
+	830: // 臺車 移動到 搬移起始點
+		step := step + 1;
+	831:
+		FeedCar.AbsMove(feed_MoveStartPos,1);
+		step := step + 1;
+		
+	832:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	833:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	834:
+		step := 840;
+		
+	840: // 上升台車
+		Hydraulic.CarLift_Up(0);
+		step := step + 1;
+		
+	841:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	842:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	843:
+		step := 850;
+		
+	850: // 臺車 移動到 投料輸送機 位置
+		FeedCar.AbsMove(config.pos_Workpiace_FeedPoint,1);
+		step := step + 1;
+		
+	851:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	852:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	853:
+		step := 860;
+		
+	860: // 臺車下降
+		Hydraulic.CarLift_Down(0);
+		step := step + 1;
+		
+	861:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	862:
+		IF Hydraulic.bDone THEN
+			step := step + 1;	
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	863:
+		step := 870;
+		
+	870: // 搬移次數 -1 後，判斷搬移次數是否大於1 大於 -> 繼續完整搬移 小於 -> 使用最後位置搬移
+		
+		IF feed_MoveCycle > 0 THEN
+			feed_MoveCycle := feed_MoveCycle - 1;
+			step := 830;
+		ELSE
+			step := 880;
+		END_IF
+			
+		
+	880: // 一到最後一次的 開始搬移位置
+		FeedCar.AbsMove(feed_MoveLastPos,1);
+		step := step + 1;
+		
+	881: // 
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	882:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	883:
+		step := 890;
+	
+	890: // 臺車上升
+		Hydraulic.CarLift_Up(0);
+		step := step + 1;
+		
+	891:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	892:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	893:
+		step := 900;
+		
+	900: // 臺車 移動到 投料輸送機 位置
+		FeedCar.AbsMove(config.pos_Workpiace_FeedPoint,1);
+		step := step + 1;
+		
+	901:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	902:
+		IF FeedCar.bDone THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	903:
+		step := 910;
+		
+		
+	910: // 降下台車
+		Hydraulic.CarLift_Down(0);
+		step := step + 1;
+		
+	911:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	912:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	913:
+		step := 1000;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_1000_DB_Data_Change" Id="{88b0ec9a-f1e7-4064-be07-41714a1b39d0}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	1000:
+		ReadSQLData.Set_Work_Order_2_inSide(0);
+		step := step + 1;
+		
+		
+	1001:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1002:
+		IF ReadSQLData.bDone THEN 
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1003:
+		step := 1010;
+
+		
+	1010: // 給料靠邊、台車移到下一支材料位置 或 回進料點
+		PullOver.Start();
+		step := step + 1;
+		
+	1011:
+		IF (PullOver.bBuzy OR PullOver.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	1012:
+		step := 1020;
+		
+	1020:
+		ReadSQLData.Get_WorkkOrder();
+		step := step + 1;
+		
+		
+	1021:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1022:
+		IF ReadSQLData.bDone THEN 
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1023:
+		step := 1030;
+		
+		
+	1030:
+		IF ProjectData.WorkOrder_Nunber_At_waitLoading > 0 THEN
+			FeedCar.AbsMove(ProjectData.WorkOrder_At_waitLoading[0].waitLoading_pos ,1);
+		ELSE
+			FeedCar.AbsMove(config.pos_StartPoint,1);
+		END_IF
+		step := step + 1;
+		
+	1031:
+		IF(FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	1032:
+		IF PullOver.bDone THEN
+			step := step + 1;
+		ELSIF PullOver.bError OR FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1033:
+		step := 1050;
+		
+// 以整合進	PullOver 內
+// 	1040:
+// 		HeightMeasurer.Measure();
+// 		step := step + 1;
+// 		
+// 	1041:
+// 		IF (HeightMeasurer.bBuzy OR HeightMeasurer.bError) THEN
+// 			step := step + 1;
+// 		END_IF
+// 		
+// 	1042:
+// 		IF Hydraulic.bDone1 THEN
+// 			step := step + 1;
+// 		ELSIF Hydraulic.bError1 THEN
+// 			step := step + 10000;
+// 		END_IF
+// 		
+// 	1043:
+// 		step := 1050;
+		
+	
+	1050:
+		bDone := TRUE;
+		step := step + 1;
+		
+	1051:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	1052:
+		IF ProjectData.WorkOrder_Nunber_At_waitLoading > 0 THEN
+			step := 0;
+		ELSIF ProjectData.WorkOrder_Nunber_At_holding <= 0 THEN
+			step := 0;
+		ELSE
+			StartMode := 400;
+			step := 400;
+		END_IF
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_2000_Push_site" Id="{36fa5823-5599-4102-84b0-f10e3bfe391f}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	2000: // 給料靠邊、台車移到下一支材料位置 或 回進料點
+		bDone := FALSE;
+		Hydraulic.Over_Pull(0);
+		step := step + 1;
+		
+	2001:
+		IF (Hydraulic.bBuzy1 OR Hydraulic.bError1) THEN
+			step := step + 1;
+		END_IF
+		
+	2002:
+		IF Hydraulic.bDone1 THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError1 THEN
+			step := step + 10000;
+		END_IF
+		
+	2003:
+		step := 2010;
+		
+	2010:
+		HeightMeasurer.Measure();
+		step := step + 1;
+		
+	2011:
+		IF (HeightMeasurer.bBuzy OR HeightMeasurer.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	2012:
+		IF HeightMeasurer.bDone THEN
+			step := step + 1;
+		ELSIF HeightMeasurer.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	2013:
+		step := 2020;
+		
+	
+	2020:
+		bDone := TRUE;
+		step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_3400_input_WeightError" Id="{246fd46e-8afd-4ed4-adfc-229d8db6342c}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	3400:
+		Hydraulic.CarLift_Up(0);
+		step := step + 1;
+		
+	3401:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	3402:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	3403:
+		step := 3410;
+		
+	3410:
+		FeedCar.AbsMove(Config.pos_StartPoint + 10, 40);
+		step := step + 1;
+		
+	3411:
+		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	3412:
+		IF FeedCar.bDone  THEN
+			step := step + 1;
+		ELSIF FeedCar.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	3413:
+		step := 3420;
+		
+	3420:
+		Hydraulic.CarLift_Down(0);
+		step := step + 1;
+		
+	3421:
+		IF (Hydraulic.bBuzy OR Hydraulic.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	3422:
+		IF Hydraulic.bDone THEN
+			step := step + 1;
+		ELSIF Hydraulic.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	3423:
+		step := 3430;
+	
+	3430:
+		pmsg.Push_Error(
+				WStrConcat(
+					"FeedMain:進料寬度錯誤$n註冊值:",
+					TO_WSTRING(Wide_Size),
+					"$n測量值:",
+					TO_WSTRING(FeedCar.rFindPos),
+					"$nAT:",
+					TO_WSTRING(step)
+				)
+			);
+		step := step + 10000;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_8000_Jog_Start" Id="{c3433aa6-470b-406f-bee3-04c6aac250d6}">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+				Jog模式
+  ====================================*) 
+//IF ((Hmi.Mode_Select = 1 OR Hmi.Mode_Select = 2)) AND step >= 8000 AND step < 9800 THEN
+//	step := 9800;
+//END_IF
+
+IF SystemError THEN
+	Hmi_Web.Roller_Fwd_S := FALSE;
+	Hmi_Web.Roller_Rev_S := FALSE;
+	Hmi_Web.Roller_Fwd := FALSE;
+	Hmi_Web.Roller_Rev := FALSE;
+	
+	Hmi_Web.Roller_Up_S := FALSE;
+	Hmi_Web.Roller_Down_S := FALSE;
+	Hmi_Web.Roller_Up := FALSE;
+	Hmi_Web.Roller_Down := FALSE;
+	
+	Hmi_Web.Car_Fwd_S := FALSE;
+	Hmi_Web.Car_Rev_S := FALSE;
+	Hmi_Web.Car_Fwd := FALSE;
+	Hmi_Web.Car_Rev := FALSE;
+	
+	Hmi_Web.Car_Up_S := FALSE;
+	Hmi_Web.Car_Down_S := FALSE;
+	Hmi_Web.Car_Up := FALSE;
+	Hmi_Web.Car_Down := FALSE;
+	
+	Hmi_Web.StopPin_Up_S := FALSE;
+	Hmi_Web.StopPin_Down_S := FALSE;
+	Hmi_Web.StopPin_Up := FALSE;
+	Hmi_Web.StopPin_Down := FALSE;
+	
+	Hmi_Web.Pull_over_Push_S := FALSE;
+	Hmi_Web.Pull_over_Push := FALSE;
+END_IF
+
+step_8100_Roller_in();
+step_8200_Car();
+step_8300_StopPin();
+step_8400_PullOver();
+step_8500_Roller_Out();
+
+CASE step OF
+	8000: // jog按鍵
+		bReady := FALSE;
+		step := step + 1;
+		
+	8001:
+		CASE Hmi_Web.Site_Select OF
+			e_Jog_Site_Select.Input_site:
+				IF Hmi_Web.Roller_Fwd THEN
+					step := 8100;
+				ELSIF Hmi_Web.Roller_Rev THEN
+					step := 8120;
+				ELSIF Hmi_Web.Roller_Up THEN
+					step := 8140;
+				ELSIF Hmi_Web.Roller_Down THEN
+					step := 8160;
+					
+				ELSIF Hmi_Web.Car_Fwd THEN
+					step := 8200;
+				ELSIF Hmi_Web.Car_Rev THEN
+					step := 8220;
+				ELSIF Hmi_Web.Car_Up THEN
+					step := 8240;
+				ELSIF Hmi_Web.Car_Down THEN
+					step := 8260;
+					
+				ELSIF Hmi_Web.StopPin_Up THEN
+					step := 8300;
+				ELSIF Hmi_Web.StopPin_Down THEN
+					step := 8320;
+					
+				ELSIF Hmi_Web.Pull_over_Push THEN
+					step := 8400;
+				END_IF
+				
+			e_Jog_Site_Select.Output_Site:
+				IF Hmi_Web.Roller_Fwd THEN
+					step := 8500;
+				ELSIF Hmi_Web.Roller_Rev THEN
+					step := 8520;
+				ELSIF Hmi_Web.Roller_Up THEN
+					step := 8540;
+				ELSIF Hmi_Web.Roller_Down THEN
+					step := 8560;
+				END_IF
+				
+		END_CASE
+		
+		IF (Input.Feed_Start) OR SystemError THEN 
+			step := 9800;
+		END_IF
+		
+	
+	9800:
+		Hmi_Web.Roller_Fwd_S := FALSE;
+		Hmi_Web.Roller_Rev_S := FALSE;
+		Hmi_Web.Roller_Fwd := FALSE;
+		Hmi_Web.Roller_Rev := FALSE;
+		
+		Hmi_Web.Roller_Up_S := FALSE;
+		Hmi_Web.Roller_Down_S := FALSE;
+		Hmi_Web.Roller_Up := FALSE;
+		Hmi_Web.Roller_Down := FALSE;
+		
+		Hmi_Web.Car_Fwd_S := FALSE;
+		Hmi_Web.Car_Rev_S := FALSE;
+		Hmi_Web.Car_Fwd := FALSE;
+		Hmi_Web.Car_Rev := FALSE;
+		
+		Hmi_Web.Car_Up_S := FALSE;
+		Hmi_Web.Car_Down_S := FALSE;
+		Hmi_Web.Car_Up := FALSE;
+		Hmi_Web.Car_Down := FALSE;
+		
+		Hmi_Web.StopPin_Up_S := FALSE;
+		Hmi_Web.StopPin_Down_S := FALSE;
+		Hmi_Web.StopPin_Up := FALSE;
+		Hmi_Web.StopPin_Down := FALSE;
+		
+		Hmi_Web.Pull_over_Push_S := FALSE;
+		Hmi_Web.Pull_over_Push := FALSE;
+		
+		step := step + 1;
+		
+	
+		
+	9801:
+// 		pmsg.Push_Info("退出手動模式");
+		step:=0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8100_Roller_in" Id="{6433e785-d293-4c2e-98c9-2071dca35ead}">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group A X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*)
+	8100:
+		FeedRoller.Jog_Rev();
+		step := step + 1;
+		
+		
+	8101:
+		IF NOT Hmi_Web.Roller_Fwd THEN
+			step := 8109;
+		ELSIF FeedRoller.bBuzy OR FeedRoller.bError THEN
+			step := step + 1;
+		END_IF
+		
+	8102:
+		IF FeedRoller.bError OR NOT Hmi_Web.Roller_Fwd THEN
+			step:=8109;
+		END_IF
+		
+	8109:
+		FeedRoller.Jog_Stop();
+		step:=8001;
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8120:
+		FeedRoller.Jog_Fwd();
+		step := step + 1;
+		
+		
+	8121:
+		IF NOT Hmi_Web.Roller_Rev THEN
+			step := 8129;
+		ELSIF FeedRoller.bBuzy OR FeedRoller.bError THEN
+			step := step + 1;
+		END_IF
+		
+	8122:
+		
+		IF FeedRoller.bError OR NOT Hmi_Web.Roller_Rev THEN
+			step:=8129;
+		END_IF
+		
+	8129:
+		FeedRoller.Jog_Stop();
+		step:=8001;
+		
+(*====================================
+				上升
+  ====================================*)
+	8140:
+		FeedRoller.Jog_Up();
+		step := step + 1;
+		
+		
+	8141:
+		IF FeedRoller.bBuzy OR FeedRoller.bError THEN
+			step := step + 1;
+		END_IF
+		
+	8142:
+		IF FeedRoller.bDone OR FeedRoller.bError THEN
+			step:=8149;
+		END_IF
+		
+	8149:
+		step:=8001;
+		
+(*====================================
+				下降
+  ====================================*) 
+		
+	8160:
+		FeedRoller.Jog_Down();
+		step := step + 1;
+		
+		
+	8161:
+		IF FeedRoller.bBuzy OR FeedRoller.bError THEN
+			step := step + 1;
+		END_IF
+		
+	8162:
+		IF FeedRoller.bDone OR FeedRoller.bError THEN
+			step:=8169;
+		END_IF
+		
+	8169:
+		step:=8001;
+
+END_CASE
+
+Hmi_Web.Roller_Fwd_S	:= step >= 8100 AND step < 8109;
+Hmi_Web.Roller_Rev_S	:= step >= 8120 AND step < 8129;
+Hmi_Web.Roller_Up_S		:= step >= 8140 AND step < 8149;
+Hmi_Web.Roller_Down_S	:= step >= 8160 AND step < 8169;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8200_Car" Id="{6ad0dc2e-1718-40a2-a447-e0433374754a}">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group A X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*)
+	8200:
+		IF FeedCar.bHome THEN
+			FeedCar.AbsMove(config.pos_Workpiace_FeedPoint,  Hmi_Web.Speed_Select);
+			step := step + 1;
+		ELSE
+			step := 8209;
+		END_IF
+		
+		
+	8201:
+		IF NOT Hmi_Web.Car_Fwd THEN
+			step := 8209;
+		ELSIF FeedCar.bBuzy OR FeedCar.bError THEN
+			step := step + 1;
+		END_IF
+		
+	8202:
+		IF FeedCar.bDone OR FeedCar.bError OR NOT Hmi_Web.Car_Fwd THEN
+			step:=8209;
+		END_IF
+		
+	8209:
+		FeedCar.Stop();
+		IF NOT Hmi_Web.Car_Fwd THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8220:
+		IF FeedCar.bHome THEN
+			FeedCar.AbsMove(0,  Hmi_Web.Speed_Select);
+		ELSE
+			FeedCar.Homing();
+		END_IF
+		step := step + 1;
+		
+		
+	8221:
+		IF NOT Hmi_Web.Car_Rev THEN
+			step := 8229;
+		ELSIF FeedCar.bBuzy OR FeedCar.bError THEN
+			step := step + 1;
+		END_IF
+		
+	8222:
+		IF FeedCar.bDone OR FeedCar.bError OR NOT Hmi_Web.Car_Rev THEN
+			step:=8229;
+		END_IF
+		
+	8229:
+		FeedCar.Stop();
+		IF NOT Hmi_Web.Car_Rev THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				上升
+  ====================================*) 
+	8240:
+		Hydraulic.CarLift_Up(TO_WORD(Hmi_Web.Module_Select));
+		step := step + 1;
+		
+		
+	8241:
+		IF NOT Hmi_Web.Car_Up THEN
+			step := 8249;
+		ELSIF Hydraulic.bBuzy OR Hydraulic.bError THEN
+			step := step + 1;
+		END_IF
+		
+	8242:
+		IF Hydraulic.bDone OR Hydraulic.bError OR NOT Hmi_Web.Car_Up THEN
+			step:=8249;
+		END_IF
+		
+	8249:
+		Hydraulic.Stop();
+		IF NOT Hmi_Web.Car_Up THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				下降
+  ====================================*) 
+	8260:
+		Hydraulic.CarLift_Down(TO_WORD(Hmi_Web.Module_Select));
+		step := step + 1;
+		
+		
+	8261:
+		IF NOT Hmi_Web.Car_Down THEN
+			step := 8269;
+		ELSIF Hydraulic.bBuzy OR Hydraulic.bError THEN
+			step := step + 1;
+		END_IF
+		
+	8262:
+		IF Hydraulic.bDone OR Hydraulic.bError OR NOT Hmi_Web.Car_Down THEN
+			step:=8269;
+		END_IF
+		
+	8269:
+		Hydraulic.Stop();
+		IF NOT Hmi_Web.Car_Down THEN
+			step:=8001;
+		END_IF
+
+END_CASE
+
+Hmi_Web.Car_Fwd_S	:= step >= 8200 AND step < 8209;
+Hmi_Web.Car_Rev_S	:= step >= 8220 AND step < 8229;
+Hmi_Web.Car_Up_S	:= step >= 8240 AND step < 8249;
+Hmi_Web.Car_Down_S	:= step >= 8260 AND step < 8269;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8300_StopPin" Id="{34c8aec0-9636-4680-a507-7b8bdefaa3b3}">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group A X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				PIN上
+  ====================================*)
+	8300:
+		StopPin.Up(TO_WORD(Hmi_Web.Module_Select));
+		step := step + 1;
+		
+		
+	8301:
+		IF StopPin.bDone OR StopPin.bError OR NOT Hmi_Web.StopPin_Up THEN
+			step:=8309;
+		END_IF
+	
+	8309:
+		IF NOT Hmi_Web.StopPin_Up THEN
+			step:=8001;
+		END_IF
+		
+		
+(*====================================
+				PIN下
+  ====================================*)
+		
+	8320:
+		StopPin.Down(TO_WORD(Hmi_Web.Module_Select));
+		step := step + 1;
+		
+		
+	8321:
+		IF StopPin.bDone OR StopPin.bError OR NOT Hmi_Web.StopPin_Down THEN
+			step:=8329;
+		END_IF
+	
+	8329:
+		IF NOT Hmi_Web.StopPin_Down THEN
+			step:=8001;
+		END_IF
+		
+END_CASE
+
+
+Hmi_Web.StopPin_Up_S	:= step >= 8300 AND step < 8309;
+Hmi_Web.StopPin_Down_S	:= step >= 8320 AND step < 8329;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8400_PullOver" Id="{ddffa82b-fef9-424b-9c2c-408c52dca785}">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group A X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*)
+	8400:
+		Hydraulic.Over_Pull_Jog();
+		step := step + 1;
+		
+		
+	8401:
+		IF Hydraulic.bDone1 OR NOT Hmi_Web.Pull_over_Push THEN
+			step:=8409;
+		END_IF
+	
+	8409:
+		IF NOT Hmi_Web.Pull_over_Push THEN
+			step:=8001;
+		END_IF
+		
+END_CASE
+
+Hmi_Web.Pull_over_Push_S	:= step >= 8400 AND step < 8409;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8500_Roller_Out" Id="{7691ad48-54c7-41c9-b7e3-9ff7c4b0cd49}">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group A X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*)
+	8500:
+		ProductRoller.Jog_Rev();
+		step := step + 1;
+		
+		
+	8501:
+		IF NOT Hmi_Web.Roller_Fwd THEN
+			step := 8509;
+		ELSIF ProductRoller.bBuzy OR ProductRoller.bError THEN
+			step := step + 1;
+		END_IF
+		
+	8502:
+		IF ProductRoller.bError OR NOT Hmi_Web.Roller_Fwd THEN
+			step:=8509;
+		END_IF
+		
+	8509:
+		ProductRoller.Jog_Stop();
+		step:=8001;
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+ 	8520:
+		ProductRoller.Jog_Fwd();
+		step := step + 1;
+		
+		
+ 	8521:
+		IF NOT Hmi_Web.Roller_Rev THEN
+			step := 8129;
+		ELSIF ProductRoller.bBuzy OR ProductRoller.bError THEN
+			step := step + 1;
+		END_IF
+		
+ 	8522:
+		
+		IF ProductRoller.bError OR NOT Hmi_Web.Roller_Rev THEN
+			step:=8529;
+		END_IF
+		
+ 	8529:
+		ProductRoller.Jog_Stop();
+		step:=8001;
+		
+(*====================================
+				上升
+  ====================================*)
+ 	8540:
+		ProductRoller.Jog_Up();
+		step := step + 1;
+		
+		
+ 	8541:
+		IF ProductRoller.bBuzy OR ProductRoller.bError THEN
+			step := step + 1;
+		END_IF
+		
+ 	8542:
+		IF ProductRoller.bDone OR ProductRoller.bError THEN
+			step:=8549;
+		END_IF
+		
+ 	8549:
+		step:=8001;
+		
+(*====================================
+				下降
+  ====================================*) 
+		
+ 	8560:
+		ProductRoller.Jog_Down();
+		step := step + 1;
+		
+		
+ 	8561:
+		IF ProductRoller.bBuzy OR ProductRoller.bError THEN
+			step := step + 1;
+		END_IF
+		
+ 	8562:
+		IF ProductRoller.bDone OR ProductRoller.bError THEN
+			step:=8569;
+		END_IF
+		
+ 	8569:
+		step:=8001;
+
+END_CASE
+
+Hmi_Web.Roller_Fwd_S	:= step >= 8100 AND step < 8109;
+Hmi_Web.Roller_Rev_S	:= step >= 8120 AND step < 8129;
+Hmi_Web.Roller_Up_S		:= step >= 8140 AND step < 8149;
+Hmi_Web.Roller_Down_S	:= step >= 8160 AND step < 8169;]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Timer" Id="{90f04883-b90f-4bbd-a1c8-59f758cfe4c2}">
+      <Implementation>
+        <ST><![CDATA[tmr01();]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

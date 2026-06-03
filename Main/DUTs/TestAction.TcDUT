@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.14">
+  <DUT Name="TestAction" Id="{fc7f812d-44ea-4bf7-b108-c564d7c3dc59}">
+    <Declaration><![CDATA[TYPE TestAction :
+STRUCT
+	// 選擇的動作 (1.軸移動、 2.等待完成、 3.等待時間 、4. 重複)
+	ActionSelect: INT;
+	
+	// 選擇的軸 (動作1 有效)
+	AxisSelect: INT;
+	
+	// 移動位置 (動作1 有效)
+	Pos : REAL;
+	
+	// 移動速度 (動作1 有效)
+	Speed: REAL;
+	
+	// 等待時間(動作3 有效)
+	WaitTime : REAL;
+	
+	// 重複次數(動作4 有效)
+	Cycles: UINT;
+	
+	// 重複動作(動作4 有效)
+	Cycles_StartStep: UINT;
+	
+	// 重複次數(動作4 有效)
+	Cycles_Done: UINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

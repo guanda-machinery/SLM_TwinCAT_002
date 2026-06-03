@@ -1,0 +1,20 @@
+# Claude Code / AI tooling local state
+.claude/
+.qodo/
+
+# TwinCAT / Visual Studio build & user-specific files
+_Boot/
+_CompileInfo/
+_Deployment/
+bin/
+obj/
+*.suo
+*.user
+*.tpy
+*.~u
+*.bak
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store

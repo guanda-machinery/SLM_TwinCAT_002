@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Mod401" Id="{f56b5821-48ca-41e3-b03d-462041133e67}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Mod401
+VAR
+	ioRawWord :WORD;
+
+	ioRaw : ARRAY [1..16] OF BOOL;
+
+	IO_f : ARRAY [1..16] OF IO_force;
+	
+	i: SINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[conver();
+	// 輸入模組1
+	FOR i := 1 TO 16 DO
+		IO_f[i](Raw_IO := ioRaw[i], Out =>MainIO.IO401.In[i]);
+	END_FOR
+	
+	
+	MainIO.IO401_s.0 := IO_f[1].Out;
+	MainIO.IO401_s.1 := IO_f[2].Out;
+	MainIO.IO401_s.2 := IO_f[3].Out;
+	MainIO.IO401_s.3 := IO_f[4].Out;
+	MainIO.IO401_s.4 := IO_f[5].Out;
+	MainIO.IO401_s.5 := IO_f[6].Out;
+	MainIO.IO401_s.6 := IO_f[7].Out;
+	MainIO.IO401_s.7 := IO_f[8].Out;
+	MainIO.IO401_s.8 := IO_f[9].Out;
+	MainIO.IO401_s.9 := IO_f[10].Out;
+	MainIO.IO401_s.10 := IO_f[11].Out;
+	MainIO.IO401_s.11 := IO_f[12].Out;
+	MainIO.IO401_s.12 := IO_f[13].Out;
+	MainIO.IO401_s.13 := IO_f[14].Out;
+	MainIO.IO401_s.14 := IO_f[15].Out;
+	MainIO.IO401_s.15 := IO_f[16].Out;
+	
+	MainIO.IO401_f.0 := IO_f[1].ForceEnable;
+	MainIO.IO401_f.1 := IO_f[2].ForceEnable;
+	MainIO.IO401_f.2 := IO_f[3].ForceEnable;
+	MainIO.IO401_f.3 := IO_f[4].ForceEnable;
+	MainIO.IO401_f.4 := IO_f[5].ForceEnable;
+	MainIO.IO401_f.5 := IO_f[6].ForceEnable;
+	MainIO.IO401_f.6 := IO_f[7].ForceEnable;
+	MainIO.IO401_f.7 := IO_f[8].ForceEnable;
+	MainIO.IO401_f.8 := IO_f[9].ForceEnable;
+	MainIO.IO401_f.9 := IO_f[10].ForceEnable;
+	MainIO.IO401_f.10 := IO_f[11].ForceEnable;
+	MainIO.IO401_f.11 := IO_f[12].ForceEnable;
+	MainIO.IO401_f.12 := IO_f[13].ForceEnable;
+	MainIO.IO401_f.13 := IO_f[14].ForceEnable;
+	MainIO.IO401_f.14 := IO_f[15].ForceEnable;
+	MainIO.IO401_f.15 := IO_f[16].ForceEnable;]]></ST>
+    </Implementation>
+    <Action Name="conver" Id="{13710d8e-1a82-42d4-b9db-fccb06dfde23}">
+      <Implementation>
+        <ST><![CDATA[ioRawWord := TO_WORD(EtherCAT.Murr_Mod.Input);
+	
+ioRaw[1] := ioRawWord.0;
+ioRaw[2] := ioRawWord.1;
+ioRaw[3] := ioRawWord.2;
+ioRaw[4] := ioRawWord.3;
+ioRaw[5] := ioRawWord.4;
+ioRaw[6] := ioRawWord.5;
+ioRaw[7] := ioRawWord.6;
+ioRaw[8] := ioRawWord.7;
+ioRaw[9] := ioRawWord.8;
+ioRaw[10] := ioRawWord.9;
+ioRaw[11] := ioRawWord.10;
+ioRaw[12] := ioRawWord.11;
+ioRaw[13] := ioRawWord.12;
+ioRaw[14] := ioRawWord.13;
+ioRaw[15] := ioRawWord.14;
+ioRaw[16] := ioRawWord.15;]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

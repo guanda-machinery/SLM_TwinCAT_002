@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="MsgStruct_RAW" Id="{b9f0413c-a617-4801-9c41-3bb15da4849f}">
+    <Declaration><![CDATA[{attribute 'pack_mode' := '1'} 
+TYPE MsgStruct_RAW :
+STRUCT
+	// 訊息時間
+	msgTIME		: DATE_AND_TIME;
+	// 訊息等級
+	Level		: MsgLevel;
+	// 訊息號碼
+	Number	: UINT;
+	// 訊息附帶文字1
+	MsgStr1	:  ARRAY[0..159] OF BYTE;
+	// 訊息附帶文字2
+	MsgStr2	: ARRAY[0..159] OF BYTE;
+	// 訊息全文
+	raw_msg_str	: ARRAY[0..499] OF BYTE;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,460 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Button" Id="{7491b716-6991-4370-adff-ecba3ca04987}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Button
+VAR
+	// 系統開機指示燈
+	_SystemPowerButton_Light : USINT := 1;
+	// 程式開始指示燈
+	_StartButton_Light : USINT;
+	// 程式暫停指示燈
+	_StopButton_Light : USINT;
+	// 程式暫停指示燈
+	_ResetButton_Light : USINT;
+	// 原點指示燈
+	_HomeButton_Light : USINT;
+	// 手動模式指示燈
+	_JogButtonLight : USINT; 
+	// 單節模式指示燈
+	_StepModeButtonLight : USINT; 
+	// 自動模式指示燈
+	_AutoModeButtonLight : USINT; 
+	
+	pc_Shutdown: NT_Shutdown;
+	pc_AbortShutdown: NT_AbortShutdown;
+	pc_Shutdown2: NT_Shutdown;
+	pc_AbortShutdown2: NT_AbortShutdown;
+	flash_clk: BOOL;
+	jogbtn_trig: R_TRIG;
+	StepButton: R_TRIG;
+	StartButton_LDP: F_TRIG;
+	SystemPowerButton_Ldp: R_TRIG;
+END_VAR
+
+VAR_OUTPUT
+	// 系統電源
+	SystemPowerButton : BOOL;
+	// 程式開始
+	StartButton : BOOL;
+	// 程式暫停
+	StopButton : BOOL;
+	// 重置
+	ResetButton : BOOL;
+	// 原點
+	HomeButton : BOOL;
+	// 手動模式
+	JogButton : BOOL; 
+	// 單節模式
+	StepModeButton : BOOL; 
+	// 自動模式
+	AutoModeButton : BOOL; 
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[SystemPowerButton	:= IO.i102;
+StartButton			:= IO.i104;
+StopButton			:= IO.i103;
+ResetButton			:= IO.i105;
+HomeButton			:= IO.i106;
+JogButton			:= IO.i108;
+StepModeButton		:= IO.i109;
+AutoModeButton		:= IO.i110;
+
+flash_clk := LightTower.clk;
+
+
+CASE _SystemPowerButton_Light OF
+	0:
+		io.q101 := FALSE;
+	
+	1:
+		io.q101 := TRUE;
+		
+	2:
+		io.q101 := flash_clk;
+END_CASE
+
+CASE _StopButton_Light OF
+	0:
+		io.q102 := FALSE;
+	
+	1:
+		io.q102 := TRUE;
+		
+	2:
+		io.q102 := flash_clk;
+END_CASE
+
+CASE _StartButton_Light OF
+	0:
+		io.q103 := FALSE;
+	
+	1:
+		io.q103 := _StopButton_Light = 0;
+		
+	2:
+		io.q103 := _StopButton_Light = 0 and flash_clk;
+END_CASE
+
+
+CASE _ResetButton_Light OF
+	0:
+		io.q104 := FALSE;
+	
+	1:
+		io.q104 := TRUE;
+		
+	2:
+		io.q104 := flash_clk;
+END_CASE
+
+
+CASE _HomeButton_Light OF
+	0:
+		io.q105 := FALSE;
+	
+	1:
+		io.q105 := TRUE;
+		
+	2:
+		io.q105 := flash_clk;
+END_CASE
+
+
+CASE _JogButtonLight OF
+	0:
+		io.q107 := FALSE;
+	
+	1:
+		io.q107 := TRUE;
+		
+	2:
+		io.q107 := flash_clk;
+END_CASE
+
+
+CASE _StepModeButtonLight OF
+	0:
+		io.q108 := FALSE;
+	
+	1:
+		io.q108 := TRUE;
+		
+	2:
+		io.q108 := flash_clk;
+END_CASE
+
+CASE _AutoModeButtonLight OF
+	0:
+		io.q109 := FALSE;
+	
+	1:
+		io.q109 := TRUE;
+		
+	2:
+		io.q109 := flash_clk;
+END_CASE
+
+PowerButtonAction();
+StartButtonAction();
+ResetButtonAction();
+
+
+HomeButtonAction();
+JogButtonAction();]]></ST>
+    </Implementation>
+    <Folder Name="動作" Id="{dad45fd5-fd54-4946-8957-9a803a79cd5a}" />
+    <Action Name="AutoModeButtonAction" Id="{8a4bf85a-24fd-4113-bff5-5b138a0cdeca}" FolderPath="動作\">
+      <Implementation>
+        <ST><![CDATA[IF AutoMain.step = 0 OR AutoMain.step > 2000 THEN
+	Button.AutoModeButtonLight := 0;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Property Name="AutoModeButtonLight" Id="{972799f4-dffd-49a4-aaab-47f61898d47c}">
+      <Declaration><![CDATA[PROPERTY AutoModeButtonLight : USINT]]></Declaration>
+      <Get Name="Get" Id="{2ddd94db-26f4-4266-9335-f8fa048e9444}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[AutoModeButtonLight := _AutoModeButtonLight;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a834cfa5-2d96-462c-8f4d-5182fcf59e7b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_AutoModeButtonLight := AutoModeButtonLight;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="HomeButton_Light" Id="{af49bf77-9290-4b88-93f9-c95501b8d72b}">
+      <Declaration><![CDATA[PROPERTY HomeButton_Light : USINT]]></Declaration>
+      <Get Name="Get" Id="{0482e8ab-899d-42aa-b8f4-6328b58f9386}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[HomeButton_Light := _HomeButton_Light;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a22d5ab5-d377-41f2-8ed4-0cd15209aeb9}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_HomeButton_Light := HomeButton_Light;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Action Name="HomeButtonAction" Id="{ce71c10c-f4c0-4bb3-bd28-5da37927f909}" FolderPath="動作\">
+      <Implementation>
+        <ST><![CDATA[IF HomeButton THEN
+	IF NOT AutoMain.bBuzy THEN
+		AutoMain.Homming();
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="JogButtonAction" Id="{3d9d4597-3647-4763-8bb3-37904525932c}" FolderPath="動作\">
+      <Implementation>
+        <ST><![CDATA[IF AutoMain.step >= 8000 AND AutoMain.step < 8100 THEN
+	Button.JogButtonLight := 1;
+ELSIF AutoMain.step >= 8100 AND AutoMain.step < 9800 THEN
+	Button.JogButtonLight := 2;
+ELSE
+	Button.JogButtonLight := 0;
+END_IF
+
+
+jogbtn_trig(CLK := JogButton);
+IF jogbtn_trig.Q THEN
+	IF AutoMain.step = 0 THEN
+		AutoMain.JogMode();
+	ELSIF AutoMain.step = 8001 THEN
+		AutoMain.JogMode_Exit();
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Property Name="JogButtonLight" Id="{4ba56b42-4226-4d10-81f5-9b757171d7b4}">
+      <Declaration><![CDATA[PROPERTY JogButtonLight : USINT]]></Declaration>
+      <Get Name="Get" Id="{e3d90845-e75d-4cd9-9d6f-5d33bdec3bf3}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[JogButtonLight := _JogButtonLight;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{500bac67-15b4-4a85-89ae-cf4f024e4e2c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_JogButtonLight := JogButtonLight;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Action Name="PowerButtonAction" Id="{2700c65c-a1a7-4c97-9129-ffea9ca89110}" FolderPath="動作\">
+      <Implementation>
+        <ST><![CDATA[SystemPowerButton_Ldp(CLK:=SystemPowerButton);
+
+
+IF SystemPowerButton_Ldp.Q THEN
+	IF SystemPowerButton_Light <> 2 THEN
+		pc_Shutdown.START := TRUE;
+		pc_Shutdown2.START := TRUE;
+		SystemPowerButton_Light := 2;
+	ELSIF SystemPowerButton_Light = 2 THEN
+		pc_AbortShutdown.START := TRUE;
+		pc_AbortShutdown2.START := TRUE;
+		SystemPowerButton_Light := 1;
+	END_IF
+END_IF
+
+IF pc_Shutdown.BUSY THEN
+	pc_Shutdown.START := FALSE;
+END_IF
+
+IF pc_Shutdown2.BUSY THEN
+	pc_Shutdown2.START := FALSE;
+END_IF
+
+IF pc_AbortShutdown.BUSY THEN
+	pc_AbortShutdown.START := FALSE;
+END_IF
+
+IF pc_AbortShutdown2.BUSY  THEN
+	pc_AbortShutdown2.START := FALSE;
+END_IF
+
+pc_Shutdown(
+	NETID:= '169.254.139.155.1.1', 
+	DELAY:= 10
+);
+
+pc_Shutdown2(
+	NETID:= '0.0.0.0.1.1', 
+	DELAY:= 15
+);
+
+pc_AbortShutdown(
+	NETID:= '169.254.139.155.1.1'
+);
+
+pc_AbortShutdown2(
+	NETID:= '0.0.0.0.1.1'
+);]]></ST>
+      </Implementation>
+    </Action>
+    <Property Name="ResetButton_Light" Id="{a707fc68-c472-4935-8574-aa5ba6e93773}">
+      <Declaration><![CDATA[PROPERTY ResetButton_Light : USINT]]></Declaration>
+      <Get Name="Get" Id="{192dcea4-5612-4243-8601-d11d243bfd8f}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ResetButton_Light := _ResetButton_Light;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{449b5090-98dd-4f77-92bd-2f80a0a52a6a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_ResetButton_Light := ResetButton_Light;
+]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Action Name="ResetButtonAction" Id="{16a051a1-8ea8-4922-a3e2-111f54544ee2}" FolderPath="動作\">
+      <Implementation>
+        <ST><![CDATA[IF SystemError THEN
+	ResetButton_Light := 2;
+ELSE
+	ResetButton_Light := 0;
+END_IF
+
+IF ResetButton AND SystemError THEN
+	SystemError := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Property Name="StartButton_Light" Id="{a5cef510-23b9-4493-8fa1-4330a59fed93}">
+      <Declaration><![CDATA[PROPERTY StartButton_Light : usint]]></Declaration>
+      <Get Name="Get" Id="{6949e6de-cc0a-4ffc-92e2-f7af2d45d8bc}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[StartButton_Light := _StartButton_Light;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{689807a6-cd13-4ec7-a3bc-956a5d41468c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_StartButton_Light := StartButton_Light;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Action Name="StartButtonAction" Id="{7a2fd946-892f-419e-921b-468286655992}" FolderPath="動作\">
+      <Implementation>
+        <ST><![CDATA[IF AutoMain.step = 0 OR AutoMain.step > 2000 THEN
+	Button.StartButton_Light := 0;
+END_IF
+
+StartButton_LDP(CLK:=StartButton);
+IF StartButton_LDP.q AND LEN(ProjectData.WorkOrder_Now.steel_id) > 0 AND 
+	_StartButton_Light = 0 AND NOT AutoMain.bBuzy THEN
+	AutoMain.ReStart();
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="StepButtonAction" Id="{09bcff2b-934c-4f47-ab3a-475aeba40679}" FolderPath="動作\">
+      <Implementation>
+        <ST><![CDATA[IF NOT Hmi_Web.Auto_Step_mode_Enable THEN
+	Button.StartButton_Light := 0;
+ELSE
+	IF Hmi_Web.Auto_Step_active THEN
+		Button.StartButton_Light := 1;
+	ELSE
+		Button.StartButton_Light := 2;
+	END_IF
+END_IF
+
+// StepButton(CLK := StepButton);
+IF jogbtn_trig.Q THEN
+	IF AutoMain.step > 0 AND AutoMain.step < 2000 THEN
+		AutoMain.JogMode();
+	ELSIF AutoMain.step = 8001 THEN
+		AutoMain.JogMode_Exit();
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Property Name="StepModeButtonLight" Id="{79e20c76-003c-4a6d-8809-5f586e371a4a}">
+      <Declaration><![CDATA[PROPERTY StepModeButtonLight : usint]]></Declaration>
+      <Get Name="Get" Id="{c3d09eea-075d-4d1f-8160-0d744136e1e4}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[StepModeButtonLight := _StepModeButtonLight;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{a19fe553-9cf3-4e54-a36c-bb983fedea51}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_StepModeButtonLight := StepModeButtonLight;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="StopButton_Light" Id="{0e945da3-27fb-45f1-bf8b-c76a81175c0f}">
+      <Declaration><![CDATA[PROPERTY StopButton_Light : USINT]]></Declaration>
+      <Get Name="Get" Id="{a5c639c4-310f-4faf-8ae6-d62f8b2709f6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[StopButton_Light := _StopButton_Light;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{598c99f9-0a7a-485b-b2c7-0480be9ea574}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_StopButton_Light := StopButton_Light;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="SystemPowerButton_Light" Id="{e12da92b-3519-4b72-a778-52943e5f8fb7}">
+      <Declaration><![CDATA[PROPERTY SystemPowerButton_Light : usint]]></Declaration>
+      <Get Name="Get" Id="{88460e12-d597-4fb5-9607-b100659df86a}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[SystemPowerButton_Light := _SystemPowerButton_Light;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{f01702b1-ab55-45ce-a079-fee800efa6db}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_SystemPowerButton_Light := SystemPowerButton_Light;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+  </POU>
+</TcPlcObject>

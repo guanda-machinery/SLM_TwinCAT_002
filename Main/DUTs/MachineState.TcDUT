@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="MachineState" Id="{e0021f9c-91ac-4087-bd9d-0cc81c8e53e7}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE MachineState :
+(
+	standby := 0, 			// 待命
+	Auto_mode := 2#01,		// 自動模式
+	auto_mode_wait := 2#10,		// 自動模式等待中
+	Remote_Auto_mode := 2#11,		// 遠端自動模式
+	manual_mode := 2#100,	// 手動模式
+	Homing_mode := 2#1000,		// 歸零模式
+	
+	error := 16#20,	// 發生錯誤
+	Door := 16#40,		// 安全光柵觸發
+	emergency := 16#80	// 緊急停止
+) INT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

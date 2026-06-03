@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="DI570" Id="{d22fd252-e27a-430f-9d0f-cb0703272b99}">
+    <Declaration><![CDATA[TYPE DI570 :
+STRUCT
+	ModType : STRING := 'KEBA DI570';
+	Input AT %I*:ARRAY [1..18] OF BOOL;
+	WcState AT %I*:BOOL;
+	InputToggle AT %I*:BOOL;
+	State AT %I*:UINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

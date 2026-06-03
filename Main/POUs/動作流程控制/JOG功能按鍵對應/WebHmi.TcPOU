@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="WebHmi" Id="{7d27227b-25bd-493c-af6d-5b01257b715e}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM WebHmi
+VAR
+	watchDog1 : TON;
+	watchDog2 : TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[WatchDog();
+
+
+
+hmi.Jog_Speed := Hmi_Web.Jog_Speed;]]></ST>
+    </Implementation>
+    <Action Name="Clamp" Id="{6e3df157-7972-4f49-b719-7172aaa8a34f}">
+      <Implementation>
+        <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="WatchDog" Id="{8d35982f-38a0-4f62-af87-136a45b979d4}">
+      <Implementation>
+        <ST><![CDATA[watchDog1(IN := NOT watchDog2.Q, PT:= T#500MS);
+watchDog2(IN := watchDog1.Q, PT:= T#500MS);
+
+Hmi_Web.Watchdog_Out := watchDog1.q;]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="Hmi" Id="{80ccac94-0eab-41d6-bcc5-0be34e491cd2}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+(* ================= 模式選擇 ================= *)
+	// 自動模式
+	Auto_Mode : BOOL;
+
+	// Jog模式
+	Jog_Mode : BOOL;
+	
+	// 手輪模式
+	MPG_Mode : BOOL;
+	
+	// 選擇的模式
+	Mode_Select : DINT;
+
+(* ================= 自動模式 ================= *)
+	// 自動流程 開始執行
+	Auto_Start : BOOL;
+	
+	// 一循環流程 開始執行
+	Auto_OneCycle_Start : BOOL;
+	
+	// 自動流程 暫停/繼續
+	Auto_Pause:BOOL;
+	
+	// 自動流程 加工單
+	Auto_ProjectWorkOrder_uuid : STRING;
+
+	// 自動流程 動作選擇
+	Auto_ProgramSelect : DINT;
+
+	// 自動流程 動作執行中
+	Auto_bBuzy : BOOL;
+	
+	// 自動流程 動作完成
+	Auto_bDone : BOOL;
+	
+	
+
+	// 動作狀態通知
+	ActinoNow:WSTRING;
+	
+
+	// 狀態欄 機器動作中
+	State: MachineState := MACHINESTATE.standby;
+	
+	
+(*==================== Jog模式====================*)
+	// Jog模式 軸組選擇
+	Jog_GroupSelect : DINT;
+	
+	// Jog模式 互鎖解除
+	Jog_UnLimite : BOOL;
+	
+	// Jog模式 速度
+	Jog_Speed: REAL := 30;
+	
+	
+	
+	Jog_move_to : LREAL;
+	Jog_move_to_start : BOOL;
+	Jog_move_to_bBuzy : BOOL;
+	Jog_move_to_bDone : BOOL;
+	
+	// JOG 設定動作群組
+	Jog_Set_GroupA: BOOL;
+	Jog_Set_GroupB: BOOL;
+	Jog_Set_GroupC: BOOL;
+	Jog_Set_GroupD: BOOL;
+	
+	// Jog模式 X軸 前進
+	Jog_X_P : BOOL;
+	// Jog模式 X軸 後退
+	Jog_X_N : BOOL;
+	
+	// Jog模式 Y軸 前進
+	Jog_Y_P : BOOL;
+	// Jog模式 Y軸 後退
+	Jog_Y_N : BOOL;
+	
+	// Jog模式 Z軸 前進
+	Jog_Z_P : BOOL;
+	// Jog模式 Z軸 後退
+	Jog_Z_N : BOOL;
+	
+	
+(*==================== 原點設置 ====================*)
+	// 設定 X軸 原點
+	Set_X_Home : BOOL;
+	// 設定 X軸 正極限
+	Set_X_P_Limite : BOOL;
+	// 設定 Y軸 原點
+	Set_Y_Home : BOOL;
+	// 設定 Y軸 正極限
+	Set_Y_P_Limite : BOOL;
+	// 設定 Z軸 原點
+	Set_Z_Home : BOOL;
+	// 設定 Z軸 正極限
+	Set_Z_P_Limite : BOOL;
+
+	
+	
+	// 將極限設定 參數 寫入軸
+	Set_Axis_Limit : BOOL;
+	
+	// 錯誤重置
+	SysErrorRest: BOOL;
+	
+
+
+	
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

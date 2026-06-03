@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="WStrMem" Id="{4bc9294e-cf92-4dcc-8c1c-8bf714633a81}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK WStrMem
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	mem : WSTRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="APPEND" Id="{eafada67-54c0-4ea0-8c0d-7041761f58eb}">
+      <Declaration><![CDATA[METHOD APPEND : BOOL
+VAR_INPUT
+	STR : WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mem := WCONCAT(mem , STR);]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="INSERT" Id="{8874ca3e-c338-4eeb-aa0f-67310d15cb16}">
+      <Declaration><![CDATA[METHOD INSERT : BOOL
+VAR_INPUT
+	STR : WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mem := WCONCAT(STR, mem);]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="READ" Id="{bacf7e6b-e71b-4cd9-bd46-50fbc427eb00}">
+      <Declaration><![CDATA[PROPERTY READ : WSTRING]]></Declaration>
+      <Get Name="Get" Id="{69b2fdd1-cef1-4488-8810-e75e8ee6de57}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[READ := mem;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="WRITE" Id="{a2974a77-ebeb-45f1-8bbc-8a4b44e731dc}">
+      <Declaration><![CDATA[METHOD WRITE : BOOL
+VAR_INPUT
+	STR :WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[mem := STR;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

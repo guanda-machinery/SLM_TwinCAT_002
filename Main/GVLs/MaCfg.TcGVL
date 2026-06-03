@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="MaCfg" Id="{b8673ec5-6807-4dca-b91c-1aae0c532642}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL PERSISTENT
+	(* ======= Group A =======*)
+	// 雷射頭A焦距
+	laserA_Dis : REAL := 297;
+	// 軸組A的 雷射測距可以測得範圍
+	laserA_Y_DisSensorArrivePos	:REAL := 300;
+	// 軸組Ax的 雷射測距點 到 雷射頭的中心點
+	laserA_X_DisSensor2LaserCenter : REAL := -76;
+	// 軸組Ay的 雷射測距點 到 雷射頭的中心點
+	laserA_Y_DisSensor2LaserCenter : REAL := 12;
+	// 軸組A的 Y 基準位置 (實際無法到達) (搭配 FindY 指令，可以測得工件高度)
+	laserA_Y_ReferencePos : REAL := 677.7;
+	
+	(* ======= Group B =======*)
+	// 雷射頭B焦距
+	laserB_Dis	: REAL := 297;
+	// 軸組B的 雷射測距可以測得範圍
+	laserB_Y_DisSensorArrivePos		: REAL := 185;
+	
+	// 軸組Bx的 雷射測距點 到 雷射頭的中心點
+	laserB_X_DisSensor2LaserCenter	: REAL := -0.6;
+	// 軸組By的 雷射測距點 到 雷射頭的中心點
+	laserB_Y_DisSensor2LaserCenter	: REAL := -77.2;
+	
+	// 軸組B的 Y 基準位置 (搭配 FindY 指令，可以測得工件高度)
+	laserB_Y_ReferencePos	: REAL := 1344.5599;
+	// 軸組B的 Z 基準位置 (實際無法到達)
+	laserB_Z_ReferencePos	: REAL := -298;
+	
+	// 軸組Bx的 雷射測距點 到 雷射頭的中心點
+	laserB_Y_safetyPos	: REAL := 20;
+	// 軸組B的Z軸的安全位置
+	laserB_Z_safetyPos		: REAL := 500;
+	
+	
+	(* ======= Group C =======*)
+	// 雷射頭C焦距
+	laserC_Dis : REAL := 298;
+	// 軸組C的 雷射測距可以測得範圍
+	laserC_Y_DisSensorArrivePos	:REAL := 185;
+	// 軸組Cx的 雷射測距點 到 雷射頭的中心點
+	laserC_X_DisSensor2LaserCenter : REAL := 77.9;
+	// 軸組Cy的 雷射測距點 到 雷射頭的中心點
+	laserC_Y_DisSensor2LaserCenter : REAL := 5.8;
+	// 軸組C的 Y 基準位置 (實際無法到達) (搭配 FindY 指令，可以測得工件高度)
+	laserC_Y_ReferencePos : REAL := 605.3;
+	// 軸組C的 Z 基準位置 (實際無法到達)
+	laserC_Z_ReferencePos : REAL := -416;
+	
+	(* ======= Group D =======*)
+	// 雷射頭D焦距
+	laserD_Dis : REAL := 299;
+	// 軸組D的 雷射測距可以測得範圍
+	laserD_Y_DisSensorArrivePos	:REAL := 185;
+	// 軸組D的 雷射測距點 到 雷射頭的中心點
+	laserD_Y_DisSensor2LaserDenter : REAL := 3.1;
+	// 軸組D的 Y 基準位置 (實際無法到達) (搭配 FindY 指令，可以測得工件高度)
+	laserD_Y_ReferencePos : REAL := 1286.064821;
+	
+	
+	// FxB被動編碼器 比例(mm/plus)
+	FxA_Enc_Scale : LREAL := 0.046047445;
+	// FxB測常盤編碼器 比例(mm/plus)
+	FxA_Enc_Ext_Scale : LREAL := 0.14459929225;
+	
+	// FxB被動編碼器 比例(mm/plus)
+	FxB_Enc_Scale : LREAL := 0.046047445;
+	// FxB測常盤編碼器 比例(mm/plus)
+	FxB_Enc_Ext_Scale : LREAL := 0.14459929225;
+	
+	
+	
+	// 進料端反轉
+	bInSite_Invert: BOOL;
+	
+	//
+	// AC夾輪的零點位置 ( 空夾位置 + 空夾兩夾輪間距(70))
+	FxA_Clamp_Zero_Pos: LREAL := 1297.4;
+	// BD夾輪的零點位置 ( 空夾位置 + 空夾兩夾輪間距(70))
+	FxB_Clamp_Zero_Pos: LREAL := 1296.49;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

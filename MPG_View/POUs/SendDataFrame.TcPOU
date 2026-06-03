@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="SendDataFrame" Id="{c35acb31-cfae-40aa-93c7-b2698ecf8947}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM SendDataFrame
+VAR
+	step : INT;
+
+	// 位置資料
+	_PosData : LREAL;
+	
+	// 軸代號
+	_AxisSn : INT;
+	
+	// 單位(ON:inch OFF:mm)
+	_DataUnit : BOOL := FALSE;
+	
+	// 座標系統(ON:工件 OFF:機械)
+	_Coordinate_System : BOOL := FALSE;
+	
+	
+(*
+ _______________________________________________________________________________________________
+|	  |		|	  |		|	  |		|	  |		|	  |		|	  |		|	  |		|	  |		|
+| D15 | D14 | D13 | D12 | D11 | D10 | D09 | D08 | D07 | D06 | D05 | D04 | D03 | D02 | D01 | D00 |
+|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|_____|
+|                                	Data0	座標值 High 2 bytes                                	|
+|_______________________________________________________________________________________________|
+|                                	Data1	座標值 Low 2 bytes                        			|
+|_______________________________________________________________________________________________|
+|										  |		|	  |		|	  |			  |					|
+|                 Data2		N/A			  | 軸  | N/A | 座  | 單  |  倍率 	  | 	軸向 		|	
+|										  |	向	|	  |	標	| 位  |			  |					|
+|_________________________________________|_____|_____|_____|______|__________|_________________|
+*)
+	Data0 : WORD;
+	Data1 : WORD;
+	Data2 : WORD;
+	
+	_tmp_Num : DWORD;
+	
+	_tmp_AxisSn : WORD;
+	
+	count : INT;
+	
+END_VAR
+
+VAR_OUTPUT
+	bBuzy : BOOL;
+	bDone : BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE step OF
+		
+
+	1: // 位置資料轉換
+		_PosData := _PosData * 1000;
+		
+		_tmp_Num := INT_TO_DWORD(LREAL_TO_INT(_PosData));
+		
+		FOR count := 0 TO 15 DO
+			Data1 := UDINT_TO_WORD(_tmp_Num AND 16#FFFF);
+			Data0 := UDINT_TO_WORD(SHR((_tmp_Num AND 16#FFFF0000), 8));
+		END_FOR
+		
+		// 軸代號轉換
+		_tmp_AxisSn := INT_TO_WORD(_AxisSn);
+		
+		Data2.8 := _tmp_AxisSn.3;
+		Data2.2 := _tmp_AxisSn.2;
+		Data2.1 := _tmp_AxisSn.1;
+		Data2.0 := _tmp_AxisSn.0;
+		
+		// 倍率(小數點?)
+		Data2.3 := TRUE;
+		Data2.4 := TRUE;
+		
+		// 單位
+		Data2.5 := _DataUnit;
+		
+		// 座標
+		Data2.6 := _Coordinate_System;
+		
+		step := step + 1;
+		
+	2:// 資料開始置位 資料傳送準備就緒
+		count := 15;
+		Data_Out.Mpg_PLC_Enable := TRUE;
+		
+		step := 10;
+		
+		
+	10: // 資料置位
+		Data_Out.Mpg_PLC_Data_0 := SHR(Data0,count) = 1;
+		Data_Out.Mpg_PLC_Data_1 := SHR(Data1,count) = 1;
+		Data_Out.Mpg_PLC_Data_2 := SHR(Data2,count) = 1;
+		step := step + 1;
+		
+	11:
+		Data_Out.Mpg_PLC_Clock := TRUE;
+		step := step + 1;
+		
+	12:
+		Data_Out.Mpg_PLC_Clock := FALSE;
+		count := count - 1;
+		IF count >= 0 THEN
+			step := step + 1;
+		ELSE
+			Data0 := 0;
+			Data1 := 0;
+			Data2 := 0;
+			step := 0;
+		END_IF
+		
+		
+END_CASE
+
+bDone := step = 0;
+bBuzy := step > 0;]]></ST>
+    </Implementation>
+    <Method Name="Send" Id="{b327ef27-2dbc-4a86-9547-994e82736332}">
+      <Declaration><![CDATA[METHOD Send : BOOL
+VAR_INPUT
+	// 位置值
+	Pos : LREAL;
+	// 軸向代碼
+	Axis_Sn : INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_AxisSn := Axis_Sn;
+_PosData := Pos;
+
+step := 1;
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <LineIds Name="SendDataFrame">
+      <LineId Id="314" Count="0" />
+      <LineId Id="389" Count="1" />
+      <LineId Id="315" Count="5" />
+      <LineId Id="395" Count="0" />
+      <LineId Id="321" Count="0" />
+      <LineId Id="323" Count="30" />
+      <LineId Id="355" Count="0" />
+      <LineId Id="357" Count="5" />
+      <LineId Id="364" Count="0" />
+      <LineId Id="366" Count="3" />
+      <LineId Id="365" Count="0" />
+      <LineId Id="370" Count="0" />
+      <LineId Id="391" Count="3" />
+      <LineId Id="372" Count="0" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="7" Count="0" />
+      <LineId Id="387" Count="0" />
+      <LineId Id="383" Count="0" />
+      <LineId Id="388" Count="0" />
+    </LineIds>
+    <LineIds Name="SendDataFrame.Send">
+      <LineId Id="5" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="14" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

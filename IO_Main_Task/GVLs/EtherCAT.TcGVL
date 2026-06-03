@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="EtherCAT" Id="{df95cc61-99f9-48d2-b337-df2215ef5acc}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// 主控制櫃 控制器
+	MainMod_1 :EL1409;
+	MainMod_2 :EL1409;
+	MainMod_3 :EL1409;
+	MainMod_4 :EL1409;
+	MainMod_5 :EL1409;
+	MainMod_6 :EL1409;
+	MainMod_7 :EL2409;
+	MainMod_8 :EL2409;
+	MainMod_9 :EL2409;
+	
+	Murr_Mod : Murr_IMPACT67;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

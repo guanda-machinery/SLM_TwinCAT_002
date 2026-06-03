@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="Jog_Fx_Group" Id="{c1adc540-8ff3-4ed9-a3c5-d870ff1c797d}">
+    <Declaration><![CDATA[TYPE Jog_Fx_Group :
+STRUCT
+	// 
+	P_S : BOOL;
+	// 後退
+	N_S : BOOL;
+	
+	// 前進
+	P : BOOL;
+	// 後退
+	N : BOOL;
+	
+	
+	// 前進
+	P_Fast_S : BOOL;
+	// 後退
+	N_Fast_S : BOOL;	
+
+	// 前進
+	P_Fast : BOOL;
+	// 後退
+	N_Fast : BOOL;
+	
+	
+	// 下壓夾狀態
+	V_Close_S : BOOL;
+	// 下壓開狀態
+	V_Open_S : BOOL;
+	
+	// 下壓夾
+	V_Close : BOOL;
+	// 下壓開
+	V_Open : BOOL;
+	
+	// 滾輪夾狀態
+	H_Close_S : BOOL;
+	// 滾輪開狀態
+	H_Open_S : BOOL;
+	// 滾輪夾保持狀態
+	H_Hold_S : BOOL;
+	
+	// 滾輪夾
+	H_Close : BOOL;
+	// 滾輪開
+	H_Open : BOOL;
+	// 滾輪夾保持
+	H_Hold : BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

@@ -1,0 +1,2066 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4026.19" ClassName="CNestedPlcProjDef">
+	<DataTypes>
+		<DataType>
+			<Name GUID="{A7C10B26-E700-C197-B6B7-537024BE1485}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..7] OF USINT</Name>
+			<BitSize>64</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000002}">USINT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>8</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-000000000041}" TcBaseType="true" HideSubItems="true" CName="AmsNetId">AMSNETID</Name>
+			<BitSize>48</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000001}">BYTE</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>6</Elements>
+			</ArrayInfo>
+			<Format>
+				<Printf>%d.%d.%d.%d.%d.%d</Printf>
+				<Parameter>[0]</Parameter>
+				<Parameter>[1]</Parameter>
+				<Parameter>[2]</Parameter>
+				<Parameter>[3]</Parameter>
+				<Parameter>[4]</Parameter>
+				<Parameter>[5]</Parameter>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-000000000042}" TcBaseType="true" CName="AmsAddr">AMSADDR</Name>
+			<BitSize>64</BitSize>
+			<SubItem>
+				<Name>netId</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000041}">AMSNETID</Type>
+				<BitSize>48</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>port</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000004}">WORD</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>48</BitOffs>
+			</SubItem>
+			<Format>
+				<Printf>%d.%d.%d.%d.%d.%d:%d</Printf>
+				<Parameter>.netId[0]</Parameter>
+				<Parameter>.netId[1]</Parameter>
+				<Parameter>.netId[2]</Parameter>
+				<Parameter>.netId[3]</Parameter>
+				<Parameter>.netId[4]</Parameter>
+				<Parameter>.netId[5]</Parameter>
+				<Parameter>.port</Parameter>
+			</Format>
+			<Format Name="Iec">
+				<Printf>(netId:=[%d.%d.%d.%d.%d.%d], port :=%d)</Printf>
+				<Parameter>.netId[0]</Parameter>
+				<Parameter>.netId[1]</Parameter>
+				<Parameter>.netId[2]</Parameter>
+				<Parameter>.netId[3]</Parameter>
+				<Parameter>.netId[4]</Parameter>
+				<Parameter>.netId[5]</Parameter>
+				<Parameter>.port</Parameter>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{CBC83B73-B816-4597-A9E5-2B03263CA131}" Namespace="MC" TcBaseType="true" HideType="true" IecDeclaration="DWORD;">NCTOPLC_AXIS_REF_STATE</Name>
+			<BitSize>32</BitSize>
+			<SubItem>
+				<Name>Operational</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Homed</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>1</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>NotMoving</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>2</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>InPositionArea</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>3</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>InTargetPosition</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>4</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Protected</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>5</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ErrorPropagationDelayed</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>6</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>HasBeenStopped</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>7</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>HasJob</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>8</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PositiveDirection</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>9</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>NegativeDirection</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>10</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>HomingBusy</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>11</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ConstantVelocity</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>12</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Compensating</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>13</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ExtSetPointGenEnabled</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>14</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PhasingActive</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>15</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ExternalLatchValid</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>16</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>NewTargetPos</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>17</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>IsDriveLimitActive</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>18</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ContinuousMotion</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>19</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ControlLoopClosed</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>20</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CamTableQueued</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>21</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CamDataQueued</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>22</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CamScalingPending</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>23</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CmdBuffered</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>24</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PTPmode</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>25</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SoftLimitMinExceeded</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>26</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SoftLimitMaxExceeded</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>27</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>DriveDeviceError</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>28</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MotionCommandsLocked</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>29</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>IoDataInvalid</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>30</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Error</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>31</BitOffs>
+			</SubItem>
+			<Format Name="Short">
+				<Printf>%08x</Printf>
+			</Format>
+			<Format Name="Cpp">
+				<Printf>0x%08x</Printf>
+			</Format>
+			<Format Name="IEC">
+				<Printf>16#%08X</Printf>
+			</Format>
+			<Relations>
+				<Relation Priority="100">
+					<Type>{4C3FC5AC-D5AA-44C6-AC5A-159774BA0F6D}</Type>
+				</Relation>
+			</Relations>
+		</DataType>
+		<DataType>
+			<Name GUID="{6BDEED54-7268-405F-A18B-665A0AE0FEE9}" Namespace="MC" TcBaseType="true" HideType="true" IecDeclaration="DWORD;">NCTOPLC_AXIS_REF_OPMODE</Name>
+			<BitSize>32</BitSize>
+			<SubItem>
+				<Name>OpModePosAreaMonitoring</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeTargetPosMonitoring</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>1</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeLoop</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>2</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeMotionMonitoring</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>3</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModePEHTimeMonitoring</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>4</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeBacklashCompensation</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>5</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeDelayedErrorReaction</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>6</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeModulo</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>7</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeSimulationAxis</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>8</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeStopMonitoring</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>12</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeOutputSmoothingFilter</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>13</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModePosLagMonitoring</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>16</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeVeloLagMonitoring</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>17</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeSoftLimitMinMonitoring</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>18</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeSoftLimitMaxMonitoring</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>19</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModePosCorrection</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>20</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeAllowSlaveCommands</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>21</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeAllowExtSetAxisCommands</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>22</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ApplicationRequest</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>23</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{303D9411-849C-467F-8A4C-5C8CD0F3DD46}" Namespace="MC" TcBaseType="true" HideType="true">NCTOPLC_AXIS_REF_STATE2_FLAGS</Name>
+			<BitSize>32</BitSize>
+			<SubItem>
+				<Name>AvoidingCollision</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<Format Name="Short">
+				<Printf>%08x</Printf>
+			</Format>
+			<Format Name="Cpp">
+				<Printf>0x%08x</Printf>
+			</Format>
+			<Format Name="IEC">
+				<Printf>16#%08X</Printf>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{669F3788-48FD-42CF-8A59-2DA946853FB6}" Namespace="MC" TcBaseType="true" HideType="true">NCTOPLC_AXIS_REF_STATE2</Name>
+			<BitSize>32</BitSize>
+			<SubItem>
+				<Name>Value</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000007}">DWORD</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Flags</Name>
+				<Type GUID="{303D9411-849C-467F-8A4C-5C8CD0F3DD46}" Namespace="MC">NCTOPLC_AXIS_REF_STATE2_FLAGS</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<Format Name="Short">
+				<Printf>%08x</Printf>
+			</Format>
+			<Format Name="Cpp">
+				<Printf>0x%08x</Printf>
+			</Format>
+			<Format Name="IEC">
+				<Printf>16#%08X</Printf>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{F7B9FC50-054E-4547-B468-83A9E72D8064}" Namespace="MC" TcBaseType="true" HideType="true">NCTOPLC_AXIS_REF_STATE3_FLAGS</Name>
+			<BitSize>32</BitSize>
+			<SubItem>
+				<Name>TouchProbe1InputState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TouchProbe2InputState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>1</BitOffs>
+			</SubItem>
+			<Format Name="Short">
+				<Printf>%08x</Printf>
+			</Format>
+			<Format Name="Cpp">
+				<Printf>0x%08x</Printf>
+			</Format>
+			<Format Name="IEC">
+				<Printf>16#%08X</Printf>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{60E203BA-3CEE-4BB0-8728-643B1F529592}" Namespace="MC" TcBaseType="true" HideType="true">NCTOPLC_AXIS_REF_STATE3</Name>
+			<BitSize>32</BitSize>
+			<SubItem>
+				<Name>Value</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000007}">DWORD</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Flags</Name>
+				<Type GUID="{F7B9FC50-054E-4547-B468-83A9E72D8064}" Namespace="MC">NCTOPLC_AXIS_REF_STATE3_FLAGS</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<Format Name="Short">
+				<Printf>%08x</Printf>
+			</Format>
+			<Format Name="Cpp">
+				<Printf>0x%08x</Printf>
+			</Format>
+			<Format Name="IEC">
+				<Printf>16#%08X</Printf>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{BA9D9D0F-1A4A-4A27-A19F-3032626A8491}" Namespace="MC" TcBaseType="true" HideType="true">NCTOPLC_AXIS_REF_CAMCOUPLINGSTATE</Name>
+			<BitSize>8</BitSize>
+			<SubItem>
+				<Name>CamActivationPending</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CamDeactivationPending</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>1</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CamActive</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>2</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CamDataQueued</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>6</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CamScalingPending</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>7</BitOffs>
+			</SubItem>
+		</DataType>
+		<DataType>
+			<Name GUID="{18071995-0000-0000-0000-000000000039}" TcBaseType="true" HideType="true">UINTARR8</Name>
+			<BitSize>128</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000005}">UINT</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>8</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC" TcBaseType="true">NCTOPLC_AXIS_REF</Name>
+			<BitSize>2048</BitSize>
+			<SubItem>
+				<Name>StateDWord</Name>
+				<Type GUID="{CBC83B73-B816-4597-A9E5-2B03263CA131}" Namespace="MC">NCTOPLC_AXIS_REF_STATE</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ErrorCode</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>AxisState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Present State Of The Axis Movement (continuous axis):
+0  = INACTIVE:		axis has no job
+1  = RUNNING:		axis is executing a motion job
+2  = OVERRIDE_ZERO:	axis is executing a job but override is zero
+3  = PHASE_VELOCONST:	axis is moving at constant velocity
+4  = PHASE_ACCPOS:	axis is accelerating
+5  = PHASE_ACCNEG:	axis is decelerating
+Slaves only:
+11 = PREPHASE:		slave axis is in a motion pre-phase
+12 = SYNCHRONIZING:	slave axis is synchronizing
+13 = SYNCHRONOUS:	slave axis is moving synchronously
+External Setpoint Generation:
+41 = EXTSETGEN_MODE1:	external setpoint generation active
+42 = EXTSETGEN_MODE2:	internal and external setpoint gen. active
+]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>AxisModeConfirmation</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>96</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>HomingState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Axis Homing Status:
+0: idle
+1: start homing
+2: searching home switch
+3: stopping on home switch
+4: moving off home switch
+5: searching sync pulse
+6: stopping after homing
+]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CoupleState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<Comment><![CDATA[Axis Coupling Status:
+0: axis is a single axis (not coupled)
+1: axis is a master axis
+2: axis is master and slave
+3: axis is a slave axis
+]]></Comment>
+				<BitSize>32</BitSize>
+				<BitOffs>160</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SvbEntries</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>192</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SafEntries</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>224</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>AxisId</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>256</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>OpModeDWord</Name>
+				<Type GUID="{6BDEED54-7268-405F-A18B-665A0AE0FEE9}" Namespace="MC">NCTOPLC_AXIS_REF_OPMODE</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>288</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ActPos</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>320</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ModuloActPos</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>384</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ActiveControlLoopIndex</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>448</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ControlLoopIndex</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>464</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ModuloActTurns</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>480</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ActVelo</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>512</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PosDiff</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>576</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SetPos</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>640</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SetVelo</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>704</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SetAcc</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>768</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TargetPos</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>832</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ModuloSetPos</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>896</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ModuloSetTurns</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>960</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CmdNo</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>992</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CmdState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000005}">UINT</Type>
+				<BitSize>16</BitSize>
+				<BitOffs>1008</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SetJerk</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1024</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SetTorque</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1088</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ActTorque</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1152</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>StateDWord2</Name>
+				<Type GUID="{669F3788-48FD-42CF-8A59-2DA946853FB6}" Namespace="MC">NCTOPLC_AXIS_REF_STATE2</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>1216</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>StateDWord3</Name>
+				<Type GUID="{60E203BA-3CEE-4BB0-8728-643B1F529592}" Namespace="MC">NCTOPLC_AXIS_REF_STATE3</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>1248</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TouchProbeState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000007}">DWORD</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>1280</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TouchProbeCounter</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000007}">DWORD</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>1312</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CamCouplingState</Name>
+				<Type GUID="{BA9D9D0F-1A4A-4A27-A19F-3032626A8491}" Namespace="MC">NCTOPLC_AXIS_REF_CAMCOUPLINGSTATE</Type>
+				<ArrayInfo>
+					<LBound>0</LBound>
+					<Elements>8</Elements>
+				</ArrayInfo>
+				<BitSize>64</BitSize>
+				<BitOffs>1344</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>CamCouplingTableID</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000039}">UINTARR8</Type>
+				<BitSize>128</BitSize>
+				<BitOffs>1408</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ActTorqueDerivative</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1536</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>SetTorqueDerivative</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1600</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>AbsPhasingPos</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1664</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>TorqueOffset</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1728</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ActPosWithoutPosCorrection</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1792</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ActAcc</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1856</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>DcTimeStamp</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>1920</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>UserData</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>1984</BitOffs>
+			</SubItem>
+			<Properties>
+				<Property>
+					<Name>NcStructType</Name>
+					<Value>2</Value>
+				</Property>
+			</Properties>
+			<Relations>
+				<Relation Priority="100">
+					<Type GUID="{429B767E-373B-40AE-BFA5-E1C08B444DF3}">NCAXLESTRUCT_TOPLC</Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{E8DA524A-605F-4879-82E6-B86EF6986572}">NCAXLESTRUCT_TOPLC2</Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{B507963E-69F3-4B64-BB8C-2BD7A560976D}">NCAXLESTRUCT_TOPLC3</Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{F794B740-82D7-4637-848E-4F74A711D038}">NCAXLESTRUCT_TOPLC4</Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{40BD39B0-C3EA-4F74-9F4F-5F1982786F7C}"></Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{40BD39B2-C3EA-4F74-9F4F-5F1982786F7C}"></Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{8CDE0C45-AB9D-42DB-BC94-1CF7521AB268}"></Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{6A65C767-34E5-42BF-AD87-E1A503EAC7BE}"></Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{72F5AAAA-16DF-4ED3-8367-F6C8C3ADAE99}"></Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{10036166-C9D3-404B-BDD3-323034AAA7F4}"></Type>
+				</Relation>
+			</Relations>
+		</DataType>
+		<DataType>
+			<Name GUID="{875D2B22-B7EB-497E-B933-0C004593CCF3}" Namespace="MC" TcBaseType="true" HideType="true" IecDeclaration="DWORD;">PLCTONC_AXIS_REF_CTRL</Name>
+			<BitSize>32</BitSize>
+			<SubItem>
+				<Name>Enable</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>FeedEnablePlus</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>1</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>FeedEnableMinus</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>2</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>HomingSensor</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>5</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>AcceptBlockedDrive</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>8</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PlcDebugFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>30</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>NcDebugFlag</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000010}">BIT</Type>
+				<BitSize>1</BitSize>
+				<BitOffs>31</BitOffs>
+			</SubItem>
+			<Format Name="Short">
+				<Printf>%08x</Printf>
+			</Format>
+			<Format Name="Cpp">
+				<Printf>0x%08x</Printf>
+			</Format>
+			<Format Name="IEC">
+				<Printf>16#%08X</Printf>
+			</Format>
+		</DataType>
+		<DataType>
+			<Name GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC" TcBaseType="true">PLCTONC_AXIS_REF</Name>
+			<BitSize>1024</BitSize>
+			<SubItem>
+				<Name>ControlDWord</Name>
+				<Type GUID="{875D2B22-B7EB-497E-B933-0C004593CCF3}" Namespace="MC">PLCTONC_AXIS_REF_CTRL</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>0</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>Override</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>32</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>AxisModeRequest</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>64</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>AxisModeDWord</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000008}">UDINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>96</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>AxisModeLReal</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>128</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PositionCorrection</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>192</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ExtSetPos</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>256</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ExtSetVelo</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>320</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ExtSetAcc</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>384</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ExtSetDirection</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000009}">DINT</Type>
+				<BitSize>32</BitSize>
+				<BitOffs>448</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ExtControllerOutput</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>512</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>GearRatio1</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>576</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>GearRatio2</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>640</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>GearRatio3</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>704</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>GearRatio4</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>768</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>MapState</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000030}">BOOL</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>832</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PlcCycleControl</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000001}">BYTE</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>840</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>PlcCycleCount</Name>
+				<Type GUID="{18071995-0000-0000-0000-000000000001}">BYTE</Type>
+				<BitSize>8</BitSize>
+				<BitOffs>848</BitOffs>
+			</SubItem>
+			<SubItem>
+				<Name>ExtTorque</Name>
+				<Type GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</Type>
+				<BitSize>64</BitSize>
+				<BitOffs>896</BitOffs>
+			</SubItem>
+			<Properties>
+				<Property>
+					<Name>NcStructType</Name>
+					<Value>1</Value>
+				</Property>
+			</Properties>
+			<Relations>
+				<Relation Priority="100">
+					<Type GUID="{60392271-8688-4F4C-B404-618DF106325D}"></Type>
+				</Relation>
+				<Relation Priority="100">
+					<Type GUID="{63A84524-72E3-41C8-BEAB-4CCE44690A13}"></Type>
+				</Relation>
+			</Relations>
+		</DataType>
+		<DataType>
+			<Name GUID="{424F8DE0-B3EB-08F5-962F-C154F3A77B90}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..10] OF LREAL</Name>
+			<BitSize>704</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>11</Elements>
+			</ArrayInfo>
+		</DataType>
+	</DataTypes>
+	<Project GUID="{79B5F322-41CA-4489-8A96-7D44E06BFD68}" Name="External_Conveyor_system" PrjFilePath="..\..\External_Conveyor_system\External_Conveyor_system.plcproj" TmcFilePath="..\..\External_Conveyor_system\External_Conveyor_system.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
+		<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{CC266943-1455-98C8-FE5F-595C57884D1C}" TmcPath="External_Conveyor_system\External_Conveyor_system.tmc">
+			<Name>External_Conveyor_system Instance</Name>
+			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+			<Vars VarGrpType="8" AreaNo="4">
+				<Name>PlcTask Retains</Name>
+				<Var>
+					<Name>FeedMain.Workpiece_Width_array_tmp</Name>
+					<Comment><![CDATA[ 輸入的寬度暫存 (防止運作中輸入質發生變動)]]></Comment>
+					<Type GUID="{424F8DE0-B3EB-08F5-962F-C154F3A77B90}">ARRAY [0..10] OF LREAL</Type>
+					<InOut>7</InOut>
+				</Var>
+			</Vars>
+			<Vars VarGrpType="2" AreaNo="1">
+				<Name>PlcTask Outputs</Name>
+				<Var>
+					<Name>Sensor.sensor.out_rawdata</Name>
+					<Comment><![CDATA[ 原始資料輸出]]></Comment>
+					<Type>USINT</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Preload_Value</Name>
+					<Comment><![CDATA[ 編碼器設定數值]]></Comment>
+					<Type>DINT</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Preload_Trigger</Name>
+					<Comment><![CDATA[
+	設定數值方式:
+	0: Disabled
+	1: Preload now
+	2: Preload with next 0- impulse
+	3: Preload with next DI0 rising edge
+	4: Preload with next DI1 rising edge
+	5: Preload with next DI2 rising edge
+	6: Preload with next DI3 rising edge
+	7: Preload with next DI0 falling edge
+	8: Preload with next DI1 falling edge
+	9: Preload with next DI2 falling edge
+	10: Preload with next DI3 falling edge
+	>10: Disabled
+	
+ 編碼器1 設定數值方式]]></Comment>
+					<Type>USINT</Type>
+				</Var>
+				<Var>
+					<Name>Axis.Axis_StepMoter.PlcToNc</Name>
+					<Type GUID="{96B75FEB-2D84-43BE-A3EC-D9A681F27D52}" Namespace="MC">PLCTONC_AXIS_REF</Type>
+				</Var>
+				<Var>
+					<Name>IO.q101</Name>
+					<Comment><![CDATA[ 入料側油壓馬達啟動]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q102</Name>
+					<Comment><![CDATA[ 入料側上浮滾輪(全) 反轉]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q103</Name>
+					<Comment><![CDATA[ 入料側上浮滾輪(全) 正轉]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q104</Name>
+					<Comment><![CDATA[ 入料側橫移台車變頻器正轉 (往靠邊)]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q105</Name>
+					<Comment><![CDATA[ 入料側橫移台車變頻器反轉 (往原點)]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q106</Name>
+					<Comment><![CDATA[ 入料側橫移台車變頻器多段速01]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q107</Name>
+					<Comment><![CDATA[ 入料側橫移台車變頻器多段速02]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q108</Name>
+					<Comment><![CDATA[ 入料側橫移台車變頻器多段速03(未設定)]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q109</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q110</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q111</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q112</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q113</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q114</Name>
+					<Comment><![CDATA[ 出口側上浮滾輪反轉]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q115</Name>
+					<Comment><![CDATA[ 出口側上浮滾輪正轉]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q116</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q201</Name>
+					<Comment><![CDATA[ 入料側橫移台車1上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q202</Name>
+					<Comment><![CDATA[ 入料側橫移台車1下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q203</Name>
+					<Comment><![CDATA[ 入料側橫移台車2上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q204</Name>
+					<Comment><![CDATA[ 入料側橫移台車2下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q205</Name>
+					<Comment><![CDATA[ 入料側橫移台車3上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q206</Name>
+					<Comment><![CDATA[ 入料側橫移台車3下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q207</Name>
+					<Comment><![CDATA[ 入料側橫移台車4上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q208</Name>
+					<Comment><![CDATA[ 入料側橫移台車4下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q209</Name>
+					<Comment><![CDATA[ 入料側整料圓柱1上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q210</Name>
+					<Comment><![CDATA[ 入料側整料圓柱1下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q211</Name>
+					<Comment><![CDATA[ 入料側整料圓柱2上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q212</Name>
+					<Comment><![CDATA[ 入料側整料圓柱2下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q213</Name>
+					<Comment><![CDATA[ 入料側整料圓柱3上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q214</Name>
+					<Comment><![CDATA[ 入料側整料圓柱3下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q215</Name>
+					<Comment><![CDATA[ 入料側整料圓柱4上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q216</Name>
+					<Comment><![CDATA[ 入料側整料圓柱4下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q301</Name>
+					<Comment><![CDATA[ 入料側油壓總閥]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q302</Name>
+					<Comment><![CDATA[ 入料側油壓靠邊閥]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q303</Name>
+					<Comment><![CDATA[ 入料側測高上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q304</Name>
+					<Comment><![CDATA[ 入料側測高下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q305</Name>
+					<Comment><![CDATA[ 出口側出料滾輪1下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q306</Name>
+					<Comment><![CDATA[ 出口側出料滾輪1上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q307</Name>
+					<Comment><![CDATA[ 入料側變頻器異常清除]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q308</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q309</Name>
+					<Comment><![CDATA[ 入料側進料滾輪1 離合器接合]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q310</Name>
+					<Comment><![CDATA[ 入料側進料滾輪1 離合器分離]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q311</Name>
+					<Comment><![CDATA[ 入料側進料滾輪2 上升]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q312</Name>
+					<Comment><![CDATA[ 入料側進料滾輪2 下降]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q313</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q314</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q315</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.q316</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.Feed_bBuzy</Name>
+					<Comment><![CDATA[ 進料機 動作中]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.Feed_bDone</Name>
+					<Comment><![CDATA[ 進料機 動作完成]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.Feed_bError</Name>
+					<Comment><![CDATA[ 進料機 發生錯誤]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.PullOver_bBuzy</Name>
+					<Comment><![CDATA[ 靠邊 動作中]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.Feed_Workpiace_W</Name>
+					<Comment><![CDATA[ 進料材料寬度]]></Comment>
+					<Type>LREAL</Type>
+				</Var>
+				<Var>
+					<Name>Output.Feed_Workpiace_H</Name>
+					<Comment><![CDATA[ 進料材料高度]]></Comment>
+					<Type>LREAL</Type>
+				</Var>
+				<Var>
+					<Name>Output.ActionMode_Now</Name>
+					<Comment><![CDATA[ 執行中的動作]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>Output.PullOver_bDone</Name>
+					<Comment><![CDATA[ 靠邊  動作完成]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.PullOver_bError</Name>
+					<Comment><![CDATA[ 靠邊  發生錯誤]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.in_Pos_sensor</Name>
+					<Comment><![CDATA[ 靠邊光電感應器]]></Comment>
+					<Type>WORD</Type>
+				</Var>
+				<Var>
+					<Name>Output.Out_Pos_sensor</Name>
+					<Comment><![CDATA[ 靠邊光電感應器]]></Comment>
+					<Type>WORD</Type>
+				</Var>
+				<Var>
+					<Name>Output.In_Moter_Running</Name>
+					<Comment><![CDATA[ 進料滾輪啟動]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.In_Moter_Error</Name>
+					<Comment><![CDATA[ 進料滾輪錯誤]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.Out_Moter_Running</Name>
+					<Comment><![CDATA[ 出料滾輪啟動]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Output.Out_Moter_Error</Name>
+					<Comment><![CDATA[ 出料滾輪錯誤]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+			</Vars>
+			<Vars VarGrpType="1">
+				<Name>PlcTask Inputs</Name>
+				<Var>
+					<Name>Sensor.sensor.in_RawData</Name>
+					<Comment><![CDATA[ 原始資料輸入]]></Comment>
+					<Type GUID="{A7C10B26-E700-C197-B6B7-537024BE1485}">ARRAY [0..7] OF USINT</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc</Name>
+					<Comment><![CDATA[ 編碼器位置]]></Comment>
+					<Type>DINT</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Preload_Done</Name>
+					<Comment><![CDATA[ 編碼器重設狀態]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Error_A</Name>
+					<Comment><![CDATA[ 編碼器 A相 錯誤]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Error_B</Name>
+					<Comment><![CDATA[ 編碼器 B相 錯誤]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Error_C</Name>
+					<Comment><![CDATA[ 編碼器 C相 錯誤]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Error_AB</Name>
+					<Comment><![CDATA[ 編碼器1 AB相 錯誤]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.WcState</Name>
+					<Comment><![CDATA[ 1:數據無效 0:數據有效]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.State</Name>
+					<Comment><![CDATA[ EtherCAT 狀態]]></Comment>
+					<Type>UINT</Type>
+				</Var>
+				<Var>
+					<Name>Axis.FeedCar_Enc.FeedCar_Enc_raw.addr</Name>
+					<Comment><![CDATA[ AMS位置]]></Comment>
+					<Type GUID="{18071995-0000-0000-0000-000000000042}">AMSADDR</Type>
+				</Var>
+				<Var>
+					<Name>Axis.Axis_StepMoter.NcToPlc</Name>
+					<Type GUID="{25521FAA-EA5F-4C7F-8864-BBCCDACD2E98}" Namespace="MC">NCTOPLC_AXIS_REF</Type>
+				</Var>
+				<Var>
+					<Name>Input.Pause</Name>
+					<Comment><![CDATA[ 暫停]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Input.Feed_Start</Name>
+					<Comment><![CDATA[ 進料機 啟動]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Input.Feed_Mode</Name>
+					<Comment><![CDATA[ 進料機 執行動作]]></Comment>
+					<Type>INT</Type>
+				</Var>
+				<Var>
+					<Name>Input.Feed_WorkOrder_UUID</Name>
+					<Comment><![CDATA[ 進料機 進料的專案UUID]]></Comment>
+					<Type>STRING(36)</Type>
+				</Var>
+				<Var>
+					<Name>Input.Feed_Enable</Name>
+					<Comment><![CDATA[ 進料機 啟動]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Input.Feed_Reset</Name>
+					<Comment><![CDATA[ 進料機 重置]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Input.PullOver_Start</Name>
+					<Comment><![CDATA[ 靠邊 模式執行]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Input.In_Moter_Start</Name>
+					<Comment><![CDATA[ 進料滾輪啟動]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Input.Out_Moter_Start</Name>
+					<Comment><![CDATA[ 出料滾輪啟動]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i101</Name>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i102</Name>
+					<Comment><![CDATA[ 入料側油壓馬達過載檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i103</Name>
+					<Comment><![CDATA[ 抽油循環馬達]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i104</Name>
+					<Comment><![CDATA[ 入料側油壓馬達過載檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i105</Name>
+					<Comment><![CDATA[ 入料側橫移馬達過載1檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i106</Name>
+					<Comment><![CDATA[ 入料側橫移馬達過載2檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i107</Name>
+					<Comment><![CDATA[ 入料側橫移變頻器運轉]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i108</Name>
+					<Comment><![CDATA[ 入料側橫移變頻器無異常]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i109</Name>
+					<Comment><![CDATA[ 入料側上浮滾輪馬達過載1檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i110</Name>
+					<Comment><![CDATA[ 入料側上浮滾輪馬達過載2檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i111</Name>
+					<Comment><![CDATA[ 入料側上浮滾輪馬達過載3檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i112</Name>
+					<Comment><![CDATA[ 入料側上浮滾輪馬達過載4檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i113</Name>
+					<Comment><![CDATA[ 出口上浮滾輪停止]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i114</Name>
+					<Comment><![CDATA[ 出口有無料檢測1]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i115</Name>
+					<Comment><![CDATA[ 出口有無料檢測2]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i116</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i201</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降1上限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i202</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降1中限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i203</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降1下限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i204</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降2上限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i205</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降2中限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i206</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降2下限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i207</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降3上限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i208</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降3中限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i209</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降3下限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i210</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降4上限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i211</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降4中限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i212</Name>
+					<Comment><![CDATA[ 入料側橫移台車升降4下限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i213</Name>
+					<Comment><![CDATA[ 入料側橫移台車原點]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i214</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i215</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i216</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i301</Name>
+					<Comment><![CDATA[ 入料側整料圓柱1下限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i302</Name>
+					<Comment><![CDATA[ 入料側整料圓柱1上限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i303</Name>
+					<Comment><![CDATA[ 入料側整料圓柱1材料定位]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i304</Name>
+					<Comment><![CDATA[ 入料側整料圓柱2下限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i305</Name>
+					<Comment><![CDATA[ 入料側整料圓柱2上限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i306</Name>
+					<Comment><![CDATA[ 入料側整料圓柱2材料定位]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i307</Name>
+					<Comment><![CDATA[ 入料側整料圓柱3下限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i308</Name>
+					<Comment><![CDATA[ 入料側整料圓柱3上限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i309</Name>
+					<Comment><![CDATA[ 入料側整料圓柱3材料定位]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i310</Name>
+					<Comment><![CDATA[ 入料側整料圓柱4下限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i311</Name>
+					<Comment><![CDATA[ 入料側整料圓柱4上限]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i312</Name>
+					<Comment><![CDATA[ 入料側整料圓柱4材料定位]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i313</Name>
+					<Comment><![CDATA[ 出口滾輪]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i314</Name>
+					<Comment><![CDATA[ 測高上限原點]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i315</Name>
+					<Comment><![CDATA[ 出料側上浮滾輪升降 上限(滾輪下)]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i316</Name>
+					<Comment><![CDATA[ 出料側上浮滾輪升降 下限(滾輪上)]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i401</Name>
+					<Comment><![CDATA[ 入料側靠邊1原點]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i402</Name>
+					<Comment><![CDATA[ 入料側靠邊1材料定位檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i403</Name>
+					<Comment><![CDATA[ 入料側靠邊2原點]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i404</Name>
+					<Comment><![CDATA[ 入料側靠邊2材料定位檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i405</Name>
+					<Comment><![CDATA[ 入料側靠邊3原點]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i406</Name>
+					<Comment><![CDATA[ 入料側靠邊3材料定位檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i407</Name>
+					<Comment><![CDATA[ 入料側靠邊4原點]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i408</Name>
+					<Comment><![CDATA[ 入料側靠邊4材料定位檢知]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i409</Name>
+					<Comment><![CDATA[ 入料側滾輪1 離合器 分離]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i410</Name>
+					<Comment><![CDATA[ 入料側滾輪1 離合器 結合]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i411</Name>
+					<Comment><![CDATA[ 入料側上浮滾輪升降2 下限(滾輪上)]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i412</Name>
+					<Comment><![CDATA[ 入料側上浮滾輪升降2 上限(滾輪下)]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i413</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i414</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i415</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>IO.i416</Name>
+					<Comment><![CDATA[ ]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+			</Vars>
+			<UnrestoredVarLinks ImportTime="2025-10-13T09:40:01">
+				<OwnerA Name="OutputSrc" Prefix="TIPC^External_Conveyor_system^External_Conveyor_system Instance" Type="2">
+					<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^Box 53 (MM 540)">
+						<Link VarA="Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_SetMode" TypeA="USINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000002}" VarB="Inc Preload Trigger Mapping^Inc0 Preload Trigger" RestoreInfo="ANotFound"/>
+					</OwnerB>
+				</OwnerA>
+			</UnrestoredVarLinks>
+			<UnrestoredVarLinks ImportTime="2025-10-13T10:06:05">
+				<OwnerA Name="InputDst" Prefix="TIPC^External_Conveyor_system^External_Conveyor_system Instance" Type="1">
+					<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^Box 53 (MM 540)">
+						<Link VarA="Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_SetValueDone" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Inc State Mapping^Inc0 Preload Done" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+				</OwnerA>
+			</UnrestoredVarLinks>
+			<UnrestoredVarLinks ImportTime="2025-10-13T10:08:38">
+				<OwnerA Name="OutputSrc" Prefix="TIPC^External_Conveyor_system^External_Conveyor_system Instance" Type="2">
+					<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^Box 53 (MM 540)">
+						<Link VarA="Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_SetValue" TypeA="DINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="Inc Preload Value Mapping^Inc0 Preload Value" RestoreInfo="ANotFound"/>
+						<Link VarA="Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_SetValueMode" TypeA="USINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000002}" VarB="Inc Preload Trigger Mapping^Inc0 Preload Trigger" RestoreInfo="ANotFound"/>
+					</OwnerB>
+				</OwnerA>
+			</UnrestoredVarLinks>
+			<UnrestoredVarLinks ImportTime="2025-12-05T17:58:35">
+				<OwnerA Name="InputDst" Prefix="TIPC^External_Conveyor_system^External_Conveyor_system Instance" Type="1">
+					<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^Box 53 (MM 540)">
+						<Link VarA="Axis.H_Measure_Enc.FeedCar_Enc_raw.Inc" TypeA="DINT" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="Inc Mapping^Inc1 Value" RestoreInfo="ANotFound"/>
+						<Link VarA="Axis.H_Measure_Enc.FeedCar_Enc_raw.Inc_Error_A" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Inc Error Mapping^Inc1 Error Track A" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="Axis.H_Measure_Enc.FeedCar_Enc_raw.Inc_Error_AB" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Inc Error Mapping^Inc1 Error Track AB" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="Axis.H_Measure_Enc.FeedCar_Enc_raw.Inc_Error_B" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Inc Error Mapping^Inc1 Error Track B" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="Axis.H_Measure_Enc.FeedCar_Enc_raw.Inc_Error_C" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Inc Error Mapping^Inc1 Error 0-Impulse Track" Size="1" RestoreInfo="ANotFound"/>
+						<Link VarA="Axis.H_Measure_Enc.FeedCar_Enc_raw.Inc_Preload_Done" TypeA="BOOL" InOutA="0" GuidA="{18071995-0000-0000-0000-000000000030}" VarB="Inc State Mapping^Inc1 Preload Done" Size="1" RestoreInfo="ANotFound"/>
+					</OwnerB>
+				</OwnerA>
+				<OwnerA Name="OutputSrc" Prefix="TIPC^External_Conveyor_system^External_Conveyor_system Instance" Type="2">
+					<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^Box 53 (MM 540)">
+						<Link VarA="Axis.H_Measure_Enc.FeedCar_Enc_raw.Inc_Preload_Trigger" TypeA="USINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000002}" VarB="Inc Preload Trigger Mapping^Inc1 Preload Trigger" RestoreInfo="ANotFound"/>
+						<Link VarA="Axis.H_Measure_Enc.FeedCar_Enc_raw.Inc_Preload_Value" TypeA="DINT" InOutA="1" GuidA="{18071995-0000-0000-0000-000000000009}" VarB="Inc Preload Value Mapping^Inc1 Preload Value" RestoreInfo="ANotFound"/>
+					</OwnerB>
+				</OwnerA>
+			</UnrestoredVarLinks>
+			<Contexts>
+				<Context>
+					<Id>0</Id>
+					<Name>PlcTask</Name>
+					<ManualConfig>
+						<OTCID>#x020100a0</OTCID>
+					</ManualConfig>
+					<Priority>22</Priority>
+					<CycleTime>10000000</CycleTime>
+				</Context>
+			</Contexts>
+			<TaskPouOids>
+				<TaskPouOid Prio="22" OTCID="#x08502041"/>
+			</TaskPouOids>
+		</Instance>
+	</Project>
+	<Mappings>
+		<OwnerA Name="External_Conveyor_system Instance">
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 2 (AMAX-4870)^Box 14 (54632)">
+				<Link VarA="PlcTask Inputs^Sensor.sensor.in_RawData[0]" VarB="Module 8 (IOL_8/8_I/O-Bytes)^TxPDO^input byte 0"/>
+				<Link VarA="PlcTask Inputs^Sensor.sensor.in_RawData[1]" VarB="Module 8 (IOL_8/8_I/O-Bytes)^TxPDO^input byte 1"/>
+				<Link VarA="PlcTask Inputs^Sensor.sensor.in_RawData[2]" VarB="Module 8 (IOL_8/8_I/O-Bytes)^TxPDO^input byte 2"/>
+				<Link VarA="PlcTask Inputs^Sensor.sensor.in_RawData[3]" VarB="Module 8 (IOL_8/8_I/O-Bytes)^TxPDO^input byte 3"/>
+				<Link VarA="PlcTask Inputs^Sensor.sensor.in_RawData[4]" VarB="Module 8 (IOL_8/8_I/O-Bytes)^TxPDO^input byte 4"/>
+				<Link VarA="PlcTask Inputs^Sensor.sensor.in_RawData[5]" VarB="Module 8 (IOL_8/8_I/O-Bytes)^TxPDO^input byte 5"/>
+				<Link VarA="PlcTask Inputs^Sensor.sensor.in_RawData[6]" VarB="Module 8 (IOL_8/8_I/O-Bytes)^TxPDO^input byte 6"/>
+				<Link VarA="PlcTask Inputs^Sensor.sensor.in_RawData[7]" VarB="Module 8 (IOL_8/8_I/O-Bytes)^TxPDO^input byte 7"/>
+				<Link VarA="PlcTask Outputs^Sensor.sensor.out_rawdata" VarB="Module 8 (IOL_8/8_I/O-Bytes)^RxPDO^output byte 0"/>
+			</OwnerB>
+			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 51 (BL 570)^Box 53 (MM 540)">
+				<Link VarA="PlcTask Inputs^Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc" VarB="Inc Mapping^Inc0 Value"/>
+				<Link VarA="PlcTask Inputs^Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Error_A" VarB="Inc Error Mapping^Inc0 Error Track A" Size="1"/>
+				<Link VarA="PlcTask Inputs^Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Error_B" VarB="Inc Error Mapping^Inc0 Error Track B" Size="1"/>
+				<Link VarA="PlcTask Inputs^Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Error_C" VarB="Inc Error Mapping^Inc0 Error 0-Impulse Track" Size="1"/>
+				<Link VarA="PlcTask Inputs^Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Preload_Done" VarB="Inc State Mapping^Inc0 Preload Done" Size="1"/>
+				<Link VarA="PlcTask Outputs^Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Preload_Trigger" VarB="Inc Preload Trigger Mapping^Inc0 Preload Trigger"/>
+				<Link VarA="PlcTask Outputs^Axis.FeedCar_Enc.FeedCar_Enc_raw.Inc_Preload_Value" VarB="Inc Preload Value Mapping^Inc0 Preload Value"/>
+			</OwnerB>
+			<OwnerB Name="TINC^NC-Task 1 SAF^Axes^轴 19">
+				<Link VarA="PlcTask Inputs^Axis.Axis_StepMoter.NcToPlc" VarB="输出^ToPlc"/>
+				<Link VarA="PlcTask Outputs^Axis.Axis_StepMoter.PlcToNc" VarB="输入^FromPlc"/>
+			</OwnerB>
+			<OwnerB Name="TIPC^IO_External_Task^IO_External_Task Instance">
+				<Link VarA="PlcTask Inputs^IO.i101" VarB="Main_IO_Task Outputs^MainIO.IO101.In[1]"/>
+				<Link VarA="PlcTask Inputs^IO.i102" VarB="Main_IO_Task Outputs^MainIO.IO101.In[2]"/>
+				<Link VarA="PlcTask Inputs^IO.i103" VarB="Main_IO_Task Outputs^MainIO.IO101.In[3]"/>
+				<Link VarA="PlcTask Inputs^IO.i104" VarB="Main_IO_Task Outputs^MainIO.IO101.In[4]"/>
+				<Link VarA="PlcTask Inputs^IO.i105" VarB="Main_IO_Task Outputs^MainIO.IO101.In[5]"/>
+				<Link VarA="PlcTask Inputs^IO.i106" VarB="Main_IO_Task Outputs^MainIO.IO101.In[6]"/>
+				<Link VarA="PlcTask Inputs^IO.i107" VarB="Main_IO_Task Outputs^MainIO.IO101.In[7]"/>
+				<Link VarA="PlcTask Inputs^IO.i108" VarB="Main_IO_Task Outputs^MainIO.IO101.In[8]"/>
+				<Link VarA="PlcTask Inputs^IO.i109" VarB="Main_IO_Task Outputs^MainIO.IO101.In[9]"/>
+				<Link VarA="PlcTask Inputs^IO.i110" VarB="Main_IO_Task Outputs^MainIO.IO101.In[10]"/>
+				<Link VarA="PlcTask Inputs^IO.i111" VarB="Main_IO_Task Outputs^MainIO.IO101.In[11]"/>
+				<Link VarA="PlcTask Inputs^IO.i112" VarB="Main_IO_Task Outputs^MainIO.IO101.In[12]"/>
+				<Link VarA="PlcTask Inputs^IO.i113" VarB="Main_IO_Task Outputs^MainIO.IO101.In[13]"/>
+				<Link VarA="PlcTask Inputs^IO.i114" VarB="Main_IO_Task Outputs^MainIO.IO101.In[14]"/>
+				<Link VarA="PlcTask Inputs^IO.i115" VarB="Main_IO_Task Outputs^MainIO.IO101.In[15]"/>
+				<Link VarA="PlcTask Inputs^IO.i116" VarB="Main_IO_Task Outputs^MainIO.IO101.In[16]"/>
+				<Link VarA="PlcTask Inputs^IO.i201" VarB="Main_IO_Task Outputs^MainIO.IO102.In[1]"/>
+				<Link VarA="PlcTask Inputs^IO.i202" VarB="Main_IO_Task Outputs^MainIO.IO102.In[2]"/>
+				<Link VarA="PlcTask Inputs^IO.i203" VarB="Main_IO_Task Outputs^MainIO.IO102.In[3]"/>
+				<Link VarA="PlcTask Inputs^IO.i204" VarB="Main_IO_Task Outputs^MainIO.IO102.In[4]"/>
+				<Link VarA="PlcTask Inputs^IO.i205" VarB="Main_IO_Task Outputs^MainIO.IO102.In[5]"/>
+				<Link VarA="PlcTask Inputs^IO.i206" VarB="Main_IO_Task Outputs^MainIO.IO102.In[6]"/>
+				<Link VarA="PlcTask Inputs^IO.i207" VarB="Main_IO_Task Outputs^MainIO.IO102.In[7]"/>
+				<Link VarA="PlcTask Inputs^IO.i208" VarB="Main_IO_Task Outputs^MainIO.IO102.In[8]"/>
+				<Link VarA="PlcTask Inputs^IO.i209" VarB="Main_IO_Task Outputs^MainIO.IO102.In[9]"/>
+				<Link VarA="PlcTask Inputs^IO.i210" VarB="Main_IO_Task Outputs^MainIO.IO102.In[10]"/>
+				<Link VarA="PlcTask Inputs^IO.i211" VarB="Main_IO_Task Outputs^MainIO.IO102.In[11]"/>
+				<Link VarA="PlcTask Inputs^IO.i212" VarB="Main_IO_Task Outputs^MainIO.IO102.In[12]"/>
+				<Link VarA="PlcTask Inputs^IO.i213" VarB="Main_IO_Task Outputs^MainIO.IO102.In[13]"/>
+				<Link VarA="PlcTask Inputs^IO.i214" VarB="Main_IO_Task Outputs^MainIO.IO102.In[14]"/>
+				<Link VarA="PlcTask Inputs^IO.i215" VarB="Main_IO_Task Outputs^MainIO.IO102.In[15]"/>
+				<Link VarA="PlcTask Inputs^IO.i216" VarB="Main_IO_Task Outputs^MainIO.IO102.In[16]"/>
+				<Link VarA="PlcTask Inputs^IO.i301" VarB="Main_IO_Task Outputs^MainIO.IO103.In[1]"/>
+				<Link VarA="PlcTask Inputs^IO.i302" VarB="Main_IO_Task Outputs^MainIO.IO103.In[2]"/>
+				<Link VarA="PlcTask Inputs^IO.i303" VarB="Main_IO_Task Outputs^MainIO.IO103.In[3]"/>
+				<Link VarA="PlcTask Inputs^IO.i304" VarB="Main_IO_Task Outputs^MainIO.IO103.In[4]"/>
+				<Link VarA="PlcTask Inputs^IO.i305" VarB="Main_IO_Task Outputs^MainIO.IO103.In[5]"/>
+				<Link VarA="PlcTask Inputs^IO.i306" VarB="Main_IO_Task Outputs^MainIO.IO103.In[6]"/>
+				<Link VarA="PlcTask Inputs^IO.i307" VarB="Main_IO_Task Outputs^MainIO.IO103.In[7]"/>
+				<Link VarA="PlcTask Inputs^IO.i308" VarB="Main_IO_Task Outputs^MainIO.IO103.In[8]"/>
+				<Link VarA="PlcTask Inputs^IO.i309" VarB="Main_IO_Task Outputs^MainIO.IO103.In[9]"/>
+				<Link VarA="PlcTask Inputs^IO.i310" VarB="Main_IO_Task Outputs^MainIO.IO103.In[10]"/>
+				<Link VarA="PlcTask Inputs^IO.i311" VarB="Main_IO_Task Outputs^MainIO.IO103.In[11]"/>
+				<Link VarA="PlcTask Inputs^IO.i312" VarB="Main_IO_Task Outputs^MainIO.IO103.In[12]"/>
+				<Link VarA="PlcTask Inputs^IO.i313" VarB="Main_IO_Task Outputs^MainIO.IO103.In[13]"/>
+				<Link VarA="PlcTask Inputs^IO.i314" VarB="Main_IO_Task Outputs^MainIO.IO103.In[14]"/>
+				<Link VarA="PlcTask Inputs^IO.i315" VarB="Main_IO_Task Outputs^MainIO.IO103.In[15]"/>
+				<Link VarA="PlcTask Inputs^IO.i316" VarB="Main_IO_Task Outputs^MainIO.IO103.In[16]"/>
+				<Link VarA="PlcTask Inputs^IO.i401" VarB="Main_IO_Task Outputs^MainIO.IO104.In[1]"/>
+				<Link VarA="PlcTask Inputs^IO.i402" VarB="Main_IO_Task Outputs^MainIO.IO104.In[2]"/>
+				<Link VarA="PlcTask Inputs^IO.i403" VarB="Main_IO_Task Outputs^MainIO.IO104.In[3]"/>
+				<Link VarA="PlcTask Inputs^IO.i404" VarB="Main_IO_Task Outputs^MainIO.IO104.In[4]"/>
+				<Link VarA="PlcTask Inputs^IO.i405" VarB="Main_IO_Task Outputs^MainIO.IO104.In[5]"/>
+				<Link VarA="PlcTask Inputs^IO.i406" VarB="Main_IO_Task Outputs^MainIO.IO104.In[6]"/>
+				<Link VarA="PlcTask Inputs^IO.i407" VarB="Main_IO_Task Outputs^MainIO.IO104.In[7]"/>
+				<Link VarA="PlcTask Inputs^IO.i408" VarB="Main_IO_Task Outputs^MainIO.IO104.In[8]"/>
+				<Link VarA="PlcTask Inputs^IO.i409" VarB="Main_IO_Task Outputs^MainIO.IO104.In[9]"/>
+				<Link VarA="PlcTask Inputs^IO.i410" VarB="Main_IO_Task Outputs^MainIO.IO104.In[10]"/>
+				<Link VarA="PlcTask Inputs^IO.i411" VarB="Main_IO_Task Outputs^MainIO.IO104.In[11]"/>
+				<Link VarA="PlcTask Inputs^IO.i412" VarB="Main_IO_Task Outputs^MainIO.IO104.In[12]"/>
+				<Link VarA="PlcTask Inputs^IO.i413" VarB="Main_IO_Task Outputs^MainIO.IO104.In[13]"/>
+				<Link VarA="PlcTask Inputs^IO.i414" VarB="Main_IO_Task Outputs^MainIO.IO104.In[14]"/>
+				<Link VarA="PlcTask Inputs^IO.i415" VarB="Main_IO_Task Outputs^MainIO.IO104.In[15]"/>
+				<Link VarA="PlcTask Inputs^IO.i416" VarB="Main_IO_Task Outputs^MainIO.IO104.In[16]"/>
+				<Link VarA="PlcTask Outputs^IO.q101" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[1]"/>
+				<Link VarA="PlcTask Outputs^IO.q102" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[2]"/>
+				<Link VarA="PlcTask Outputs^IO.q103" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[3]"/>
+				<Link VarA="PlcTask Outputs^IO.q104" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[4]"/>
+				<Link VarA="PlcTask Outputs^IO.q105" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[5]"/>
+				<Link VarA="PlcTask Outputs^IO.q106" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[6]"/>
+				<Link VarA="PlcTask Outputs^IO.q107" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[7]"/>
+				<Link VarA="PlcTask Outputs^IO.q108" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[8]"/>
+				<Link VarA="PlcTask Outputs^IO.q109" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[9]"/>
+				<Link VarA="PlcTask Outputs^IO.q110" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[10]"/>
+				<Link VarA="PlcTask Outputs^IO.q111" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[11]"/>
+				<Link VarA="PlcTask Outputs^IO.q112" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[12]"/>
+				<Link VarA="PlcTask Outputs^IO.q113" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[13]"/>
+				<Link VarA="PlcTask Outputs^IO.q114" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[14]"/>
+				<Link VarA="PlcTask Outputs^IO.q115" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[15]"/>
+				<Link VarA="PlcTask Outputs^IO.q116" VarB="Main_IO_Task Inputs^MainIO.IO105.Out[16]"/>
+				<Link VarA="PlcTask Outputs^IO.q201" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[1]"/>
+				<Link VarA="PlcTask Outputs^IO.q202" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[2]"/>
+				<Link VarA="PlcTask Outputs^IO.q203" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[3]"/>
+				<Link VarA="PlcTask Outputs^IO.q204" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[4]"/>
+				<Link VarA="PlcTask Outputs^IO.q205" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[5]"/>
+				<Link VarA="PlcTask Outputs^IO.q206" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[6]"/>
+				<Link VarA="PlcTask Outputs^IO.q207" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[7]"/>
+				<Link VarA="PlcTask Outputs^IO.q208" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[8]"/>
+				<Link VarA="PlcTask Outputs^IO.q209" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[9]"/>
+				<Link VarA="PlcTask Outputs^IO.q210" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[10]"/>
+				<Link VarA="PlcTask Outputs^IO.q211" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[11]"/>
+				<Link VarA="PlcTask Outputs^IO.q212" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[12]"/>
+				<Link VarA="PlcTask Outputs^IO.q213" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[13]"/>
+				<Link VarA="PlcTask Outputs^IO.q214" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[14]"/>
+				<Link VarA="PlcTask Outputs^IO.q215" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[15]"/>
+				<Link VarA="PlcTask Outputs^IO.q216" VarB="Main_IO_Task Inputs^MainIO.IO106.Out[16]"/>
+				<Link VarA="PlcTask Outputs^IO.q301" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[1]"/>
+				<Link VarA="PlcTask Outputs^IO.q302" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[2]"/>
+				<Link VarA="PlcTask Outputs^IO.q303" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[3]"/>
+				<Link VarA="PlcTask Outputs^IO.q304" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[4]"/>
+				<Link VarA="PlcTask Outputs^IO.q305" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[5]"/>
+				<Link VarA="PlcTask Outputs^IO.q306" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[6]"/>
+				<Link VarA="PlcTask Outputs^IO.q307" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[7]"/>
+				<Link VarA="PlcTask Outputs^IO.q308" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[8]"/>
+				<Link VarA="PlcTask Outputs^IO.q309" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[9]"/>
+				<Link VarA="PlcTask Outputs^IO.q310" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[10]"/>
+				<Link VarA="PlcTask Outputs^IO.q311" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[11]"/>
+				<Link VarA="PlcTask Outputs^IO.q312" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[12]"/>
+				<Link VarA="PlcTask Outputs^IO.q313" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[13]"/>
+				<Link VarA="PlcTask Outputs^IO.q314" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[14]"/>
+				<Link VarA="PlcTask Outputs^IO.q315" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[15]"/>
+				<Link VarA="PlcTask Outputs^IO.q316" VarB="Main_IO_Task Inputs^MainIO.IO107.Out[16]"/>
+			</OwnerB>
+			<OwnerB Name="TIPC^Main^Main Instance">
+				<Link VarA="PlcTask Inputs^Input.Feed_Enable" VarB="PlcTask Outputs^ExpConver.ExpConver_Enable"/>
+				<Link VarA="PlcTask Inputs^Input.Feed_Mode" VarB="PlcTask Outputs^ExpConver.ExpConver_Mode"/>
+				<Link VarA="PlcTask Inputs^Input.Feed_Reset" VarB="PlcTask Outputs^ExpConver.ExpConver_Reset"/>
+				<Link VarA="PlcTask Inputs^Input.Feed_Start" VarB="PlcTask Outputs^ExpConver.ExpConver_Start"/>
+				<Link VarA="PlcTask Inputs^Input.Feed_WorkOrder_UUID" VarB="PlcTask Outputs^ExpConver.ExpConver_WorkOrder_UUID"/>
+				<Link VarA="PlcTask Inputs^Input.In_Moter_Start" VarB="PlcTask Outputs^ExpConver.In_Moter_Start"/>
+				<Link VarA="PlcTask Inputs^Input.Out_Moter_Start" VarB="PlcTask Outputs^ExpConver.Out_Moter_Start"/>
+				<Link VarA="PlcTask Inputs^Input.PullOver_Start" VarB="PlcTask Outputs^ExpConver.PullOver_Start"/>
+				<Link VarA="PlcTask Outputs^Output.ActionMode_Now" VarB="PlcTask Inputs^ExpConver.ActionMode_Now"/>
+				<Link VarA="PlcTask Outputs^Output.Feed_Workpiace_H" VarB="PlcTask Inputs^ExpConver.Feed_Workpiace_H"/>
+				<Link VarA="PlcTask Outputs^Output.Feed_Workpiace_W" VarB="PlcTask Inputs^ExpConver.Feed_Workpiace_W"/>
+				<Link VarA="PlcTask Outputs^Output.Feed_bBuzy" VarB="PlcTask Inputs^ExpConver.Feed_bBuzy"/>
+				<Link VarA="PlcTask Outputs^Output.Feed_bDone" VarB="PlcTask Inputs^ExpConver.Feed_bDone"/>
+				<Link VarA="PlcTask Outputs^Output.Feed_bError" VarB="PlcTask Inputs^ExpConver.Feed_bError"/>
+				<Link VarA="PlcTask Outputs^Output.In_Moter_Error" VarB="PlcTask Inputs^ExpConver.In_Moter_Error"/>
+				<Link VarA="PlcTask Outputs^Output.In_Moter_Running" VarB="PlcTask Inputs^ExpConver.In_Moter_Running"/>
+				<Link VarA="PlcTask Outputs^Output.Out_Moter_Error" VarB="PlcTask Inputs^ExpConver.Out_Moter_Error"/>
+				<Link VarA="PlcTask Outputs^Output.Out_Moter_Running" VarB="PlcTask Inputs^ExpConver.Out_Moter_Running"/>
+				<Link VarA="PlcTask Outputs^Output.Out_Pos_sensor" VarB="PlcTask Inputs^ExpConver.Out_sensor"/>
+				<Link VarA="PlcTask Outputs^Output.PullOver_bBuzy" VarB="PlcTask Inputs^ExpConver.PullOver_bBuzy"/>
+				<Link VarA="PlcTask Outputs^Output.PullOver_bDone" VarB="PlcTask Inputs^ExpConver.PullOver_bDone"/>
+				<Link VarA="PlcTask Outputs^Output.PullOver_bError" VarB="PlcTask Inputs^ExpConver.PullOver_bError"/>
+				<Link VarA="PlcTask Outputs^Output.in_Pos_sensor" VarB="PlcTask Inputs^ExpConver.In_sensor"/>
+			</OwnerB>
+		</OwnerA>
+	</Mappings>
+</TcSmItem>

@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="SQL_GetPosX_Struct" Id="{74ab54c4-1ec2-40b5-bfdd-cf4923eb0970}">
+    <Declaration><![CDATA[// 取得檔案的參數
+TYPE SQL_GetPosX_Struct :
+STRUCT
+	Payload_A_Uid : STRING(36);
+	Payload_B_Uid : STRING(36);
+	Payload_C_Uid : STRING(36);
+	Payload_D_Uid : STRING(36);
+	Pos	: LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

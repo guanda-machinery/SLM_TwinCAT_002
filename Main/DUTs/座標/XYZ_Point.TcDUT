@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="XYZ_Point" Id="{febfdfd3-e7b9-4344-8113-62942bf9db15}">
+    <Declaration><![CDATA[TYPE XYZ_Point :
+STRUCT
+	X : LREAL;
+	Y : LREAL;
+	Z : LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

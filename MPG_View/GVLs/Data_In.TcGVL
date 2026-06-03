@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="Data_In" Id="{a2d56dc2-0b1c-406f-aac9-159625325788}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	
+	AxisPos AT %I* : ARRAY [0..15] OF LREAL;
+	
+	AxisPosUse AT %I* : ARRAY [0..15] OF BOOL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

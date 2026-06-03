@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.14">
+  <POU Name="AI_force" Id="{e6fbe259-0513-417f-9edf-27f27c4a73bb}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK AI_force
+VAR_INPUT
+	Raw_IO : INT;
+END_VAR
+
+VAR_OUTPUT
+	Out : INT;
+END_VAR
+
+VAR
+	ForceEnable : BOOL;
+	ForceValue : INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF NOT ForceEnable THEN
+	OUT := Raw_IO;
+ELSE
+	OUT := ForceValue;
+END_IF]]></ST>
+    </Implementation>
+    <LineIds Name="AI_force">
+      <LineId Id="9" Count="0" />
+      <LineId Id="21" Count="3" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

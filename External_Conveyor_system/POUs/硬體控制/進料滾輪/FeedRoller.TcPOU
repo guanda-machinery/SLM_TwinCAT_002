@@ -1,0 +1,370 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="FeedRoller" Id="{43aa51a0-3fdd-42aa-a1a1-a62d486f7622}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM FeedRoller
+VAR
+	step: INT;
+	
+	_run : BOOL;
+	
+	start_RTrig : R_TRIG;
+	start_FTrig : F_TRIG;
+	
+	_bError : BOOL;
+	
+	tmr0 : TON;
+	tmr1 : TON;
+END_VAR
+
+VAR_OUTPUT
+	bDone: BOOL;
+	bBuzy: BOOL;
+	bError: BOOL;
+	
+	Move_Fwd : BOOL;
+	Move_Rev : BOOL;
+	At_Up : BOOL;
+	At_Down : BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (EStop OR SystemError OR Input.Feed_Reset) AND bBuzy THEN
+	IF bBuzy THEN
+		step := step  + 10000;
+	END_IF
+	IO.q114 := FALSE;
+	IO.q115 := FALSE;
+	IO.q305 := FALSE;
+	IO.q306 := FALSE;
+END_IF
+
+
+// 外部 送入 啟動訊號
+start_RTrig(CLK := Input.In_Moter_Start );
+
+IF	start_RTrig.q THEN
+	step := 1;
+END_IF
+
+// 外部 解除 啟動訊號
+start_FTrig(CLK := Input.In_Moter_Start);
+
+IF start_FTrig.Q THEN
+	step := 100;
+END_IF
+
+// 執行動作發生錯誤
+_bError := step > 10000;
+
+IF _bError THEN
+	_run := FALSE;
+	IO.q103 := FALSE;
+	IO.q102 := FALSE;
+END_IF
+
+// 馬達 動作中過載檢知
+IF IO.i109 AND step > 0 AND step < 10000 THEN
+	step := 10900;
+END_IF
+
+bBuzy := step > 0 AND step < 10000;
+bError := step > 10000;
+
+IF bBuzy THEN
+	bDone := FALSE;
+END_IF
+
+step_0_Auto_Start();
+step_1_Auto_Stop();
+step_7_Jog_FwdRev();
+step_8_Jog_UpDown();
+
+Output.In_Moter_Running := step > 0 OR Move_Fwd OR Move_Rev;
+Output.In_Moter_Error := _bError;
+
+tmr0();
+tmr1();
+
+Move_Fwd	:= IO.q103;
+Move_Rev	:= IO.q102;
+At_Up		:= IO.i411;
+At_Down		:= IO.i412;]]></ST>
+    </Implementation>
+    <Folder Name="內部動作" Id="{47b6a848-b1d5-46ec-8f62-40040615a3f0}" />
+    <Method Name="Jog_Down" Id="{c9cc5a65-fbdb-4941-ab50-276bee3dcba7}">
+      <Declaration><![CDATA[METHOD Jog_Down
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+
+step := 820;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Jog_Fwd" Id="{bd1ce346-ddad-4475-8083-2b88d06e40f5}">
+      <Declaration><![CDATA[METHOD Jog_Fwd
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+
+step := 700;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Jog_Rev" Id="{37b5d3e9-e9eb-4c82-9e99-3b227a2e87a8}">
+      <Declaration><![CDATA[METHOD Jog_Rev
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+
+step := 720;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Jog_Stop" Id="{7a9649e2-f14f-47ae-916c-0256c32b4f73}">
+      <Declaration><![CDATA[METHOD Jog_Stop
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 780;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Jog_Up" Id="{c4a62127-ea09-46ec-ac63-440e44ba3595}">
+      <Declaration><![CDATA[METHOD Jog_Up
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+
+step := 800;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="step_0_Auto_Start" Id="{76b2a0c6-243b-4f19-a2df-7cbff707ba0f}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	1:
+		IF IO.i109 THEN
+			// 滾輪馬達保護氣跳脫
+			step := step + 10000;
+// 		ELSIF NOT IO.i314 THEN
+// 			// 測高位置錯誤
+// 			step := step + 10000;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	2:
+		IF HeightMeasurer.bBuzy THEN
+			// 測高動作執行中
+			step := step + 10000;
+		ELSE
+			// 進料動作執行中
+			step := step + 1;
+		END_IF
+		
+	3:
+		step := 10;
+		
+	10:
+		IO.q309 := TRUE;
+		IO.q310 := FALSE;
+		IO.q311 := TRUE;
+		IO.q312 := FALSE;
+		tmr1.PT := T#10S;
+		tmr1.IN := TRUE;
+		step := step + 1;
+		
+	11:
+		IF NOT IO.i412 OR tmr1.Q THEN
+			IO.q309 := FALSE;
+			IO.q311 := FALSE;
+			tmr1.IN := FALSE;
+			IF NOT IO.i412 THEN
+				step := step + 1;
+			ELSE
+				// 上升超時
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	12:
+		step := 20;
+		
+	20:
+		IO.q103 := TRUE;
+		_run :=	TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_1_Auto_Stop" Id="{ba37e0ae-0b7c-4d9c-a676-7e438d1becf0}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	100:
+		IO.q309 := FALSE;
+		IO.q311 := FALSE;
+		IO.q103 := FALSE;
+		step := step + 1;
+		
+	101:
+		tmr0.PT:= T#1S;
+		tmr0.IN := TRUE;
+		IF tmr0.Q THEN
+			tmr0.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	102:
+		step := 110;
+		
+	110:
+		IO.q310 := TRUE;
+		IO.q312 := TRUE;
+		tmr1.PT := T#10S;
+		tmr1.IN := TRUE;
+		step := step + 1;
+		
+	111:
+		IF IO.i412 OR tmr1.Q THEN
+			IO.q310 := FALSE;
+			IO.q312 := FALSE;
+			tmr1.IN := FALSE;
+			IF IO.i412 THEN
+				step := step + 1;
+			ELSE
+				// 上升超時
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	112:
+		_run :=	FALSE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7_Jog_FwdRev" Id="{bba9ebf5-3eed-4bad-81dc-a2f1a500c145}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	700:
+		IO.q102 := FALSE;
+		IF IO.i109 THEN
+			// 滾輪馬達保護氣跳脫
+			step := step + 10000;
+// 		ELSIF NOT IO.i314 THEN
+// 			// 測高位置錯誤
+// 			step := step + 10000;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	701: // 啟動馬達
+		IO.q103 := TRUE;
+		bDone := TRUE;
+		step := 0;
+		
+	
+		
+
+
+	720:
+		IO.q103 := FALSE;
+		IF IO.i109 THEN
+			// 滾輪馬達保護氣跳脫
+			step := step + 10000;
+// 		ELSIF NOT IO.i314 THEN
+// 			// 測高位置錯誤
+// 			step := step + 10000;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	721:
+		IO.q102 := TRUE;
+		bDone := TRUE;
+		step := 0;
+		
+	
+		
+
+
+	780:
+		IO.q102 := FALSE;
+		IO.q103 := FALSE;
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8_Jog_UpDown" Id="{d15ce6a1-eac3-452d-9200-c5d63c805c0b}" FolderPath="內部動作\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	800:
+		IO.q309 := TRUE;
+		IO.q310 := FALSE;
+		IO.q311 := TRUE;
+		IO.q312 := FALSE;
+		
+		tmr1.PT := T#10S;
+		tmr1.IN := TRUE;
+		step := step + 1;
+		
+	801: // 滾輪上升
+		IF NOT IO.i412 OR tmr1.Q THEN
+			IO.q309 := FALSE;
+			IO.q311 := FALSE;
+			tmr1.IN := FALSE;
+			IF NOT IO.i412 THEN
+				step := step + 1;
+			ELSE
+				// 上升超時
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	802:
+		bDone := TRUE;
+		step := 0;
+		
+	
+		
+
+
+	820:
+		IO.q309 := FALSE;
+		IO.q310 := TRUE;
+		IO.q311 := FALSE;
+		IO.q312 := TRUE;
+		
+		tmr1.PT := T#10S;
+		tmr1.IN := TRUE;
+		step := step + 1;
+		
+	821: // 滾輪上升
+		IF IO.i412 OR tmr1.Q THEN
+			IO.q310 := FALSE;
+			IO.q312 := FALSE;
+			tmr1.IN := FALSE;
+			IF IO.i412 THEN
+				step := step + 1;
+			ELSE
+				// 上升超時
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	822:
+		bDone := TRUE;
+		step := 0;
+		
+	
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

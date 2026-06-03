@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="AxisTest" Id="{35f06738-183f-40dd-9282-b9cb3d9688ea}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	test_Action_List : ARRAY [0..10] OF TestAction;
+	
+	pos :  ARRAY [0..3] OF LREAL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

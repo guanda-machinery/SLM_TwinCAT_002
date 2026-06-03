@@ -1,0 +1,478 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="ReadSQLData" Id="{474d9dcb-12b7-4b18-8dca-ae307114c8cd}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM ReadSQLData
+VAR
+	step : INT;	
+
+	_fb_PLCDBCmdEvt : FB_PLCDBCmdEvt(sNetID:= '', tTimeout:= T#5S );
+
+	
+	_SqlCommand : STRING(1024);
+	
+	// 讀回的資料筆數
+	read_num: UDINT;
+	
+	// 帶入參數
+	_stPara		: ARRAY [0..5] OF ST_ExpParameter;
+	
+	tcMessage     : I_TcMessage;
+	
+	database_server_id: UDINT := 2;
+	
+	_uuid : STRING(36);
+	
+	_DataExists :BOOL;
+	
+	_tmp_db_Steel_Status : sc_db_Steel_Status;
+	
+	_waitLoading_Pos : sc_db_Set_Work_Order_WaitLoading_Pos;
+	
+	test: PVOID;
+	TmrWdt: TON;
+	_tmp_number: INT;
+END_VAR
+
+VAR_OUTPUT
+	bBuzy	: BOOL;
+	bDone	: BOOL;
+	bError	: BOOL;
+	
+	fNext_XPos	: LREAL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+bBuzy := step > 0 AND step < 10000;
+
+bError := step > 10000;
+
+IF bBuzy OR bError  THEN
+	bDone := FALSE;
+END_IF
+
+TmrWdt(in := bBuzy, PT:=T#20S);
+IF TmrWdt.Q THEN
+	pMsg.Push_alarm(
+				ErrorCodeConver.Str2("ReadSQLData", ":功能執行超時", TO_DWORD(step))
+			);
+	step := step + 10000;
+END_IF
+
+IF step = 0 THEN
+	RETURN;
+END_IF
+
+
+
+Stap_0100_Get_Work_Order();
+Stap_1000_Set_Work_Order_Status();
+Stap_1100_Set_Work_Order_WaitLoading_Pos();]]></ST>
+    </Implementation>
+    <Folder Name="入口" Id="{00a5c9bb-ce94-419b-a8d6-2382132a9550}" />
+    <Method Name="Get_WorkkOrder" Id="{c646221a-bbdb-48c4-aae7-16cd28b396a5}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Get_WorkkOrder
+VAR_INPUT
+	Status : STRING := 'holding';
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bdone := FALSE;
+
+_uuid := Status;
+
+step := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Work_Order_2_inSide" Id="{a84c68f5-c8b6-4015-b793-4edba85cb0bd}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Set_Work_Order_2_inSide
+VAR_INPUT
+	id : UINT;
+	
+	(*
+	finish 加工完成
+	inSide 入料  
+	holding 暫存中(在吊掛區等待進入料架)
+	machining 加工中
+	alignment 無靠邊插單
+	inserts 插單
+	waitLoading 等待上料(在料架上等待，後進入機台)
+	waitUnloading 等待下料(在料架上等待，後進入出料吊掛區或其他機台)
+	paired 已配對
+	pairing 配對中
+	pairedFailed 配對失敗
+	dxfTransferring DXF 傳輸中
+	connectedFailed 連線失敗
+	transformFailed 轉換失敗
+	waitPaired 等待配對
+	pairedCancel 配對取消
+	unknown 未知
+	*)
+// 	status : STRING(80) := '';
+	
+	(*
+		holdingEntranceRack 吊掛入料區
+		entranceRack 入料區
+		holdingExitRack 吊掛出料區
+		exitRack 出料區
+		machine 機台內
+	*)
+// 	location : STRING(80) := '';
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_tmp_db_Steel_Status.uuid := ProjectData.WorkOrder_At_waitLoading[id].steel_id;
+
+_tmp_db_Steel_Status.steel_status := 'inSide';
+
+_tmp_db_Steel_Status.steel_location := 'entranceRack';
+
+step := 1000;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Work_Order_2_waitLoading" Id="{edde6e6b-c929-4fff-b797-d3bce5edc471}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Set_Work_Order_2_waitLoading
+VAR_INPUT
+	id : UINT;
+	
+	(*
+	finish 加工完成
+	inSide 入料  
+	holding 暫存中(在吊掛區等待進入料架)
+	machining 加工中
+	alignment 無靠邊插單
+	inserts 插單
+	waitLoading 等待上料(在料架上等待，後進入機台)
+	waitUnloading 等待下料(在料架上等待，後進入出料吊掛區或其他機台)
+	paired 已配對
+	pairing 配對中
+	pairedFailed 配對失敗
+	dxfTransferring DXF 傳輸中
+	connectedFailed 連線失敗
+	transformFailed 轉換失敗
+	waitPaired 等待配對
+	pairedCancel 配對取消
+	unknown 未知
+	*)
+// 	status : STRING(80) := '';
+	
+	(*
+		holdingEntranceRack 吊掛入料區
+		entranceRack 入料區
+		holdingExitRack 吊掛出料區
+		exitRack 出料區
+		machine 機台內
+	*)
+// 	location : STRING(80) := '';
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_tmp_db_Steel_Status.uuid := ProjectData.WorkOrder_At_holding[id].steel_id;
+
+_tmp_db_Steel_Status.steel_status := 'waitLoading';
+
+_tmp_db_Steel_Status.steel_location := '';
+
+step := 1000;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Work_Order_WaitLoading_Pos" Id="{a7532598-dd87-4a79-b22b-62061bbc0224}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD  Set_Work_Order_WaitLoading_Pos : BOOL
+VAR_INPUT
+	id : uint;
+	Pos : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_waitLoading_Pos.uuid := ProjectData.WorkOrder_At_holding[id].steel_id;
+_waitLoading_Pos.Pos := Pos;
+
+step := 1100;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Stap_0100_Get_Work_Order" Id="{aa253295-28f4-4c07-ab72-27c0effe1e2d}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	100:
+		step := step + 1;
+
+	101:
+		// SQL命令
+		_SqlCommand := 
+		'
+		SELECT 
+			"sequence_number",
+			s.height,
+			s.width,
+			CAST("part_nest_id" as char(36)),
+			waitloading_at_pos
+		FROM
+			"public"."work_order_data" 
+		LEFT JOIN 
+			"public"."steeldata" s 
+		ON 
+			s.id = part_nest_id::uuid
+		WHERE
+ 			"steel_status" = $'holding$' AND work_order_data.processing_project_id = {id}
+		ORDER BY 
+			"sequence_number"
+		';
+	
+		// 設定對應參數
+ 		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := SIZEOF(_uuid);
+		step := step + 1;
+		
+	102:
+		IF 
+			_fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(Input.Feed_WorkOrder_UUID),							// 帶入的參數值
+				cbData:= SIZEOF(Input.Feed_WorkOrder_UUID),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 1,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 32,
+				pReturnData := ADR(ProjectData.WorkOrder_At_holding),
+				cbReturnData := SIZEOF(ProjectData.WorkOrder_At_holding),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF _fb_PLCDBCmdEvt.bError THEN
+				tcMessage := _fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				ProjectData.WorkOrder_Nunber_At_holding := TO_UINT(read_num);
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	103:
+		step := 110;
+		
+	110:
+		step := 111;
+		
+	111:
+		// SQL命令
+		_SqlCommand := 
+		'
+		SELECT 
+			"sequence_number",
+			s.height,
+			s.width,
+			CAST("part_nest_id" as char(36)),
+			waitloading_at_pos
+		FROM
+			"public"."work_order_data" 
+		LEFT JOIN 
+			"public"."steeldata" s 
+		ON 
+			s.id = part_nest_id::UUID
+		WHERE
+ 			"steel_status" = $'waitLoading$'
+		ORDER BY 
+			"sequence_number"
+		';
+	
+		step := step + 1;
+		
+	112:
+		IF 
+			_fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= 0,									// 帶入的參數值
+				cbData:= 0,									// 帶入的參數值大小
+				pParameter:= 0,					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= 0,		// 帶入的參數類型設定的大小
+// 				pData:= ADR(_uuid),							// 帶入的參數值
+// 				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+// 				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+// 				cbParameter:= SIZEOF(_stPara[0]) * 1,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 32,
+				pReturnData := ADR(ProjectData.WorkOrder_At_waitLoading),
+				cbReturnData := SIZEOF(ProjectData.WorkOrder_At_waitLoading),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF _fb_PLCDBCmdEvt.bError THEN
+				tcMessage := _fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				ProjectData.WorkOrder_Nunber_At_waitLoading := TO_UINT(read_num);
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	113:
+		step := 120;
+		
+	120:
+		step := 121;
+		
+	121:
+		// SQL命令
+		_SqlCommand := 
+		'
+		SELECT 
+			Count(*)::int2
+		FROM
+			public.work_order_data
+		WHERE
+ 			steel_status = $'machine$'
+		';
+	
+		step := step + 1;
+		
+	122:
+		IF 
+			_fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= 0,									// 帶入的參數值
+				cbData:= 0,									// 帶入的參數值大小
+				pParameter:= 0,					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= 0,		// 帶入的參數類型設定的大小
+// 				pData:= ADR(_uuid),							// 帶入的參數值
+// 				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+// 				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+// 				cbParameter:= SIZEOF(_stPara[0]) * 1,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(ProjectData.WorkOrder_Nunber_At_Machining),
+				cbReturnData := SIZEOF(ProjectData.WorkOrder_Nunber_At_Machining),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF _fb_PLCDBCmdEvt.bError THEN
+				tcMessage := _fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	123:
+		step := 130;
+		
+	130:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_1000_Set_Work_Order_Status" Id="{f25f8939-bb01-4466-92d0-f24fe3450d29}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	1000:
+		IF len(_tmp_db_Steel_Status.steel_location) > 0 OR len(_tmp_db_Steel_Status.steel_status) > 0 THEN
+			step := step + 1;
+		ELSE
+			step := step + 10000;
+		END_IF
+		
+	1001:
+		step := 1010;
+
+	1010:
+		_SqlCommand := ' UPDATE work_order_data SET ';
+		IF len(_tmp_db_Steel_Status.steel_status) > 0 THEN
+			_SqlCommand := CONCAT(STR1:= _SqlCommand, STR2:= 'steel_status = {status}');
+		END_IF
+		IF len(_tmp_db_Steel_Status.steel_location) > 0 THEN
+			_SqlCommand := CONCAT(STR1:= _SqlCommand, STR2:= ', steel_location = {location}');
+		END_IF
+		// SQL命令
+		_SqlCommand := CONCAT(STR1:= _SqlCommand, STR2:= ' WHERE part_nest_id = {id}');
+	
+		// 設定對應參數
+ 		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		_stPara[1].sParaName := 'status'; 		_stPara[1].eParaType := E_ExpParameterType.STRING_; 		_stPara[1].nParaSize := 81;
+		_stPara[2].sParaName := 'location'; 	_stPara[2].eParaType := E_ExpParameterType.STRING_; 		_stPara[2].nParaSize := 81;
+		step := step + 1;
+		
+	1011:
+		IF 
+			_fb_PLCDBCmdEvt.Execute(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_tmp_db_Steel_Status),			// 帶入的參數值
+				cbData:= SIZEOF(_tmp_db_Steel_Status),		// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 3,		// 帶入的參數類型設定的大小
+			) 
+		THEN
+			IF _fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+		END_IF
+		
+	1012:
+		pMsg.Push_Info(WStrConcat(
+				"Set_Steel_Start: ",
+				WLEFT(STR:= TO_WSTRING(_uuid), SIZE:= 8),
+				" :狀態設定為:",
+				TO_WSTRING(_tmp_db_Steel_Status.steel_status)
+				));
+		bDone :=TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_1100_Set_Work_Order_WaitLoading_Pos" Id="{86c8c256-bb6e-45c4-a305-71c6be30b212}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	1100:
+		step := 1110;
+
+	1110:
+		_SqlCommand := ' 
+			UPDATE work_order_data 
+			SET waitloading_at_pos = {pos}
+			WHERE part_nest_id = {id}
+			';
+			
+		// 設定對應參數
+ 		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		_stPara[1].sParaName := 'pos'; 			_stPara[1].eParaType := E_ExpParameterType.Double64; 		_stPara[1].nParaSize := 8;
+		step := step + 1;
+		
+	1111:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.Execute(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_waitLoading_Pos),			// 帶入的參數值
+				cbData:= SIZEOF(_waitLoading_Pos),		// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 2,		// 帶入的參數類型設定的大小
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+		END_IF
+		
+	1112:
+		bDone :=TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>
