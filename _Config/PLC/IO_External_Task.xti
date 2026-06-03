@@ -21,7 +21,7 @@
 		</DataType>
 	</DataTypes>
 	<Project GUID="{83343E19-A944-4C4E-91CE-DDD337BD3D82}" Name="IO_External_Task" PrjFilePath="..\..\IO_External_Task\IO_External_Task.plcproj" TmcFilePath="..\..\IO_External_Task\IO_External_Task.tmc" ReloadTmc="true" AmsPort="854" FileArchiveSettings="#x000e" SymbolicMapping="true">
-		<Instance Id="#x085020c0" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{BA374780-2709-8496-B4C5-7C010A68EE98}" TmcPath="IO_External_Task\IO_External_Task.tmc">
+		<Instance Id="#x085020c0" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{12614795-BC8C-51DE-B944-DEB31B5695FD}" TmcPath="IO_External_Task\IO_External_Task.tmc">
 			<Name>IO_External_Task Instance</Name>
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 			<Vars VarGrpType="2" AreaNo="1">

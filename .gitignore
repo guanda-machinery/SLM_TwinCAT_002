@@ -3,6 +3,8 @@
 .qodo/
 
 # TwinCAT / Visual Studio build & user-specific files
+_CompileInfo_Upload/
+/.vs
 _Boot/
 _CompileInfo/
 _Deployment/
@@ -13,8 +15,10 @@ obj/
 *.tpy
 *.~u
 *.bak
+*.tmc
 
 # OS
 Thumbs.db
 Desktop.ini
 .DS_Store
+

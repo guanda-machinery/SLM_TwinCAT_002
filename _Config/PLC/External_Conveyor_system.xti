@@ -1055,7 +1055,7 @@ External Setpoint Generation:
 		</DataType>
 	</DataTypes>
 	<Project GUID="{79B5F322-41CA-4489-8A96-7D44E06BFD68}" Name="External_Conveyor_system" PrjFilePath="..\..\External_Conveyor_system\External_Conveyor_system.plcproj" TmcFilePath="..\..\External_Conveyor_system\External_Conveyor_system.tmc" ReloadTmc="true" AmsPort="852" FileArchiveSettings="#x000e" SymbolicMapping="true">
-		<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{CC266943-1455-98C8-FE5F-595C57884D1C}" TmcPath="External_Conveyor_system\External_Conveyor_system.tmc">
+		<Instance Id="#x08502040" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{CDF5773F-6AE7-105A-7D05-C24CFA72AA30}" TmcPath="External_Conveyor_system\External_Conveyor_system.tmc">
 			<Name>External_Conveyor_system Instance</Name>
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 			<Vars VarGrpType="8" AreaNo="4">

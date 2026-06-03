@@ -1753,8 +1753,8 @@ External Setpoint Generation:
 	</ImageDatas>
 	<Project ProjectGUID="{33494338-7D6D-4B94-B52F-3D84D6163BD1}" TargetNetId="5.143.127.236.1.1" Target64Bit="true" RelativeTargetNetId="true" RelativeIpAddresses="true" SaveSolutionArchive="true" ShowHideConfigurations="#x1c6">
 		<System>
-			<Settings MaxCpus="4" MaxStackSize="128">
-				<Cpu/>
+			<Settings MaxCpus="4" NonWinCpus="2" MaxStackSize="128">
+				<Cpu CpuId="2"/>
 				<Cpu CpuId="3"/>
 			</Settings>
 			<Licenses>
@@ -1775,7 +1775,7 @@ External Setpoint Generation:
 				<Task Id="7" Priority="28" CycleTime="20000" AmsPort="352" AutoStart="false" AdtTasks="true">
 					<Name>MPG_View</Name>
 				</Task>
-				<Task Id="10" Priority="22" CycleTime="100000" AmsPort="355" Affinity="#x00000001" AdtTasks="true">
+				<Task Id="10" Priority="22" CycleTime="100000" AmsPort="355" AdtTasks="true">
 					<Name>Conveyor</Name>
 				</Task>
 			</Tasks>
