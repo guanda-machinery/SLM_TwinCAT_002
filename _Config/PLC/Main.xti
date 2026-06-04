@@ -1251,10 +1251,10 @@ External Setpoint Generation:
 		</DataType>
 	</DataTypes>
 	<Project GUID="{9921DBC6-8FA2-4ECB-8283-76D7776F3D73}" Name="Main" PrjFilePath="..\..\Main\Main.plcproj" TmcFilePath="..\..\Main\Main.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x000e" CopyTmcToTarget="true" SymbolicMapping="true">
-		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="1" TmcHash="{8FFA382A-1A93-45F0-2F1C-939F18F5E168}" TmcPath="Main\Main.tmc">
+		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="1" TmcHash="{58174486-0226-4049-E374-1D8D78BFF833}" TmcPath="Main\Main.tmc">
 			<Name>Main Instance</Name>
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
-			<Vars VarGrpType="2" AreaNo="1">
+			<Vars VarGrpType="2" ContextId="1" AreaNo="17">
 				<Name>PlcTask Outputs</Name>
 				<Var>
 					<Name>Sensor.sensorA.out_rawdata</Name>
@@ -1661,7 +1661,7 @@ External Setpoint Generation:
 					<Type>BOOL</Type>
 				</Var>
 			</Vars>
-			<Vars VarGrpType="1">
+			<Vars VarGrpType="1" ContextId="1" AreaNo="16">
 				<Name>PlcTask Inputs</Name>
 				<Var>
 					<Name>GetEtherSta.sNetId</Name>
@@ -2448,6 +2448,15 @@ External Setpoint Generation:
 			<Contexts>
 				<Context>
 					<Id>0</Id>
+					<Name>NC_Task_1_SAF</Name>
+					<ManualConfig>
+						<OTCID>#x05000010</OTCID>
+					</ManualConfig>
+					<Priority>4</Priority>
+					<CycleTime>2000000</CycleTime>
+				</Context>
+				<Context>
+					<Id>1</Id>
 					<Name>PlcTask</Name>
 					<ManualConfig>
 						<OTCID>#x02010050</OTCID>
@@ -2457,6 +2466,7 @@ External Setpoint Generation:
 				</Context>
 			</Contexts>
 			<TaskPouOids>
+				<TaskPouOid Prio="4" OTCID="#x08502002"/>
 				<TaskPouOid Prio="14" OTCID="#x08502001"/>
 			</TaskPouOids>
 		</Instance>

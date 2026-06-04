@@ -411,13 +411,21 @@ END_CASE
 		Hmi_Web.Process_Data_UUID_B_Start := TRUE;
 		step := step + 1;
 		
-	312:
+	312:	
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	313:
 		IF NOT Hmi_Web.Process_Data_UUID_B_Start THEN
 			Hmi_Web.Process_Data_UUID_B :='';
 			step := step + 1;
 		END_IF
 	
-	313:
+	314:
 		q_Lens_Blow := FALSE;
 		WorkNum := WorkNum + 1;
 		step := 320;
