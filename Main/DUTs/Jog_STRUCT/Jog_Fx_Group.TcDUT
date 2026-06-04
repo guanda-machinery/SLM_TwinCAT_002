@@ -48,6 +48,11 @@ STRUCT
 	H_Open : BOOL;
 	// 滾輪夾保持
 	H_Hold : BOOL;
+	
+	// 外部編碼器接觸
+	ExEncTouch : BOOL;
+	// 外部編碼器脫離
+	ExEncExit : BOOL;
 END_STRUCT
 END_TYPE
 ]]></Declaration>

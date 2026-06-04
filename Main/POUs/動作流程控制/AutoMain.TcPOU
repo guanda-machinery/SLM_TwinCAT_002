@@ -3722,7 +3722,13 @@ CASE step OF
 		ELSIF Hmi_Web.Jog_FxA.P THEN
 			step := 9360;
 		ELSIF Hmi_Web.Jog_FxA.N THEN
-			step := 9380;
+			step := 9370;
+		ELSIF Hmi_Web.Jog_FxA.ExEncTouch THEN
+			IO.q311 := TRUE;
+			IO.q311 := FALSE;
+		ELSIF Hmi_Web.Jog_FxA.ExEncExit THEN
+			IO.q311 := FALSE;
+			IO.q311 := TRUE;
 		ELSIF Hmi_Web.Jog_FxB.H_Close THEN
 			step := 9400;
 		ELSIF Hmi_Web.Jog_FxB.H_Hold THEN
@@ -3733,6 +3739,17 @@ CASE step OF
 			step := 9430;
 		ELSIF Hmi_Web.Jog_FxB.V_Open THEN
 			step := 9440;
+		ELSIF Hmi_Web.Jog_FxB.ExEncTouch THEN
+			IO.q313 := TRUE;
+			IO.q314 := FALSE;
+		ELSIF Hmi_Web.Jog_FxB.ExEncExit THEN
+			IO.q313 := FALSE;
+			IO.q314 := TRUE;
+		ELSE
+			IO.q311 := FALSE;
+			IO.q311 := FALSE;
+			IO.q313 := FALSE;
+			IO.q314 := FALSE;
 		END_IF
 		
 		IF Hmi.Jog_Mode OR Hmi.MPG_Mode OR Hmi.Auto_Mode OR
@@ -4825,20 +4842,21 @@ CASE step OF
 				滾輪反轉
   ====================================*) 
 		
-	9380:
+	9370:
 		Fx.RelMove(-100000, 200 * Hmi.Jog_Speed * 0.01);
 		step := step + 1;
 		
-	9381:
+	9371:
 		IF Fx.bDone OR Fx.bError OR NOT Hmi_Web.Jog_FxA.N THEN
 			step := 9389;
 		END_IF
 		
-	9389:
+	9379:
 		Fx.Stop();
 		IF NOT Hmi_Web.Jog_FxA.N THEN
 			step:=8001;
 		END_IF
+		
 END_CASE]]></ST>
       </Implementation>
     </Action>
