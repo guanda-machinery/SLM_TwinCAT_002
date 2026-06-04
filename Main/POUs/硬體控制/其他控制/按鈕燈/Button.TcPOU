@@ -294,7 +294,7 @@ IF pc_AbortShutdown2.BUSY  THEN
 END_IF
 
 pc_Shutdown(
-	NETID:= '169.254.139.155.1.1', 
+	NETID:= '192.168.31.180.1.1', 
 	DELAY:= 10
 );
 
@@ -304,7 +304,7 @@ pc_Shutdown2(
 );
 
 pc_AbortShutdown(
-	NETID:= '169.254.139.155.1.1'
+	NETID:= '192.168.31.180.1.1'
 );
 
 pc_AbortShutdown2(

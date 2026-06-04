@@ -38,6 +38,8 @@ ReadSQLData();
 
 PullOver();
 
+HMI_WEB_dataConver();
+
 MsgMain();]]></ST>
     </Implementation>
   </POU>

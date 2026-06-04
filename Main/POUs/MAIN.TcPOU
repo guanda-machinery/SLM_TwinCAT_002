@@ -38,9 +38,6 @@ ReadSQLData();
 
 LogFx();
 
-// C++操作介面
-//CppHmi();
-
 MsgMain();
 
 LightTower();

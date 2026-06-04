@@ -2491,20 +2491,6 @@ External Setpoint Generation:
 				<Link VarA="PlcTask Outputs^Sensor.sensorC.out_rawdata" VarB="Module 3 (IOL_4/4_I/O-Bytes)^RxPDO^output byte 0"/>
 				<Link VarA="PlcTask Outputs^Sensor.sensorD.out_rawdata" VarB="Module 4 (IOL_4/4_I/O-Bytes)^RxPDO^output byte 0"/>
 			</OwnerB>
-			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 2 (AMAX-4870)^Box 3 (AMAX-4870)^Box 4 (AMAX-4870)^Term 26 (EK1100)^Term 27 (EL5102)">
-				<Link VarA="PlcTask Inputs^Axis.Encoder_FxA_PosEnc.MDP5001_511_Input^MDP5001_511_Counter_value" VarB="ENC Status Channel 1^Counter value"/>
-				<Link VarA="PlcTask Inputs^Axis.Encoder_FxA_PosEnc.MDP5001_511_Input^MDP5001_511_Latch_value" VarB="ENC Status Channel 1^Latch value"/>
-				<Link VarA="PlcTask Inputs^Axis.Encoder_FxA_PosEnc.MDP5001_511_Input^MDP5001_511_Latch_value_2" VarB="ENC Status Channel 1^Latch value 2"/>
-				<Link VarA="PlcTask Inputs^Axis.Encoder_FxA_PosEnc.MDP5001_511_Input^MDP5001_511_Status" VarB="ENC Status Channel 1^Status"/>
-				<Link VarA="PlcTask Inputs^Axis.Encoder_FxB_PosEnc.MDP5001_511_Input^MDP5001_511_Counter_value" VarB="ENC Status Channel 2^Counter value"/>
-				<Link VarA="PlcTask Inputs^Axis.Encoder_FxB_PosEnc.MDP5001_511_Input^MDP5001_511_Latch_value" VarB="ENC Status Channel 2^Latch value"/>
-				<Link VarA="PlcTask Inputs^Axis.Encoder_FxB_PosEnc.MDP5001_511_Input^MDP5001_511_Latch_value_2" VarB="ENC Status Channel 2^Latch value 2"/>
-				<Link VarA="PlcTask Inputs^Axis.Encoder_FxB_PosEnc.MDP5001_511_Input^MDP5001_511_Status" VarB="ENC Status Channel 2^Status"/>
-				<Link VarA="PlcTask Outputs^Axis.Encoder_FxA_PosEnc.MDP5001_511_Output^MDP5001_511_Control" VarB="ENC Control Channel 1^Control"/>
-				<Link VarA="PlcTask Outputs^Axis.Encoder_FxA_PosEnc.MDP5001_511_Output^MDP5001_511_Set_counter_value" VarB="ENC Control Channel 1^Set counter value"/>
-				<Link VarA="PlcTask Outputs^Axis.Encoder_FxB_PosEnc.MDP5001_511_Output^MDP5001_511_Control" VarB="ENC Control Channel 2^Control"/>
-				<Link VarA="PlcTask Outputs^Axis.Encoder_FxB_PosEnc.MDP5001_511_Output^MDP5001_511_Set_counter_value" VarB="ENC Control Channel 2^Set counter value"/>
-			</OwnerB>
 			<OwnerB Name="TIID^Device 2 (EtherCAT)^Box 1 (AMAX-4870)^Box 2 (AMAX-4870)^Box 3 (AMAX-4870)^Box 4 (AMAX-4870)^Term 26 (EK1100)^Term 28 (EL5102)">
 				<Link VarA="PlcTask Inputs^Axis.Encoder_FxA_Clamp.MDP5001_511_Input^MDP5001_511_Counter_value" VarB="ENC Status Channel 1^Counter value"/>
 				<Link VarA="PlcTask Inputs^Axis.Encoder_FxA_Clamp.MDP5001_511_Input^MDP5001_511_Latch_value" VarB="ENC Status Channel 1^Latch value"/>

@@ -231,6 +231,9 @@
     <Compile Include="MSG\通知訊息\uuidv7_g.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="NC_Task_1_SAF.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PlcTask.TcTTO">
       <SubType>Code</SubType>
     </Compile>

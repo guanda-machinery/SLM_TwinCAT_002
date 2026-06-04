@@ -34,7 +34,8 @@ VAR_GLOBAL
 	// 動力滾輪下降
 	Roller_Down : BOOL;
 	
-	
+	// 橫移台車位置
+	Car_Pos : LREAL;
 	// 橫移台車正轉
 	Car_Fwd_S : BOOL;
 	// 橫移台車反轉
