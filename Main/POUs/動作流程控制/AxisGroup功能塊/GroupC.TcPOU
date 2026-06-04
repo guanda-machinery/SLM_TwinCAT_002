@@ -294,7 +294,7 @@ END_VAR
 	===============================================*)
 	110:
 		ProjectData.Payload_C_Data_Now := ProjectData.Payload_C_Data_buff[WorkNum];
-		Hmi_Web.Process_Data_UUID_C := ProjectData.Payload_C_Data_buff[WorkNum].data_uid;
+		Hmi_Web.Process_Data_UUID_A := ProjectData.Payload_C_Data_buff[WorkNum].data_uid;
 		step := step + 1;
 	
 	111:
@@ -351,7 +351,7 @@ END_CASE]]></ST>
 	===============================================*)
 	210:
 		ProjectData.Payload_C_Data_Now := ProjectData.Payload_C_Data_buff[WorkNum];
-		Hmi_Web.Process_Data_UUID_C := ProjectData.Payload_C_Data_buff[WorkNum].data_uid;
+		Hmi_Web.Process_Data_UUID_A := ProjectData.Payload_C_Data_buff[WorkNum].data_uid;
 		step := step + 1;
 	
 	211:
@@ -374,6 +374,13 @@ END_CASE]]></ST>
 		END_IF
 		
 	222:
+		IF stepA.bDone THEN
+			step := step + 1;
+		ELSIF stepA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	223:
 		step := 230;
 
 (*	===============================================
@@ -411,7 +418,7 @@ END_CASE
 		step := step + 1;
 		
 	311:
-		Hmi_Web.Process_Data_UUID_C_Start := TRUE;
+		Hmi_Web.Process_Data_UUID_A_Start := TRUE;
 		step := step + 1;
 		
 	312:	
@@ -423,8 +430,8 @@ END_CASE
 		END_IF
 		
 	313:
-		IF NOT Hmi_Web.Process_Data_UUID_C_Start THEN
-			Hmi_Web.Process_Data_UUID_C :='';
+		IF NOT Hmi_Web.Process_Data_UUID_A_Start THEN
+			Hmi_Web.Process_Data_UUID_A :='';
 			step := step + 1;
 		END_IF
 	

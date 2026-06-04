@@ -371,6 +371,13 @@ END_CASE]]></ST>
 		END_IF
 		
 	222:
+		IF stepA.bDone THEN
+			step := step + 1;
+		ELSIF stepA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	223:
 		step := 230;
 
 (*	===============================================
