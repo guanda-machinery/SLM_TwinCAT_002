@@ -25,9 +25,6 @@ VAR_GLOBAL
 	Now_Steel_H_m : LREAL;
 	Now_Steel_W_m : LREAL;
 	
-	// Dxf File buffer 1MB x 4
-	LaserDxf_FileBuff : ARRAY [0..3] OF SQL_DxfFileStruct;
-	
 	// 雷射參數 暫存區
 	LaserParameter : ARRAY [0..3] OF LaserParameter_Data;
 	
@@ -38,7 +35,6 @@ VAR_GLOBAL
 	Payload_A_Data_Now : LaserProcess_Data;
 	// A面加工資訊預讀
 	Payload_A_Data_buff : ARRAY [0..50] OF LaserProcess_Data;
-	
 	// A面加工完成數量
 	Now_Steel_Payload_A_DataNumber_Done : INT;
 	
@@ -49,8 +45,6 @@ VAR_GLOBAL
 	Payload_B_Data_Now : LaserProcess_Data; //115 byte
 	// B面加工資訊緩衝區
 	Payload_B_Data_buff : ARRAY [0..50] OF LaserProcess_Data;
-	// B面加工 已下載到雷射主機的 DXF名稱
-	Payload_B_DxfName_In_LaserPrinter : ARRAY [0..50] OF STRING;
 	// B面加工完成數量
 	Now_Steel_Payload_B_DataNumberDone : INT;
 	
@@ -61,8 +55,6 @@ VAR_GLOBAL
 	Payload_C_Data_Now : LaserProcess_Data; //115 byte
 	// C面加工資訊緩衝區
 	Payload_C_Data_buff : ARRAY [0..50] OF LaserProcess_Data;
-	// C面加工 已下載到雷射主機的 DXF名稱
-	Payload_C_DxfName_In_LaserPrinter : ARRAY [0..50] OF STRING;
 	// C面加工完成數量
 	Now_Steel_Payload_C_DataNumberDone : INT;
 	
@@ -73,8 +65,6 @@ VAR_GLOBAL
 	Payload_D_Data_Now : LaserProcess_Data; //115 byte
 	// D面加工資訊緩衝區
 	Payload_D_Data_buff : ARRAY [0..50] OF LaserProcess_Data;
-	// D面加工 已下載到雷射主機的 DXF名稱
-	Payload_D_DxfName_In_LaserPrinter : ARRAY [0..50] OF STRING;
 	// D面加工完成數量
 	Now_Steel_Payload_D_DataNumberDone : INT;
 	

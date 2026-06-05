@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37314.3 d17.14
+VisualStudioVersion = 17.14.37314.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{B1E792BE-AA5F-4E3C-8C82-674BF9C0715B}") = "TwinCAT Project1", "TwinCAT Project1.tsproj", "{33494338-7D6D-4B94-B52F-3D84D6163BD1}"
-EndProject
-Project("{BACAAE27-5D5D-4513-97FF-0FED82FEF961}") = "資料庫讀寫服務設定", "..\資料庫讀寫服務設定\資料庫讀寫服務設定.tcconnproj", "{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -245,24 +243,6 @@ Global
 		{79B5F322-41CA-4489-8A96-7D44E06BFD68}.Release|TwinCAT RT (x64).Build.0 = Release|TwinCAT RT (x64)
 		{79B5F322-41CA-4489-8A96-7D44E06BFD68}.Release|TwinCAT RT (x86).ActiveCfg = Release|TwinCAT RT (x86)
 		{79B5F322-41CA-4489-8A96-7D44E06BFD68}.Release|TwinCAT RT (x86).Build.0 = Release|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Debug|TwinCAT CE7 (ARMV7).ActiveCfg = Debug|TwinCAT CE7 (ARMV7)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Debug|TwinCAT OS (ARMT2).ActiveCfg = Debug|TwinCAT OS (ARMT2)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Debug|TwinCAT OS (ARMV7-A).ActiveCfg = Debug|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Debug|TwinCAT OS (ARMV7-M).ActiveCfg = Debug|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Debug|TwinCAT OS (ARMV8-A).ActiveCfg = Debug|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Debug|TwinCAT OS (x64).ActiveCfg = Debug|TwinCAT OS (x64)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Debug|TwinCAT OS (x64-E).ActiveCfg = Debug|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Debug|TwinCAT RT (x64).ActiveCfg = Debug|TwinCAT RT (x64)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Debug|TwinCAT RT (x86).ActiveCfg = Debug|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Release|TwinCAT CE7 (ARMV7).ActiveCfg = Release|TwinCAT CE7 (ARMV7)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Release|TwinCAT OS (ARMT2).ActiveCfg = Release|TwinCAT OS (ARMT2)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Release|TwinCAT OS (ARMV7-A).ActiveCfg = Release|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Release|TwinCAT OS (ARMV7-M).ActiveCfg = Release|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Release|TwinCAT OS (ARMV8-A).ActiveCfg = Release|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Release|TwinCAT OS (x64).ActiveCfg = Release|TwinCAT OS (x64)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Release|TwinCAT OS (x64-E).ActiveCfg = Release|TwinCAT RT (x86)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Release|TwinCAT RT (x64).ActiveCfg = Release|TwinCAT RT (x64)
-		{3D9FEF78-9BC6-4526-82FE-89DEE045FF29}.Release|TwinCAT RT (x86).ActiveCfg = Release|TwinCAT RT (x86)
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

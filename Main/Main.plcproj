@@ -101,7 +101,6 @@
     <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構" />
     <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\寫入起始時間" />
     <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得範圍內的加工資料" />
-    <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得雷射DXF" />
     <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得X點" />
     <Folder Include="POUs\動作流程控制\外部輸送滾輪" />
     <Folder Include="POUs\安全控制" />
@@ -280,9 +279,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得範圍內的加工資料\SQL_Get_Payload_Struct.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得雷射DXF\SQL_DxfFileStruct.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得X點\SQL_GetPosX_Struct.TcDUT">
