@@ -84,7 +84,7 @@ VAR_GLOBAL PERSISTENT
 	FxB_Clamp_Zero_Pos: LREAL := 1296.49;
 	
 	// 雷射動作超時
-	LaserPrinter_Timeout : INT;
+	LaserPrinter_Timeout : DINT := 60000;
 	
 END_VAR]]></Declaration>
   </GVL>

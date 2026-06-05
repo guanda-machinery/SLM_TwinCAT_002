@@ -423,9 +423,15 @@ END_CASE
 		END_IF
 		
 	313:
+		tmr01.PT := TO_TIME(MaCfg.LaserPrinter_Timeout);
+		tmr01.IN := TRUE;
 		IF NOT Hmi_Web.Process_Data_UUID_C_Start THEN
 			Hmi_Web.Process_Data_UUID_C :='';
+			tmr01.IN := FALSE;
 			step := step + 1;
+		ELSIF tmr01.Q THEN
+			pMsg.Push_Error("GroupA:雷射動作超時");
+			step := step + 10000;
 		END_IF
 		
 	314:

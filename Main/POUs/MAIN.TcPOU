@@ -6,7 +6,7 @@ VAR
 	
 	boot :BOOL := TRUE;
 
-	
+	tm : TIME;
 
 
 END_VAR
@@ -31,8 +31,7 @@ ExpConver();
 
 AxisAction();
 
-
-
+tm := TO_TIME(MaCfg.LaserPrinter_Timeout);
 // SQL 專案資料讀寫功能
 ReadSQLData();
 
