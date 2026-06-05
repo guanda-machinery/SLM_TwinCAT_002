@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="pMsg" Id="{9be3b0e4-d16f-4edc-be10-6e7cf09e9cc5}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM pMsg
+VAR
+	msg: MsgPush;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="Push_Alarm" Id="{6fea6c43-d79f-490d-9b50-e578c99fb7a9}">
+      <Declaration><![CDATA[METHOD PUBLIC Push_Alarm : BOOL
+VAR_INPUT
+	STR : WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[msg.iMessageId := 0;
+msg.msgeLevel := MsgLevel.Alarm;
+msg.sMessageStr1:=STR;
+msg();
+IF hmi.State = MachineState.Auto_mode THEN
+	Safety.SystemAlarm := TRUE;
+end_if]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Push_Alarm_NoPause" Id="{89870b20-ce2c-4b3c-a60f-728a3f3aad03}">
+      <Declaration><![CDATA[METHOD PUBLIC Push_Alarm_NoPause : BOOL
+VAR_INPUT
+	STR : WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[msg.iMessageId := 0;
+msg.msgeLevel := MsgLevel.Alarm;
+msg.sMessageStr1:=STR;
+msg();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Push_Error" Id="{ad4230eb-5835-4986-8266-46edab4d9af7}">
+      <Declaration><![CDATA[METHOD PUBLIC Push_Error : BOOL
+VAR_INPUT
+	STR : WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[msg.iMessageId := 0;
+msg.msgeLevel := MsgLevel.Error;
+msg.sMessageStr1:=STR;
+SystemError := TRUE;
+hmi.State := MachineState.error;
+msg();]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Push_Info" Id="{4c10f860-b2c0-4388-a77e-b1ec438ac51a}">
+      <Declaration><![CDATA[METHOD PUBLIC Push_Info : BOOL
+VAR_INPUT
+	STR : WSTRING;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[msg.iMessageId := 0;
+msg.msgeLevel := MsgLevel.Info;
+msg.sMessageStr1:=STR;
+msg();]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

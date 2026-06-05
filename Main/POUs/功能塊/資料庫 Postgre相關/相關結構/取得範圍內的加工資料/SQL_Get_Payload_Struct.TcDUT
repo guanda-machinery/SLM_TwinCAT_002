@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="SQL_Get_Payload_Struct" Id="{656b129a-eaea-4fc3-ae2d-e814525d2b51}">
+    <Declaration><![CDATA[
+TYPE SQL_Get_Payload_Struct :
+STRUCT
+	// 
+	Payload_Uid : STRING(36);
+	PosBegain	: LREAL;
+	PosEnd	: LREAL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

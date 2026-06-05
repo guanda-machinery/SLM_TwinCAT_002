@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="tsSteelData" Id="{e45290d6-cdf0-4bee-9025-2d7134b52df5}">
+    <Declaration><![CDATA[// 專案資料結構
+TYPE tsSteelData :
+STRUCT
+	// 素材編號 (uuid)
+	uid							: STRING(36);
+	// 型鋼類型
+	SteelType					: DINT;
+	// 長度
+	Length						: LREAL;
+	// 高度
+	Height						: LREAL;
+	// 寬度
+	Width						: LREAL;
+	// 翼板厚度t1
+	T1							: LREAL;
+	// 翼板厚度t2
+	T2							: LREAL;
+	// 原點偏移
+	OriginOffset				: LREAL;
+	// 開啟預覽
+	PreviewEnabled				: BOOL;
+	// 預覽模式
+	PreviewMode					: DINT;
+	// 預覽時間
+	PreviewTme					: DINT;
+	// 「指定區域加工模式」的起始範圍
+	rDesignateAreaRangeBegin	: LREAL;
+	// 「指定區域加工模式」的結束範圍
+	rDesignateAreaRangeEnd		: LREAL;
+	
+	// 上面的加工內容
+	payloadTop					: STRING(36);
+	// 下面的加工內容
+	payloadBottom				: STRING(36);
+	// 左面的加工內容
+	payloadLeft					: STRING(36);
+	// 右面的加工內容
+	payloadRight				: STRING(36);
+	
+	// 全部加工完成
+	bJobFinish					:BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

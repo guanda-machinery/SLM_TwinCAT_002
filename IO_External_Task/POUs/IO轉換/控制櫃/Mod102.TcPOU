@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="Mod102" Id="{18263ab0-2885-4107-983d-f8b3c8ec188a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Mod102
+VAR
+	IO_f : ARRAY [1..16] OF IO_force;
+	i: SINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[	// 輸入模組1
+	FOR i := 1 TO 16 DO
+		IO_f[i](Raw_IO := EtherCAT.LoadMod_2.Input[i], Out =>MainIO.io102.In[i]);
+	END_FOR
+	
+	
+	MainIO.io102_s.0 := IO_f[1].Out;
+	MainIO.io102_s.1 := IO_f[2].Out;
+	MainIO.io102_s.2 := IO_f[3].Out;
+	MainIO.io102_s.3 := IO_f[4].Out;
+	MainIO.io102_s.4 := IO_f[5].Out;
+	MainIO.io102_s.5 := IO_f[6].Out;
+	MainIO.io102_s.6 := IO_f[7].Out;
+	MainIO.io102_s.7 := IO_f[8].Out;
+	MainIO.io102_s.8 := IO_f[9].Out;
+	MainIO.io102_s.9 := IO_f[10].Out;
+	MainIO.io102_s.10 := IO_f[11].Out;
+	MainIO.io102_s.11 := IO_f[12].Out;
+	MainIO.io102_s.12 := IO_f[13].Out;
+	MainIO.io102_s.13 := IO_f[14].Out;
+	MainIO.io102_s.14 := IO_f[15].Out;
+	MainIO.io102_s.15 := IO_f[16].Out;
+	
+	MainIO.io102_f.0 := IO_f[1].ForceEnable;
+	MainIO.io102_f.1 := IO_f[2].ForceEnable;
+	MainIO.io102_f.2 := IO_f[3].ForceEnable;
+	MainIO.io102_f.3 := IO_f[4].ForceEnable;
+	MainIO.io102_f.4 := IO_f[5].ForceEnable;
+	MainIO.io102_f.5 := IO_f[6].ForceEnable;
+	MainIO.io102_f.6 := IO_f[7].ForceEnable;
+	MainIO.io102_f.7 := IO_f[8].ForceEnable;
+	MainIO.io102_f.8 := IO_f[9].ForceEnable;
+	MainIO.io102_f.9 := IO_f[10].ForceEnable;
+	MainIO.io102_f.10 := IO_f[11].ForceEnable;
+	MainIO.io102_f.11 := IO_f[12].ForceEnable;
+	MainIO.io102_f.12 := IO_f[13].ForceEnable;
+	MainIO.io102_f.13 := IO_f[14].ForceEnable;
+	MainIO.io102_f.14 := IO_f[15].ForceEnable;
+	MainIO.io102_f.15 := IO_f[16].ForceEnable;]]></ST>
+    </Implementation>
+    <LineIds Name="Mod102">
+      <LineId Id="23" Count="0" />
+      <LineId Id="308" Count="2" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="320" Count="14" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="275" Count="14" />
+      <LineId Id="274" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

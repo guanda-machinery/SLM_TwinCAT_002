@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="LaserParameter_Data" Id="{012f3bb4-70dc-431f-903f-c66ed3586902}">
+    <Declaration><![CDATA[TYPE LaserParameter_Data :
+STRUCT
+	// 加工參數代碼
+	id				: DINT;
+	// 螺徑(mm)
+	SpiralDiameter	: LREAL;
+	// 螺距(mm)
+	SpiralDist		: LREAL;
+	// 功率(%)
+	Power			: DINT;
+	// 速度(mm/S)
+	Speed			: DINT;	
+	// 頻率(KHZ)
+	FREQ			: DINT;	
+	// 脈波寬度(ns)
+	PulseWidth		: DINT;	
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

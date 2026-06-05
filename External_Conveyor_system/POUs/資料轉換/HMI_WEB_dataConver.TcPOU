@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="HMI_WEB_dataConver" Id="{173a9c07-f878-4e60-89ac-7c28f0373126}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM HMI_WEB_dataConver
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Hmi_Web.Car_pos := Axis.FeedCar.Pos;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

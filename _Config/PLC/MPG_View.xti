@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4026.19" ClassName="CNestedPlcProjDef">
+	<DataTypes>
+		<DataType>
+			<Name GUID="{E3578902-E346-B01F-C260-EDF96C7D5DB7}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..15] OF LREAL</Name>
+			<BitSize>1024</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-00000000000E}">LREAL</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>16</Elements>
+			</ArrayInfo>
+		</DataType>
+		<DataType>
+			<Name GUID="{37DF1FA7-25A9-2180-5625-C9B3B7C20643}" IecBaseType="true" AutoDeleteType="true">ARRAY [0..15] OF BOOL</Name>
+			<BitSize>128</BitSize>
+			<BaseType GUID="{18071995-0000-0000-0000-000000000030}">BOOL</BaseType>
+			<ArrayInfo>
+				<LBound>0</LBound>
+				<Elements>16</Elements>
+			</ArrayInfo>
+		</DataType>
+	</DataTypes>
+	<Project GUID="{374A2A03-5071-4F6A-A43A-6F9A3743A0C4}" Name="MPG_View" PrjFilePath="..\..\MPG_View\MPG_View.plcproj" TmcFilePath="..\..\MPG_View\MPG_View.tmc" ReloadTmc="true" AmsPort="855" FileArchiveSettings="#x000e" SymbolicMapping="true">
+		<Instance Id="#x08502100" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{1AABB130-05BD-4664-F523-C868DFE26C71}" TmcPath="MPG_View\MPG_View.tmc">
+			<Name>MPG_View Instance</Name>
+			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
+			<Vars VarGrpType="2" AreaNo="1">
+				<Name>MPG_View Outputs</Name>
+				<Var>
+					<Name>Data_Out.Mpg_PLC_Enable</Name>
+					<Comment><![CDATA[ 資料開始]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Data_Out.Mpg_PLC_Clock</Name>
+					<Comment><![CDATA[ 資料同步脈衝]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Data_Out.Mpg_PLC_Data_0</Name>
+					<Comment><![CDATA[ 資料 PIN0]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Data_Out.Mpg_PLC_Data_1</Name>
+					<Comment><![CDATA[ 資料 PIN1]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
+					<Name>Data_Out.Mpg_PLC_Data_2</Name>
+					<Comment><![CDATA[ 資料 PIN2]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+			</Vars>
+			<Vars VarGrpType="1">
+				<Name>MPG_View Inputs</Name>
+				<Var>
+					<Name>Data_In.AxisPos</Name>
+					<Type GUID="{E3578902-E346-B01F-C260-EDF96C7D5DB7}">ARRAY [0..15] OF LREAL</Type>
+				</Var>
+				<Var>
+					<Name>Data_In.AxisPosUse</Name>
+					<Type GUID="{37DF1FA7-25A9-2180-5625-C9B3B7C20643}">ARRAY [0..15] OF BOOL</Type>
+				</Var>
+			</Vars>
+			<Contexts>
+				<Context>
+					<Id>0</Id>
+					<Name>MPG_View</Name>
+					<ManualConfig>
+						<OTCID>#x02010070</OTCID>
+					</ManualConfig>
+					<Priority>28</Priority>
+					<CycleTime>2000000</CycleTime>
+				</Context>
+			</Contexts>
+			<TaskPouOids>
+				<TaskPouOid Prio="28" OTCID="#x08502101"/>
+			</TaskPouOids>
+		</Instance>
+	</Project>
+</TcSmItem>

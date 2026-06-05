@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="Out_16_To_PLC" Id="{a6a26fd0-ca0f-4305-8ef4-011bde3ff595}">
+    <Declaration><![CDATA[TYPE Out_16_To_PLC :
+STRUCT
+	Out AT %I*:ARRAY [1..16] OF BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

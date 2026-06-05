@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="ReadStoberError" Id="{0b407c1f-ec05-4523-9cc3-9801367d888a}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM ReadStoberError
+VAR
+	step: INT;
+	
+	raw_Data	: DWORD;
+	
+	fb_CoERead : FB_EcCoESdoRead;
+	
+	readindex : INT;
+	
+	i_Event :ARRAY [0..17] OF UDINT;
+	i_CASE :ARRAY [0..17] OF UDINT;
+	
+	
+	EtherCatAddr	: ARRAY [0..8] OF T_AmsNetId := [9('0.0.0.0.3.1')];
+	DriverAddr		: ARRAY [0..8] OF UINT := [1010,1011,1012,1013,1014,1015,1017,1018,1019];
+	MoterName		: ARRAY [0..17] OF WSTRING := ["Fx1", "Fx2", "Ax", "Ay", "Az1", "Az2", "Bx", "Bz", "By1", "By2", "Cz1", "Cz2", "Cx", "Cy", "Dy", "Dx", "Dz", "NA"];
+	i: INT;
+	
+	showNumber 		: INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE step OF
+	1:
+		fb_CoERead.bExecute		:= FALSE;
+		readindex := 0;
+		step := step + 1;
+		
+	2:
+		step := 10;
+		
+	10:
+		fb_CoERead.sNetId		:= EtherCatAddr[readindex];
+		fb_CoERead.nSlaveAddr	:= DriverAddr[readindex];
+		fb_CoERead.nIndex		:= 16#2852;
+		fb_CoERead.pDstBuf		:= ADR(raw_Data);
+		fb_CoERead.cbBufLen		:= 4;
+		fb_CoERead.bExecute		:= TRUE;
+		step := step + 1;
+		
+	11:
+		IF NOT fb_CoERead.bBusy THEN
+			fb_CoERead.bExecute		:= FALSE;
+			step := step + 1;
+		END_IF
+		
+	12:
+		IF NOT fb_CoERead.bError THEN
+			i_Event[readindex * 2] := DWORD_TO_UDINT(raw_Data);
+			step := step + 1;
+		ELSE
+			step := 0;
+		END_IF
+	
+	13:
+		raw_Data := 0;
+		step := 20;
+		
+	20:
+		fb_CoERead.nIndex		:= 16#282B;
+		fb_CoERead.pDstBuf		:= ADR(raw_Data);
+		fb_CoERead.cbBufLen		:= 4;
+		fb_CoERead.bExecute		:= TRUE;
+		step := step + 1;
+		
+	21:
+		IF NOT fb_CoERead.bBusy THEN
+			fb_CoERead.bExecute		:= FALSE;
+			step := step + 1;
+		END_IF
+		
+	22:
+		IF NOT fb_CoERead.bError THEN
+			i_CASE[readindex * 2] := DWORD_TO_UDINT(raw_Data);
+			step := step + 1;
+		ELSE
+			step := 0;
+		END_IF
+	
+	23:
+		raw_Data := 0;
+		step := 30;
+		
+	30:
+		fb_CoERead.nIndex		:= 16#A852;
+		fb_CoERead.pDstBuf		:= ADR(raw_Data);
+		fb_CoERead.cbBufLen		:= 4;
+		fb_CoERead.bExecute		:= TRUE;
+		step := step + 1;
+		
+	31:
+		IF NOT fb_CoERead.bBusy THEN
+			fb_CoERead.bExecute		:= FALSE;
+			step := step + 1;
+		END_IF
+		
+	32:
+		IF NOT fb_CoERead.bError THEN
+			i_Event[readindex * 2 + 1] := DWORD_TO_UDINT(raw_Data);
+			step := step + 1;
+		ELSE
+			step := 0;
+		END_IF
+	
+	33:
+		raw_Data := 0;
+		step := 40;
+		
+	40:
+		fb_CoERead.nIndex		:= 16#A82B;
+		fb_CoERead.pDstBuf		:= ADR(raw_Data);
+		fb_CoERead.cbBufLen		:= 4;
+		fb_CoERead.bExecute		:= TRUE;
+		step := step + 1;
+		
+	41:
+		IF NOT fb_CoERead.bBusy THEN
+			fb_CoERead.bExecute		:= FALSE;
+			step := step + 1;
+		END_IF
+		
+	42:
+		IF NOT fb_CoERead.bError THEN
+			i_CASE[readindex * 2 + 1] := DWORD_TO_UDINT(raw_Data);
+			step := step + 1;
+		ELSE
+			step := 0;
+		END_IF
+	
+	43:
+		raw_Data := 0;
+		step := 50;
+		
+	50:
+		IF readindex < 5 THEN
+		 	readindex := readindex + 1;
+			step := 10;
+		ELSE
+			readindex := 0;
+			step := step + 1;
+		END_IF
+		
+	51:
+		step := 60;
+		
+	60:
+		IF showNumber > 0 AND showNumber <= 17 THEN
+			i := showNumber - 1;
+			step := 61;
+		ELSE
+			i := 0;
+			step := 62;
+		END_IF
+		
+	61:
+		pMsg.Push_Info(ErrorCodeConver.StoberErrorCode(MoterName[i], i_Event[i], i_case[i]));
+		pMsg.Push_Info(
+			WCONCAT(
+				STR1:= MoterName[i],
+				STR2:= StoberErrorStr(i_Event[i], i_case[i])
+		));
+		step := 65;
+		
+	62:
+		IF i < 12 AND i <> 8 AND i_Event[i] <> 30 THEN
+			pMsg.Push_Info(ErrorCodeConver.StoberErrorCode(MoterName[i], i_Event[i], i_case[i]));
+			pMsg.Push_Info(
+				WCONCAT(
+					STR1:= MoterName[i],
+					STR2:= StoberErrorStr(i_Event[i], i_case[i])
+			));
+		END_IF
+		step := step + 1;
+		
+	63:
+		i := i + 1;
+		IF i < 12 THEN
+			step := step - 1;
+		ELSE
+			step := 65;
+		END_IF
+		
+	65:
+		i := 0;
+		step := 90;
+		
+	90:
+		step := 0;
+END_CASE
+
+fb_CoERead();]]></ST>
+    </Implementation>
+    <Method Name="Read" Id="{5f4e5edb-2d81-427b-b9c8-8f45e544572a}">
+      <Declaration><![CDATA[METHOD Read : BOOL
+VAR_INPUT
+	// 選擇軸
+	Axis : AXIS_REF;
+END_VAR]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+step := 1;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

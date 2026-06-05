@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="Sql_TestWriteData" Id="{9576ff06-6aac-4ff2-97c1-87f9987a7286}">
+    <Declaration><![CDATA[TYPE Sql_TestWriteData :
+STRUCT
+	LogTime : DATE_AND_TIME;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

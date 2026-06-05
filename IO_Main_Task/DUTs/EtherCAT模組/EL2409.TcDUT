@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.14">
+  <DUT Name="EL2409" Id="{42f2112d-7431-4135-8b53-9251993202f7}">
+    <Declaration><![CDATA[TYPE EL2409 :
+STRUCT
+	ModType : STRING := 'EL2409';
+	WcState AT %I*:BOOL;
+	State AT %I*:UINT;
+	
+	Output AT %Q*:ARRAY [1..16] OF BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

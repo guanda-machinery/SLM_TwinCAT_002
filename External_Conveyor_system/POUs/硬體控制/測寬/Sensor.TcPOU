@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Sensor" Id="{7234c44c-3617-4727-9641-18b287ae804c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Sensor
+VAR
+	sensor	: OGD251_Decoder := (DisableSeosor := false);
+	
+	tmp_value: LREAL;
+END_VAR
+
+VAR_OUTPUT
+	MeasureValue : LREAL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// 測距感應器
+sensor();
+
+tmp_value := config.W_Measure_ZeroPoint - sensor.fDistance;
+
+IF sensor.fDistance <> 0 THEN
+	MeasureValue := tmp_value;
+ELSE
+	MeasureValue := 0;
+END_IF]]></ST>
+    </Implementation>
+    <Method Name="Measure" Id="{769de48d-8599-4587-9a9f-744c42577c16}">
+      <Declaration><![CDATA[METHOD Measure : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[MeasureValue := config.W_Measure_ZeroPoint - sensor.fDistance;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

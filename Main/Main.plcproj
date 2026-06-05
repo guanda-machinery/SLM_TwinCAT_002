@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FileVersion>1.0.0.0</FileVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9921dbc6-8fa2-4ecb-8283-76d7776f3d73}</ProjectGuid>
+    <SubObjectsSortedByName>True</SubObjectsSortedByName>
+    <DownloadApplicationInfo>true</DownloadApplicationInfo>
+    <WriteProductVersion>true</WriteProductVersion>
+    <GenerateTpy>true</GenerateTpy>
+    <Name>Main</Name>
+    <ProgramVersion>3.1.4026.19</ProgramVersion>
+    <Application>{730746a3-a255-4afe-8479-eb74a893b2f6}</Application>
+    <TypeSystem>{5cea8cbf-1619-4989-bf7e-0d9d6abd2db2}</TypeSystem>
+    <Implicit_Task_Info>{372d3eee-8bf5-4231-8c20-1bd7c1a1f1c9}</Implicit_Task_Info>
+    <Implicit_KindOfTask>{2c2c179c-7005-4068-b7c6-d1875c6ef604}</Implicit_KindOfTask>
+    <Implicit_Jitter_Distribution>{8244ed57-3975-47a5-b426-1b38f6a7dca8}</Implicit_Jitter_Distribution>
+    <LibraryReferences>{f00e047e-3834-477b-af3c-7ad6238f9759}</LibraryReferences>
+    <Released>false</Released>
+  </PropertyGroup>
+  <ItemGroup>
+    <PlaceholderReference Include="BreakpointLogging">
+      <DefaultResolution>Breakpoint Logging Functions, 3.5.5.0 (3S - Smart Software Solutions GmbH)</DefaultResolution>
+      <Namespace>BPLog</Namespace>
+      <SystemLibrary>true</SystemLibrary>
+    </PlaceholderReference>
+    <PlaceholderReference Include="RecipeManagement">
+      <DefaultResolution>Recipe Management, 3.3.1.0 (System)</DefaultResolution>
+      <Namespace>Recipe_Management</Namespace>
+      <SystemLibrary>true</SystemLibrary>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_EtherCAT">
+      <DefaultResolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_EtherCAT</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_MC2">
+      <DefaultResolution>Tc2_MC2, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_MC2</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Standard">
+      <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Standard</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_System">
+      <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_System</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Utilities">
+      <DefaultResolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Utilities</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Database">
+      <DefaultResolution>Tc3_Database, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Database</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_DynamicMemory">
+      <DefaultResolution>Tc3_DynamicMemory, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_DynamicMemory</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_EventLogger">
+      <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_EventLogger</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_IoLink">
+      <DefaultResolution>Tc3_IoLink, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_IoLink</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Module">
+      <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Module</Namespace>
+    </PlaceholderReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DUTs" />
+    <Folder Include="DUTs\IO模組" />
+    <Folder Include="DUTs\Jog_STRUCT" />
+    <Folder Include="DUTs\座標" />
+    <Folder Include="DUTs\加工資料結構" />
+    <Folder Include="DUTs\加工資料結構\工單結構" />
+    <Folder Include="DUTs\加工資料結構\雷射加工參數" />
+    <Folder Include="DUTs\加工資料結構\材料加工資訊結構" />
+    <Folder Include="DUTs\加工資料結構\雷射加工資料" />
+    <Folder Include="GVLs" />
+    <Folder Include="MSG" />
+    <Folder Include="MSG\訊息列表" />
+    <Folder Include="MSG\訊息格式" />
+    <Folder Include="MSG\通知訊息" />
+    <Folder Include="POUs" />
+    <Folder Include="POUs\功能塊" />
+    <Folder Include="POUs\功能塊\EtherCat相關" />
+    <Folder Include="POUs\功能塊\字串處理功能塊" />
+    <Folder Include="POUs\功能塊\字串處理功能塊\浮點轉字串控制去小數點" />
+    <Folder Include="POUs\功能塊\字串處理功能塊\字串記憶" />
+    <Folder Include="POUs\功能塊\字串處理功能塊\字串填充" />
+    <Folder Include="POUs\功能塊\字串處理功能塊\字串連接" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關">
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Folder>
+    <Folder Include="POUs\功能塊\Stober驅動" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\記錄用" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\寫入起始時間" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得範圍內的加工資料" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得X點" />
+    <Folder Include="POUs\動作流程控制\外部輸送滾輪" />
+    <Folder Include="POUs\安全控制" />
+    <Folder Include="POUs\硬體控制" />
+    <Folder Include="POUs\硬體控制\其他控制\按鈕燈" />
+    <Folder Include="POUs\硬體控制\測距感應器" />
+    <Folder Include="POUs\硬體控制\軸" />
+    <Folder Include="POUs\硬體控制\手搖輪" />
+    <Folder Include="POUs\硬體控制\其他控制" />
+    <Folder Include="POUs\硬體控制\其他控制\三色燈" />
+    <Folder Include="POUs\動作流程控制" />
+    <Folder Include="POUs\動作流程控制\AxisGroup功能塊" />
+    <Folder Include="POUs\動作流程控制\JOG資料轉換" />
+    <Folder Include="POUs\動作流程控制\測試功能" />
+    <Folder Include="VISUs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DUTs\ActionMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\IO模組\IO_In16.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\IO模組\IO_Out16.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Jog_STRUCT\Jog_Laser_Group.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Jog_STRUCT\Jog_Fx_Group.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\MachineState.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Sub_Step.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\TestAction.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\加工資料結構\材料加工資訊結構\tsSteelData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\加工資料結構\工單結構\WorkOrder_Data.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\加工資料結構\雷射加工參數\LaserParameter_Data.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\加工資料結構\雷射加工資料\LaserProcess_Data.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\座標\XYZ_Point.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\Axis.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\GrobelVariable.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Hmi.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Hmi_Web.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\MaCfg.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\IO.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\PosC.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\ProjectData.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\RecipeManager.TcRMO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\Safety.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\SensorTest.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\AxisTest.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\SpdC.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="MSG\訊息列表\MsgBuff.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="MSG\訊息格式\MsgLevel.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\訊息格式\MsgStruct.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\訊息格式\MsgStruct_RAW.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\通知訊息\MsgMain.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\通知訊息\MsgPush.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\通知訊息\uuidv7_g.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="NC_Task_1_SAF.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="PlcTask.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\MAIN.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\ErrorCodeConver.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\EtherCat相關\EtherCat_Driver_Reset.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\EtherCat相關\GetEtherSta.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\pMsg.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\RW_Config.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\Stober驅動\ReadStoberError.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\Stober驅動\StoberErrorStr.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\字串處理功能塊\字串填充\FILLSTRING.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\字串處理功能塊\浮點轉字串控制去小數點\Real2String.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\字串處理功能塊\字串記憶\WStrMem.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\字串處理功能塊\字串連接\StrConcat.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\字串處理功能塊\字串連接\WStrConcat.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\ReadSQLData.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得範圍內的加工資料\SQL_Get_Payload_Struct.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得X點\SQL_GetPosX_Struct.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\寫入起始時間\Payload_Write_Time.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\FxErrPos.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\FxErrPos_Struct.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\AxisGroup功能塊\GroupA.TcPOU">
+      <SubType>Code</SubType>
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\AxisGroup功能塊\GroupB.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\AxisGroup功能塊\GroupC.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\AxisGroup功能塊\GroupD.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\AxisGroup功能塊\GroupFx.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\外部輸送滾輪\ExpConver.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\安全控制\MaBaseState.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\其他控制\按鈕燈\Button.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\手搖輪\Jog_MPG.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\測距感應器\I_DisSensor.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\測距感應器\OMH555_Decoder.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\測距感應器\DT80_Decoder.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\測距感應器\Sensor.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\軸\AxisAction.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\軸\AxisBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\軸\I_Axis.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\軸\MultipleAxisBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\其他控制\三色燈\LightTower.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\軸\AxisFx.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\AutoMain.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\JOG資料轉換\WebHmi.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\測試功能\Sql_TestData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\測試功能\Sql_TestWriteData.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\測試功能\TestActionPou.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Main.tmc">
+      <SubType>Content</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderResolution Include="Tc2_EtherCAT">
+      <Resolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_Math">
+      <Resolution>Tc2_Math, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_MC2">
+      <Resolution>Tc2_MC2, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_Standard">
+      <Resolution>Tc2_Standard, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_System">
+      <Resolution>Tc2_System, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc2_Utilities">
+      <Resolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+    <PlaceholderResolution Include="Tc3_Module">
+      <Resolution>Tc3_Module, * (Beckhoff Automation GmbH)</Resolution>
+    </PlaceholderResolution>
+  </ItemGroup>
+  <ItemGroup>
+    <SubObject Include="AutoMain.step_7000_test_mask_A">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="AutoMain.step_7100_test_mask_A_1">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="AutoMain.step_7200_test_mask_B">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="AutoMain.step_7300_test_mask_B_1">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="AutoMain.step_7400_test_mask_C">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="AutoMain.step_7500_test_mask_C_1">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="AutoMain.step_7600_test_mask_D">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+    <SubObject Include="AutoMain.step_7700_test_mask_D_1">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+  </ItemGroup>
+  <ProjectExtensions>
+    <PlcProjectOptions>
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="OptionKey">
+      <v n="Name">"&lt;ProjectRoot&gt;"</v>
+      <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+        <v>{192FAD59-8248-4824-A8DE-9177C94C195A}</v>
+        <o>
+          <v n="Name">"{192FAD59-8248-4824-A8DE-9177C94C195A}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{246001F4-279D-43AC-B241-948EB31120E1}</v>
+        <o>
+          <v n="Name">"{246001F4-279D-43AC-B241-948EB31120E1}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{29BD8D0C-3586-4548-BB48-497B9A01693F}</v>
+        <o>
+          <v n="Name">"{29BD8D0C-3586-4548-BB48-497B9A01693F}"</v>
+          <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+            <v>NamingConventions</v>
+            <o>
+              <v n="Name">"NamingConventions"</v>
+              <d n="SubKeys" t="Hashtable" />
+              <d n="Values" t="Hashtable" />
+            </o>
+            <v>Rules</v>
+            <o>
+              <v n="Name">"Rules"</v>
+              <d n="SubKeys" t="Hashtable" />
+              <d n="Values" t="Hashtable" />
+            </o>
+          </d>
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{40450F57-0AA3-4216-96F3-5444ECB29763}</v>
+        <o>
+          <v n="Name">"{40450F57-0AA3-4216-96F3-5444ECB29763}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="String">
+            <v>ActiveVisuProfile</v>
+            <v>IR0whWr8bwfwBwAAiD2qpQAAAABVAgAA37x72QAAAAABAAAAAAAAAAEaUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwACTHsAZgA5ADUAYgBiADQAMgA2AC0ANQA1ADIANAAtADQAYgA0ADUALQA5ADQAMAAwAC0AZgBiADAAZgAyAGUANwA3AGUANQAxAGIAfQADCE4AYQBtAGUABDBUAHcAaQBuAEMAQQBUACAAMwAuADEAIABCAHUAaQBsAGQAIAA0ADAAMgA0AC4ANwAFFlAAcgBvAGYAaQBsAGUARABhAHQAYQAGTHsAMQA2AGUANQA1AGIANgAwAC0ANwAwADQAMwAtADQAYQA2ADMALQBiADYANQBiAC0ANgAxADQANwAxADMAOAA3ADgAZAA0ADIAfQAHEkwAaQBiAHIAYQByAGkAZQBzAAhMewAzAGIAZgBkADUANAA1ADkALQBiADAANwBmAC0ANABkADYAZQAtAGEAZQAxAGEALQBhADgAMwAzADUANgBhADUANQAxADQAMgB9AAlMewA5AGMAOQA1ADgAOQA2ADgALQAyAGMAOAA1AC0ANAAxAGIAYgAtADgAOAA3ADEALQA4ADkANQBmAGYAMQBmAGUAZABlADEAYQB9AAoOVgBlAHIAcwBpAG8AbgALBmkAbgB0AAwKVQBzAGEAZwBlAA0KVABpAHQAbABlAA4aVgBpAHMAdQBFAGwAZQBtAE0AZQB0AGUAcgAPDkMAbwBtAHAAYQBuAHkAEAxTAHkAcwB0AGUAbQARElYAaQBzAHUARQBsAGUAbQBzABIwVgBpAHMAdQBFAGwAZQBtAHMAUwBwAGUAYwBpAGEAbABDAG8AbgB0AHIAbwBsAHMAEyhWAGkAcwB1AEUAbABlAG0AcwBXAGkAbgBDAG8AbgB0AHIAbwBsAHMAFCRWAGkAcwB1AEUAbABlAG0AVABlAHgAdABFAGQAaQB0AG8AcgAVIlYAaQBzAHUATgBhAHQAaQB2AGUAQwBvAG4AdAByAG8AbAAWFHYAaQBzAHUAaQBuAHAAdQB0AHMAFwxzAHkAcwB0AGUAbQAYGFYAaQBzAHUARQBsAGUAbQBCAGEAcwBlABkmRABlAHYAUABsAGEAYwBlAGgAbwBsAGQAZQByAHMAVQBzAGUAZAAaCGIAbwBvAGwAGyJQAGwAdQBnAGkAbgBDAG8AbgBzAHQAcgBhAGkAbgB0AHMAHEx7ADQAMwBkADUAMgBiAGMAZQAtADkANAAyAGMALQA0ADQAZAA3AC0AOQBlADkANAAtADEAYgBmAGQAZgAzADEAMABlADYAMwBjAH0AHRxBAHQATABlAGEAcwB0AFYAZQByAHMAaQBvAG4AHhRQAGwAdQBnAGkAbgBHAHUAaQBkAB8WUwB5AHMAdABlAG0ALgBHAHUAaQBkACBIYQBmAGMAZAA1ADQANAA2AC0ANAA5ADEANAAtADQAZgBlADcALQBiAGIANwA4AC0AOQBiAGYAZgBlAGIANwAwAGYAZAAxADcAIRRVAHAAZABhAHQAZQBJAG4AZgBvACJMewBiADAAMwAzADYANgBhADgALQBiADUAYwAwAC0ANABiADkAYQAtAGEAMAAwAGUALQBlAGIAOAA2ADAAMQAxADEAMAA0AGMAMwB9ACMOVQBwAGQAYQB0AGUAcwAkTHsAMQA4ADYAOABmAGYAYwA5AC0AZQA0AGYAYwAtADQANQAzADIALQBhAGMAMAA2AC0AMQBlADMAOQBiAGIANQA1ADcAYgA2ADkAfQAlTHsAYQA1AGIAZAA0ADgAYwAzAC0AMABkADEANwAtADQAMQBiADUALQBiADEANgA0AC0ANQBmAGMANgBhAGQAMgBiADkANgBiADcAfQAmFk8AYgBqAGUAYwB0AHMAVAB5AHAAZQAnVFUAcABkAGEAdABlAEwAYQBuAGcAdQBhAGcAZQBNAG8AZABlAGwARgBvAHIAQwBvAG4AdgBlAHIAdABpAGIAbABlAEwAaQBiAHIAYQByAGkAZQBzACgQTABpAGIAVABpAHQAbABlACkUTABpAGIAQwBvAG0AcABhAG4AeQAqHlUAcABkAGEAdABlAFAAcgBvAHYAaQBkAGUAcgBzACs4UwB5AHMAdABlAG0ALgBDAG8AbABsAGUAYwB0AGkAbwBuAHMALgBIAGEAcwBoAHQAYQBiAGwAZQAsEnYAaQBzAHUAZQBsAGUAbQBzAC1INgBjAGIAMQBjAGQAZQAxAC0AZAA1AGQAYwAtADQAYQAzAGIALQA5ADAANQA0AC0AMgAxAGYAYQA3ADUANgBhADMAZgBhADQALihJAG4AdABlAHIAZgBhAGMAZQBWAGUAcgBzAGkAbwBuAEkAbgBmAG8AL0x7AGMANgAxADEAZQA0ADAAMAAtADcAZgBiADkALQA0AGMAMwA1AC0AYgA5AGEAYwAtADQAZQAzADEANABiADUAOQA5ADYANAAzAH0AMBhNAGEAagBvAHIAVgBlAHIAcwBpAG8AbgAxGE0AaQBuAG8AcgBWAGUAcgBzAGkAbwBuADIMTABlAGcAYQBjAHkAMzBMAGEAbgBnAHUAYQBnAGUATQBvAGQAZQBsAFYAZQByAHMAaQBvAG4ASQBuAGYAbwA0MEwAbwBhAGQATABpAGIAcgBhAHIAaQBlAHMASQBuAHQAbwBQAHIAbwBqAGUAYwB0ADUaQwBvAG0AcABhAHQAaQBiAGkAbABpAHQAeQDQAAIaA9ADAS0E0AUGGgfQBwgaAUUHCQjQAAkaBEUKCwQDAAAABQAAAA0AAAAAAAAA0AwLrQIAAADQDQEtDtAPAS0Q0AAJGgRFCgsEAwAAAAUAAAANAAAAKAAAANAMC60BAAAA0A0BLRHQDwEtENAACRoERQoLBAMAAAAFAAAADQAAAAAAAADQDAutAgAAANANAS0S0A8BLRDQAAkaBEUKCwQDAAAABQAAAA0AAAAUAAAA0AwLrQIAAADQDQEtE9APAS0Q0AAJGgRFCgsEAwAAAAUAAAANAAAAAAAAANAMC60CAAAA0A0BLRTQDwEtENAACRoERQoLBAMAAAAFAAAADQAAAAAAAADQDAutAgAAANANAS0V0A8BLRDQAAkaBEUKCwQDAAAABQAAAA0AAAAAAAAA0AwLrQIAAADQDQEtFtAPAS0X0AAJGgRFCgsEAwAAAAUAAAANAAAAKAAAANAMC60EAAAA0A0BLRjQDwEtENAZGq0BRRscAdAAHBoCRR0LBAMAAAAFAAAADQAAAAAAAADQHh8tINAhIhoCRSMkAtAAJRoFRQoLBAMAAAADAAAAAAAAAAoAAADQJgutAAAAANADAS0n0CgBLRHQKQEtENAAJRoFRQoLBAMAAAADAAAAAAAAAAoAAADQJgutAQAAANADAS0n0CgBLRHQKQEtEJoqKwFFAAEC0AABLSzQAAEtF9AAHy0t0C4vGgPQMAutAQAAANAxC60XAAAA0DIarQDQMy8aA9AwC60CAAAA0DELrQMAAADQMhqtANA0Gq0A0DUarQA=</v>
+          </d>
+        </o>
+        <v>{8A0FB252-96EB-4DCC-A5B4-B4804D05E2D6}</v>
+        <o>
+          <v n="Name">"{8A0FB252-96EB-4DCC-A5B4-B4804D05E2D6}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+            <v>WriteLineIDs</v>
+            <v>True</v>
+          </d>
+        </o>
+        <v>{8F99A816-E488-41E4-9FA3-846536012284}</v>
+        <o>
+          <v n="Name">"{8F99A816-E488-41E4-9FA3-846536012284}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{E709B08B-B6E4-4966-8EED-D793A13114C6}</v>
+        <o>
+          <v n="Name">"{E709B08B-B6E4-4966-8EED-D793A13114C6}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+            <v>EnableBreakpointLogging</v>
+            <v>True</v>
+          </d>
+        </o>
+      </d>
+      <d n="Values" t="Hashtable" />
+    </o>
+        </Data>
+        <TypeList>
+          <Type n="Boolean">System.Boolean</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+          <Type n="String">System.String</Type>
+        </TypeList>
+      </XmlArchive>
+    </PlcProjectOptions>
+  </ProjectExtensions>
+</Project>

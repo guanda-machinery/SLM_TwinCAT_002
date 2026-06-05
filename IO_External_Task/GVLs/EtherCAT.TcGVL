@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="EtherCAT" Id="{5f706d9b-3b6d-44a2-83bb-44042d5f7311}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// 主控制櫃 控制器
+	LoadMod_1 :DI570;
+	LoadMod_2 :DI570;
+	LoadMod_3 :DI570;
+	LoadMod_4 :DI570;
+	
+	LoadMod_5 :DO570;
+	LoadMod_6 :DO570;
+	LoadMod_7 :DO570;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

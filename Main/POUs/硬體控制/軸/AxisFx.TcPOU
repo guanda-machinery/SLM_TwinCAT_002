@@ -1,0 +1,215 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="AxisFx" Id="{3cbb0b1e-239b-4b94-a8e8-61d22c352a81}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK AxisFx EXTENDS MultipleAxisBase IMPLEMENTS I_Axis
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	fb_SetPosition : MC_SetPosition;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* =================== 繼承至 AxisBase ===================*)
+
+// 確定兩個軸都有映射才執行
+IF __ISVALIDREF(Axis1) THEN
+	b_ISVALIDREF := TRUE;
+	Main();
+	Step1_13_SetPos();
+END_IF]]></ST>
+    </Implementation>
+    <Folder Name="內部程式" Id="{a7a446e3-393d-4246-aa10-0bb2aa10ec37}" />
+    <Action Name="MC_FB" Id="{ed6c29f3-f936-45ef-8544-1d315d62af7f}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[// 正轉極限
+Axis1Power.Enable_Positive:= OutLimiter;
+Axis2Power.Enable_Positive:= OutLimiter;
+// 反轉極限
+Axis1Power.Enable_Negative:= inLimiter;
+Axis2Power.Enable_Negative:= inLimiter;
+
+Axis1.ReadStatus();
+Axis2.ReadStatus();
+
+// 軸速度百分比
+
+IF hmi.Auto_Pause THEN
+	Axis1Power.Override := 0;
+ELSE
+	Axis1Power.Override := Axis.Override;
+END_IF
+
+Axis2Power.Override := Axis.Override;
+
+(*===================== 軸電源 =====================*)
+Axis1Power(Axis:= Axis1);
+Axis2Power(Axis:= Axis2);
+
+(*===================== 軸重置 =====================*)
+Axis1Reset(Axis:= Axis1);
+Axis2Reset(Axis:= Axis2);
+
+(*===================== 軸耦合 =====================*)
+AxisGearIn(master := Axis1, slave := Axis2);
+
+(*===================== 軸解耦 =====================*)
+AxisGearOut(slave := Axis2);
+
+(*===================== 軸停止 =====================*)
+Axis1Stop(Axis:= Axis1);
+
+(*===================== 軸命令取消 =====================*)
+Axis1Halt(Axis:= Axis1);
+
+(*===================== 軸絕對移動 =====================*)
+fb_AbsMove(Axis:= Axis1);
+
+(*===================== 軸相對移動 =====================*)
+fb_RelMove(Axis:= Axis1);
+
+(*===================== 軸歸零 =====================*)
+fb_Axis1_NcIoOutput(Axis:= Axis1, Device := NcIoDeviceDrive, NcIoOutput := NcIoOutputnCtrl2);
+fb_Axis2_NcIoOutput(Axis:= Axis2, Device := NcIoDeviceDrive, NcIoOutput := NcIoOutputnCtrl2);
+
+(*===================== 軸歸零 =====================*)
+fb_Home(Axis:= Axis1, HomingMode:= MC_Direct);
+
+(*===================== 軸設定位置 =====================*)
+fb_SetPosition.Options.ClearPositionLag := TRUE;
+fb_SetPosition(Axis:= Axis1, Mode := FALSE);
+
+(*===================== 軸寫入BOOL參數 =====================*)
+fb_WriteBoolParameter(Axis:= Axis1);
+
+(*===================== 軸寫入參數 =====================*)
+fb_WriteParameter(Axis:= Axis1);
+
+(*===================== 背隙補償 =====================*)
+fb_BacklashCompensation(Axis:= Axis1);]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="SetPos" Id="{dde7fa5d-fdd2-4dd2-8077-7bbdf9c98adb}">
+      <Declaration><![CDATA[METHOD SetPos : BOOL
+VAR_INPUT
+	Pos : LREAL;
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[TargetPos := pos;
+step:=1300;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Step1_13_SetPos" Id="{1ee2f36f-79e2-4391-8f05-529245cf7919}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[(*========================================
+				歸零
+=========================================*)	
+CASE step OF
+	1300:
+		fb_SetPosition.Execute := FALSE;
+		step := step + 1;
+		
+	1301: 
+		step:= 1350;
+			
+		
+	1350:// 設定原點
+		fb_SetPosition.Position := TargetPos;
+		fb_SetPosition.Execute := TRUE;
+		step:=step + 1;
+		
+	1351:
+		IF fb_SetPosition.Busy OR fb_SetPosition.Error THEN
+			step:=step + 1;
+		END_IF
+		
+	1352:
+		IF fb_SetPosition.Done THEN
+			fb_SetPosition.Execute := FALSE;
+			step:=step + 1;
+		ELSIF fb_SetPosition.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ":位置同步失敗", str2:= ws_step, ErrorCode:= fb_SetPosition.ErrorID)
+			);
+			fb_SetPosition.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	
+	1353:
+		step:= 1390;
+	
+			
+	1390:
+		bDone := TRUE;
+		step:=890;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step1_3_Home" Id="{ba051d98-bfa7-4dae-bb8d-6b0865980bfa}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[(*========================================
+				歸零
+=========================================*)	
+CASE step OF
+	300:
+		fb_Home.Execute := FALSE;
+		step := step + 1;
+		
+	301: 
+		Origin_pos := Pos;
+		step:= 350;
+			
+		
+	350:// 設定原點
+		fb_Home.Execute := TRUE;
+		step:=step + 1;
+		
+	351:
+		IF fb_Home.Busy OR fb_Home.Error THEN
+			step:=step + 1;
+		END_IF
+		
+	352:
+		IF fb_Home.Done THEN
+			fb_Home.Execute := FALSE;
+			bHome := TRUE;
+			step:=step + 1;
+		ELSIF fb_Home.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ":位置清除失敗", str2:= ws_step, ErrorCode:= fb_Home.ErrorID)
+			);
+			fb_Home.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	
+	353:
+		tmr200.in :=TRUE;
+		IF tmr200.q THEN
+			tmr200.in :=FALSE;
+			step:=step + 1;
+		END_IF
+		
+	354:
+		step:= 360;
+		
+	360:
+		step:= 390;
+	
+			
+	390://延遲
+		tmr200.in :=TRUE;
+		IF tmr200.q THEN
+			tmr200.in :=FALSE;
+			bDone := TRUE;
+			step:=890;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

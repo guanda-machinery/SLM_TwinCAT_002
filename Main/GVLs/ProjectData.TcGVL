@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="ProjectData" Id="{cedaf5d3-eaf0-4f48-a63b-b4ceb6012b54}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+	// 使用的料
+	WorkOrder_Now : WorkOrder_Data;
+	
+	// 在自動料架上 料的數量
+	WorkOrder_Num_On_Wait : INT;
+	
+	// 狀態為 inSide(入料) 的料
+	WorkOrder_inSide 	: WorkOrder_Data;
+	// 狀態為 alignment(無靠邊插單) 的料
+	WorkOrder_alignment 	: WorkOrder_Data;
+	// 狀態為 inserts(插單) 的料
+	WorkOrder_inserts 	: WorkOrder_Data;
+	
+	
+	Now_Steel	: tsSteelData;
+	
+	// 接縫 (出現在BH，板長不夠時兩塊板連接的位置)
+	Joint_Pos : LREAL := 0;
+	
+	Now_Steel_H_m : LREAL;
+	Now_Steel_W_m : LREAL;
+	
+	// 雷射參數 暫存區
+	LaserParameter : ARRAY [0..3] OF LaserParameter_Data;
+	
+
+	// A面加工資訊數量
+	Now_Steel_Payload_A_DataNumber : INT;
+	// A面加工資訊
+	Payload_A_Data_Now : LaserProcess_Data;
+	// A面加工資訊預讀
+	Payload_A_Data_buff : ARRAY [0..50] OF LaserProcess_Data;
+	// A面加工完成數量
+	Now_Steel_Payload_A_DataNumber_Done : INT;
+	
+	
+	// B面加工資訊數量
+	Now_Steel_Payload_B_DataNumber : INT;
+	// B面加工資訊
+	Payload_B_Data_Now : LaserProcess_Data; //115 byte
+	// B面加工資訊緩衝區
+	Payload_B_Data_buff : ARRAY [0..50] OF LaserProcess_Data;
+	// B面加工完成數量
+	Now_Steel_Payload_B_DataNumberDone : INT;
+	
+	
+	// C面加工資訊數量
+	Now_Steel_Payload_C_DataNumber : INT;
+	// C面加工資訊
+	Payload_C_Data_Now : LaserProcess_Data; //115 byte
+	// C面加工資訊緩衝區
+	Payload_C_Data_buff : ARRAY [0..50] OF LaserProcess_Data;
+	// C面加工完成數量
+	Now_Steel_Payload_C_DataNumberDone : INT;
+	
+	
+	// D面加工資訊數量
+	Now_Steel_Payload_D_DataNumber : INT;
+	// D面加工資訊
+	Payload_D_Data_Now : LaserProcess_Data; //115 byte
+	// D面加工資訊緩衝區
+	Payload_D_Data_buff : ARRAY [0..50] OF LaserProcess_Data;
+	// D面加工完成數量
+	Now_Steel_Payload_D_DataNumberDone : INT;
+	
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

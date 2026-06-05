@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="Murr_IMPACT67" Id="{322b09b6-85fb-4613-8d3c-7cb2a44dc223}">
+    <Declaration><![CDATA[TYPE Murr_IMPACT67 :
+STRUCT
+	ModType : STRING := 'Murr IMPACT67';
+	
+	Input AT %I*:UINT;
+	
+	Output AT %Q*:UINT;
+	
+	Io_State AT %I*:ARRAY[0..7] OF USINT;
+	
+	WcState AT %I*:BOOL;
+	InputToggle AT %I*:BOOL;
+	State AT %I*:UINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

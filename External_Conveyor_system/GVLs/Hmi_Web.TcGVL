@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="Hmi_Web" Id="{0f398653-cedc-4268-a966-b60359ce9728}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+(*==================== Jog模式====================*)
+	// 料架選擇
+	Site_Select : e_Jog_Site_Select;
+	
+	// 料架速度 (0:高速 1:低速)
+	Speed_Select : INT;
+	
+	// 指定橫移料架
+	Module_Select : INT;
+	
+	// 動力滾輪正轉反饋
+	Roller_Fwd_S : BOOL;
+	// 動力滾輪反轉反饋
+	Roller_Rev_S : BOOL;
+	
+	// 動力滾輪正轉
+	Roller_Fwd : BOOL;
+	// 動力滾輪反轉
+	Roller_Rev : BOOL;
+	
+	
+	// 動力滾輪上升
+	Roller_Up_S : BOOL;
+	// 動力滾輪下降
+	Roller_Down_S : BOOL;
+	
+	// 動力滾輪上升
+	Roller_Up : BOOL;
+	// 動力滾輪下降
+	Roller_Down : BOOL;
+	
+	// 橫移台車位置
+	Car_Pos : LREAL;
+	// 橫移台車正轉
+	Car_Fwd_S : BOOL;
+	// 橫移台車反轉
+	Car_Rev_S : BOOL;
+	
+	// 橫移台車正轉
+	Car_Fwd : BOOL;
+	// 橫移台車反轉
+	Car_Rev : BOOL;
+	
+	
+	// 橫移台車上升
+	Car_Up_S : BOOL;
+	// 橫移台車下降
+	Car_Down_S : BOOL;
+	
+	// 橫移台車上升
+	Car_Up : BOOL;
+	// 橫移台車下降
+	Car_Down : BOOL;
+	
+	
+	// 定位柱上升
+	StopPin_Up_S : BOOL;
+	// 定位柱下降
+	StopPin_Down_S : BOOL;
+	
+	// 定位柱上升
+	StopPin_Up : BOOL;
+	// 定位柱下降
+	StopPin_Down : BOOL;
+
+
+	// 橫移台車上升
+	Pull_over_Push_S : BOOL;
+
+	// 靠邊推
+	Pull_over_Push : BOOL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

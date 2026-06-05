@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="MsgPush" Id="{28f8eb94-03a0-4571-b2e8-03482315f862}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK MsgPush
+VAR_INPUT
+	// 事件等級(MessageLevel.info:訊息、.Alarm:警告、.Error:錯誤)
+	msgeLevel: MsgLevel;
+	// 訊息編號
+	iMessageId: UINT;
+	// 訊息插入文字1
+	sMessageStr1: WSTRING(80) := "";
+	// 訊息插入文字2
+	sMessageStr2: WSTRING(80) := "";
+	
+END_VAR
+
+VAR
+	msg		: MsgStruct;
+	
+	MsgNum			: USINT;
+END_VAR
+VAR_OUTPUT
+	bDone: BOOL;
+	nState : INT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[MsgNum := ULINT_TO_USINT(MsgBuff.evenNumber MOD 16);
+
+
+
+//MsgBuff.messageList[MsgNum].MsgTime := 	FILETIME_TO_DT(currentTime);
+//MsgBuff.messageList[MsgNum].Level :=	msgeLevel;
+//MsgBuff.messageList[MsgNum].Number :=	iMessageId;
+//MsgBuff.messageList[MsgNum].MsgStr1 :=	sMessageStr1;
+//MsgBuff.messageList[MsgNum].MsgStr2 :=	sMessageStr2;
+//MsgBuff.messageList[MsgNum].Sn :=		MsgBuff.evenNumber;
+MsgBuff.evenNumber := MsgBuff.evenNumber + 1;
+
+bDone := FALSE;
+
+msg.MsgTime := 	msgbuff.currentTime;
+msg.Level :=	msgeLevel;
+msg.Number :=	iMessageId;
+msg.MsgStr1 :=	sMessageStr1;
+msg.MsgStr2 :=	sMessageStr2;
+msg.raw_msg_str := sMessageStr1;
+
+MsgBuff.messageList[MsgNum] := msg;
+
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

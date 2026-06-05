@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="FxErrPos" Id="{c080bbac-ae63-402f-bf44-049212f08b53}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK FxErrPos
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	bBuzy : BOOL;
+	bDone : BOOL;
+	bError : BOOL;
+END_VAR
+VAR
+	// 資料庫功能主體
+	_fb_PLCDBCmdEvt : FB_PLCDBCmdEvt(sNetID:= '', tTimeout:= T#5S );
+	
+	// 啟動寫入
+	_write : BOOL;
+	
+	// SQL指令
+	_SqlCommand : STRING(255);
+	
+	//  結構參數
+	_stPara		: ARRAY [0..3] OF ST_ExpParameter;
+	
+	// 寫入的結構
+	_FxErrPos 	: FxErrPos_Struct;
+	
+	// 現在時間
+	_NowTime	: DT;
+	
+	// SQL錯誤訊息
+	tcMessage     : I_TcMessage;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+
+// SQL命令
+	_SqlCommand := 
+	'INSERT INTO "public"."fx_pos_err" ("fx_a_pos", "ex_enc_pos", "data_time", "sheetid") VALUES ( {fx_a_pos}, {ex_enc_pos}, {data_time}, {sheetid}::UUID);';
+	
+	// 設定對應參數
+	_stPara[0].sParaName := 'fx_a_pos'; 		_stPara[0].eParaType := E_ExpParameterType.Double64; 	_stPara[0].nParaSize := SIZEOF(_FxErrPos.fx_a_pos);
+	_stPara[1].sParaName := 'ex_enc_pos'; 		_stPara[1].eParaType := E_ExpParameterType.Double64; 	_stPara[1].nParaSize := SIZEOF(_FxErrPos.ex_enc_pos);
+	_stPara[2].sParaName := 'data_time';		_stPara[2].eParaType := E_ExpParameterType.DateTime;	_stPara[2].nParaSize := SIZEOF(_FxErrPos.data_time);
+	_stPara[3].sParaName := 'sheetid';			_stPara[3].eParaType := E_ExpParameterType.STRING_;		_stPara[3].nParaSize := SIZEOF(_FxErrPos.sheetid);
+
+IF _write THEN
+	bBuzy	:= TRUE;
+	bError	:= FALSE;
+	bDone	:= FALSE;
+	
+	IF _fb_PLCDBCmdEvt.Execute(
+			hDBID := 1,
+			pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+			cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+			pData:= ADR(_FxErrPos),						// 帶入的參數值
+			cbData:= SIZEOF(_FxErrPos),		//itmp, 	// 帶入的參數值大小
+			pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+			cbParameter:= SIZEOF(_stPara),				// 帶入的參數類型設定的大小
+			) 
+	THEN
+		IF _fb_PLCDBCmdEvt.bError THEN
+			tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+			bError := TRUE;
+		ELSE
+			bDone := TRUE;
+		END_IF
+		bBuzy := FALSE;
+		_write := FALSE;
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <Method Name="Write" Id="{e53ba087-6f78-4d39-a7f9-0f1ca740a5b0}">
+      <Declaration><![CDATA[METHOD Write : BOOL
+VAR_INPUT
+	// 
+	fx_a_pos	: LREAL;
+	
+	ex_enc_pos	: LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_FxErrPos.data_time 	:= msgbuff.currentTime;
+
+_FxErrPos.sheetid		:= ProjectData.Now_Steel.uid;
+
+_FxErrPos.fx_a_pos		:= fx_a_pos;
+
+_FxErrPos.ex_enc_pos	:= ex_enc_pos;
+
+_write := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

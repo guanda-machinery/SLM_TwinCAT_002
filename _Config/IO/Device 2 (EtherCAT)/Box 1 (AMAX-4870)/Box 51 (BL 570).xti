@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<TcSmItem xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.beckhoff.com/schemas/2012/07/TcSmProject" TcSmVersion="1.0" TcVersion="3.1.4024.65" ClassName="CFlbTermDef" SubType="9099">
+	<ImageDatas>
+		<ImageData Id="1000">424de6000000000000007600000028000000100000000e000000010004000000000070000000c40e0000c40e000000000000000000000000000000008000008000000080800080000000800080008080000080808000c0c0c0000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00ffffffffff000000ffffffffff000000ffffffffff0000ffffffffffff0000ffffffffffff000000ffffffffff000000ffff8700ff0000fffff707800f0000fffff08ff00f0ff0ff0000fff00f0ff0ff0000fff00f0ff0fffff08ff00f0ff0fffff70780ff0000ffffff8700ff0000ff</ImageData>
+	</ImageDatas>
+	<Box Id="51" BoxType="9099" BoxFlags="#x00000020">
+		<Name>__FILENAME__</Name>
+		<ImageId>1000</ImageId>
+		<EtherCAT SlaveType="2" PdiType="#x5080" MboxDataLinkLayer="true" StateMBoxPolling="true" CycleMBoxPollingTime="0" CoeType="35" FoeType="1" VendorId="#x0000ceba" ProductCode="#x00017e1f" InfoDataAddr="true" TimeoutStateChange1="10000" TimeoutStateChange2="9000" TimeoutStateChange3="15000" TimeoutMailbox2="2000" PortPhys="273" IdentificationAdo="308" MaxSlotCount="256" MaxSlotGroupCount="1" SlotPdoIncrement="1" SlotIndexIncrement="16" Type="BL 570" Desc="BL 570">
+			<SyncMan>001000012600010001000000000100010001001026010000</SyncMan>
+			<SyncMan>001100012200010002000000000100010001001122010000</SyncMan>
+			<Fmmu>00000000000000000d0800010100000003000000000000000000000000000000</Fmmu>
+			<BootStrapData>0010000100110001</BootStrapData>
+			<MBoxUserCmdData>020003000c0000001100000003000000000000000000000000000000000000002030f100040000001f7e0100437573746f6d204964656e74696669657200</MBoxUserCmdData>
+			<MBoxUserCmdData>02000300090000002100000003000000000000000000000000000000000000002040f1010100000001446961676e6f7369732053657474696e6773202d2053746172742054696d696e6700</MBoxUserCmdData>
+			<MBoxUserCmdData>02000300090000002000000003000000000000000000000000000000000000002040f1020100000001446961676e6f7369732053657474696e6773202d20537461727420547261636500</MBoxUserCmdData>
+			<CoeProfile ProfileNo="5001"/>
+		</EtherCAT>
+		<Box File="Box 17 (AI 575).xti" Id="17">
+			<EtherCAT PortABoxInfo="#x01000033"/>
+		</Box>
+		<Box File="Box 53 (MM 540).xti" Id="53">
+			<EtherCAT PortABoxInfo="#x01000011"/>
+		</Box>
+		<Box File="DI570 8 (DI 570).xti" Id="54">
+			<EtherCAT PortABoxInfo="#x01000035"/>
+		</Box>
+		<Box File="DI570 9 (DI 570).xti" Id="55">
+			<EtherCAT PortABoxInfo="#x01000036"/>
+		</Box>
+		<Box File="DI570 10 (DI 570).xti" Id="56">
+			<EtherCAT PortABoxInfo="#x01000037"/>
+		</Box>
+		<Box File="DI570 11 (DI 570).xti" Id="57">
+			<EtherCAT PortABoxInfo="#x01000038"/>
+		</Box>
+		<Box File="DO570 4 (DO 570).xti" Id="58">
+			<EtherCAT PortABoxInfo="#x01000039"/>
+		</Box>
+		<Box File="DO570 5 (DO 570).xti" Id="59">
+			<EtherCAT PortABoxInfo="#x0100003a"/>
+		</Box>
+		<Box File="DO570 6 (DO 570).xti" Id="60">
+			<EtherCAT PortABoxInfo="#x0100003b"/>
+		</Box>
+	</Box>
+</TcSmItem>

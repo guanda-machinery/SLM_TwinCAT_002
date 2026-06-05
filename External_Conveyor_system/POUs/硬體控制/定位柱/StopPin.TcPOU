@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="StopPin" Id="{10a13c84-a29d-41f7-a665-4ffe6624b496}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM StopPin
+VAR
+	// 程式流程
+	step : INT;
+	
+	Module_Select : WORD;
+	
+	tmr01 : TON;
+END_VAR
+
+VAR_OUTPUT
+	bDone : BOOL;
+	bBuzy : BOOL;
+	bError : BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+Step_1_Up();
+
+Step_2_Down();
+
+bBuzy := step > 0 AND step < 10000;
+bError := step > 10000;
+
+IF bError OR bBuzy THEN
+	bDone := FALSE;
+END_IF
+
+tmrAct();]]></ST>
+    </Implementation>
+    <Folder Name="內部程式" Id="{d967a0c2-5afd-4fad-93ef-d6231863c6b3}" />
+    <Method Name="Down" Id="{ec43b3ca-2565-4d4f-b617-f98c45775268}">
+      <Declaration><![CDATA[METHOD Down : BOOL
+VAR_INPUT
+	// 動作的台車 bit0:台車1、bit0:台車2、bit0:台車3、bit0:台車4
+	Action_Select : WORD := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Action_Select = 0 THEN
+	Module_Select := 255;
+ELSE
+	Module_Select := Action_Select;
+END_IF
+step := 200;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Step_1_Up" Id="{58ae553d-4cf0-4349-9991-1068714fa15b}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	100: // 圓柱上升
+		io.q209 := Module_Select.0;
+		io.q210 := FALSE;
+		io.q211 := Module_Select.1;
+		io.q212 := FALSE;
+		io.q213 := Module_Select.2;
+		io.q214 := FALSE;
+		io.q215 := Module_Select.3;
+		io.q216 := FALSE;
+		
+		tmr01.in := TRUE;
+		tmr01.PT := T#15S;
+		
+		step := step + 1;
+		
+	101: // 確定要上升的圓柱都已到定位圓柱上升
+		IF tmr01.q OR
+		 	(
+				(NOT Module_Select.0 OR io.i302) AND 
+				(NOT Module_Select.1 OR io.i305) AND 
+				(NOT Module_Select.2 OR io.i308) AND 
+				(NOT Module_Select.3 OR io.i311)
+			)
+		THEN
+			io.q209 := FALSE;
+			io.q211 := FALSE;
+			io.q213 := FALSE;
+			io.q215 := FALSE;
+			
+			tmr01.in := FALSE;
+			
+			IF (NOT Module_Select.0 OR io.i302) AND 
+				(NOT Module_Select.1 OR io.i305) AND 
+				(NOT Module_Select.2 OR io.i308) AND 
+				(NOT Module_Select.3 OR io.i311)
+			THEN
+				step := step + 1;
+			ELSIF tmr01.q THEN
+				step := step + 10000;
+			END_IF
+			
+		END_IF	
+		
+	102:
+		bdone := TRUE;
+		step := 0;
+	
+		
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_2_Down" Id="{58a8b64e-9aec-4d72-b5c5-8e987a5e37a5}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	200: // 圓柱下降
+		io.q209 := FALSE;
+		io.q210 := Module_Select.0;
+		io.q211 := FALSE;
+		io.q212 := Module_Select.1;
+		io.q213 := FALSE;
+		io.q214 := Module_Select.2;
+		io.q215 := FALSE;
+		io.q216 := Module_Select.3;
+		
+		tmr01.in := TRUE;
+		tmr01.PT := T#15S;
+		
+		step := step + 1;
+		
+	201: // 確定所有圓柱 已下降
+		IF tmr01.q OR 
+			(
+				(NOT Module_Select.0 OR io.i301) AND 
+				(NOT Module_Select.1 OR io.i304) AND 
+				(NOT Module_Select.2 OR io.i307) AND 
+				(NOT Module_Select.3 OR io.i310)
+			)
+		 THEN
+			io.q210 := FALSE;
+			io.q212 := FALSE;
+			io.q214 := FALSE;
+			io.q216 := FALSE;
+			
+			tmr01.in := FALSE;
+			
+			IF (NOT Module_Select.0 OR io.i301) AND 
+				(NOT Module_Select.1 OR io.i304) AND 
+				(NOT Module_Select.2 OR io.i307) AND 
+				(NOT Module_Select.3 OR io.i310)
+			THEN
+				step := step + 1;
+			ELSIF tmr01.q THEN
+				step := step + 10000;
+			END_IF
+			
+		END_IF	
+		
+	202:
+		bdone := TRUE;
+		step := 0;
+	
+		
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="tmrAct" Id="{cc2fe9ea-c2c6-4396-9d56-295b59b4938a}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[tmr01();]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Up" Id="{7f35c6f0-2b35-4e07-a8b8-68b90bf08cf1}">
+      <Declaration><![CDATA[METHOD Up : BOOL
+VAR_INPUT
+	// 動作的台車 bit0:台車1、bit0:台車2、bit0:台車3、bit0:台車4
+	Action_Select : WORD := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF Action_Select = 0 THEN
+	Module_Select := 255;
+ELSE
+	Module_Select := Action_Select;
+END_IF
+	
+step := 100;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

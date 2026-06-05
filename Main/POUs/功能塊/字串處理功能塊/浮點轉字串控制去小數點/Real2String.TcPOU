@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Real2String" Id="{e0832646-7e8a-45fd-a2ba-27b2f3c93190}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION Real2String : STRING
+VAR_INPUT
+	num : LREAL;
+	strlen : INT := 2;
+END_VAR
+VAR
+	_pointPos : INT;
+	
+	fillNumber : INT;
+	
+	tmpstr : STRING;
+	
+	i : INT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[tmpstr := TO_STRING(num);
+
+_pointPos := FIND(tmpstr, '.') + strlen;
+
+Real2String := LEFT(tmpstr, _pointPos);]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

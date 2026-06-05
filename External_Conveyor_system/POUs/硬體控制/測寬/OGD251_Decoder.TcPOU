@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="OGD251_Decoder" Id="{91d286db-3331-48bf-a248-2311590c3f23}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK OGD251_Decoder IMPLEMENTS I_DisSensor
+VAR_INPUT
+	// 關閉感應器
+	DisableSeosor :	BOOL;
+END_VAR
+VAR_OUTPUT
+	// 距離 (單位:mm)
+	fDistance : REAL;
+	// 裝置狀態正常
+	SSC1_1			:BOOL;
+	// 裝置狀態正常
+	bDevice_is_OK			:BOOL;
+	// 需要維護
+	bMaintenance_required	:BOOL;
+	// 超出測量距離
+	bOut_of_specification	:BOOL;
+	// 檢查功能
+	bFunctional_check		:BOOL;
+	// 錯誤
+	bFailure				:BOOL;
+	// 距離比例(單位:公尺)
+	iScale_Distance			:INT;
+END_VAR
+VAR
+	// 原始資料輸入
+	in_RawData AT %I* : ARRAY [0..7] OF USINT;
+	// 原始資料輸出
+	out_rawdata AT %Q* :USINT;	
+	
+	
+
+	DistanceTmp : WORD;
+	tmpStatus : WORD;
+	tmpStatus2 : WORD;
+	tmpStatus3 : POINTER TO SINT;
+	tmpfDistance : SINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[DistanceTmp := USINT_TO_WORD(in_RawData[0]);
+
+DistanceTmp := ROL(DistanceTmp, 8) + USINT_TO_WORD(in_RawData[1]);
+
+
+// 數值比例 (單位:公尺)
+tmpStatus3 := ADR(in_RawData[2]);
+
+
+
+
+IF (DistanceTmp = 16#7FF8) OR (DistanceTmp = 16#8008) OR (DistanceTmp = 16#7FFC) THEN
+	fDistance := 0;
+ELSE
+	// 距離 = 感應器RAW值 X 10^單位值 X 1000(將 m 轉為 mm)
+	fDistance := LREAL_TO_REAL(DistanceTmp * EXPT(10, tmpStatus3^) * 1000);
+END_IF
+
+tmpStatus := ROR(in_RawData[3] AND 16#F0, 4);
+
+SSC1_1 := (in_RawData[3] AND 16#1) = 1;
+
+bDevice_is_OK := tmpStatus = 0;
+bMaintenance_required := tmpStatus = 1;
+bOut_of_specification := tmpStatus = 2;
+bFunctional_check := tmpStatus = 3;
+bFailure := tmpStatus = 4;
+
+tmpStatus2 := 0;
+tmpStatus2.0 := DisableSeosor;
+
+out_rawdata := WORD_TO_USINT(tmpStatus2);]]></ST>
+    </Implementation>
+    <Property Name="Distance" Id="{8e0378c0-67bb-40cd-9e30-84522ca06113}">
+      <Declaration><![CDATA[PROPERTY Distance : REAL]]></Declaration>
+      <Get Name="Get" Id="{e7885e92-8d61-48f1-bb65-3b7427544fc6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Distance := fDistance;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <LineIds Name="OGD251_Decoder">
+      <LineId Id="123" Count="0" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="240" Count="0" />
+      <LineId Id="245" Count="1" />
+      <LineId Id="202" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="85" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="40" Count="3" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="76" Count="0" />
+    </LineIds>
+    <LineIds Name="OGD251_Decoder.Distance.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

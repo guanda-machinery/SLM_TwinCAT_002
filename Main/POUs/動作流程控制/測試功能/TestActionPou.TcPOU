@@ -1,0 +1,280 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="TestActionPou" Id="{7293cffe-6f2d-413d-bf74-bb48785c8d40}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM TestActionPou
+VAR
+	// 步驟
+	Step: INT;
+	// 已執行的清單
+	ActionStep: UINT;
+	
+	
+	
+	
+	
+	// 選擇的軸
+	AxisSelect: INT;
+	// 移動的位置
+	MovePos: REAL;
+	// 移動的速度
+	MoveSpeed: REAL;
+	
+	// 清單重置用
+	i: INT;
+	tmr1: TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (EStop OR SystemError) THEN
+	Step := 0;
+END_IF
+
+Step00_ActionSelect();
+
+Step01_Move();]]></ST>
+    </Implementation>
+    <Action Name="Step00_ActionSelect" Id="{2b78250f-8074-412f-b2f9-b81a0dd05d80}">
+      <Implementation>
+        <ST><![CDATA[CASE Step OF
+	1:
+		ActionStep := 0;
+		FOR i := 0 TO 10 DO
+			AxisTest.test_Action_List[i].Cycles_Done := 0;
+		END_FOR
+		Step := Step + 1;
+		
+	2:
+		Step := 10;
+	
+	10:
+		CASE AxisTest.test_Action_List[ActionStep].ActionSelect OF
+			1: // 軸移動
+				Step := 100;
+				
+			2: // 等待移動完成
+				Step := 200;
+				
+			3:// 等待時間
+				tmr1.PT := REAL_TO_TIME(AxisTest.test_Action_List[ActionStep].WaitTime*1000);
+				Step := 300;
+				
+			4:// 重複
+				Step := 400;
+				
+			ELSE
+				Step := 0;
+		END_CASE
+		
+		
+	200:
+		IF NOT GaX.bBuzy AND NOT GaY.bBuzy AND NOT GaZ.bBuzy AND 
+			NOT GbX.bBuzy AND NOT GbY.bBuzy AND NOT GbZ.bBuzy AND 
+			NOT GcX.bBuzy AND NOT GcY.bBuzy AND NOT GcZ.bBuzy AND 
+			NOT GdX.bBuzy AND NOT GdY.bBuzy AND NOT GdZ.bBuzy AND 
+			NOT Fx.bBuzy  
+		THEN
+			Step := 900;
+		END_IF
+		
+	300:
+		tmr1.IN :=TRUE;
+		IF tmr1.Q THEN
+			tmr1.IN := FALSE;
+			Step := Step + 1;
+		END_IF
+		
+	301:
+		Step := 900;
+		
+	400:
+		IF AxisTest.test_Action_List[ActionStep].Cycles_Done >= AxisTest.test_Action_List[ActionStep].Cycles THEN
+			Step := Step + 1;
+		ELSE
+			AxisTest.test_Action_List[ActionStep].Cycles_Done := AxisTest.test_Action_List[ActionStep].Cycles_Done + 1;
+			ActionStep := AxisTest.test_Action_List[ActionStep].Cycles_StartStep;
+			Step := 10;
+		END_IF 
+		
+	401:
+		Step := 900;
+		
+	900:
+		IF ActionStep <= 10 THEN
+			ActionStep := ActionStep + 1;
+			Step := 10;
+		ELSE
+			Step := 0;
+		END_IF
+END_CASE
+
+tmr1();]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step01_Move" Id="{dd6b04d3-ce48-4e35-ab0c-adccfbba489e}">
+      <Implementation>
+        <ST><![CDATA[CASE Step OF
+	100:
+		AxisSelect := AxisTest.test_Action_List[ActionStep].AxisSelect;
+		MovePos := AxisTest.test_Action_List[ActionStep].Pos;
+		MoveSpeed := AxisTest.test_Action_List[ActionStep].Speed;
+		
+		Step := Step + 1;
+	
+	101:
+		CASE AxisSelect OF
+			1:
+				IF NOT GaX.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			2:
+				IF NOT GaY.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			3:
+				IF NOT GaZ.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			11:
+				IF NOT GbX.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			12:
+				IF NOT GbY.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			13:
+				IF NOT GbZ.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			21:
+				IF NOT GcX.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			22:
+				IF NOT GcY.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			23:
+				IF NOT GcZ.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			31:
+				IF NOT GdX.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			32:
+				IF NOT GdY.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			33:
+				IF NOT GdZ.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			41:
+				IF NOT Fx.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+		END_CASE
+		
+		
+	102:
+		CASE AxisSelect OF
+			1:
+				GaX.AbsMove(MovePos, MoveSpeed);
+				IF GaX.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			2:
+				GaY.AbsMove(MovePos, MoveSpeed);
+				IF GaY.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			3:
+				GaZ.AbsMove(MovePos, MoveSpeed);
+				IF GaZ.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			11:
+				GbX.AbsMove(MovePos, MoveSpeed);
+				IF GbX.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			12:
+				GbY.AbsMove(MovePos, MoveSpeed);
+				IF GbY.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			13:
+				GbZ.AbsMove(MovePos, MoveSpeed);
+				IF GbZ.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			21:
+				GcX.AbsMove(MovePos, MoveSpeed);
+				IF GcX.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			22:
+				GcY.AbsMove(MovePos, MoveSpeed);
+				IF GcY.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			23:
+				GcZ.AbsMove(MovePos, MoveSpeed);
+				IF GcZ.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			31:
+				GdX.AbsMove(MovePos, MoveSpeed);
+				IF GdX.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			32:
+				GdY.AbsMove(MovePos, MoveSpeed);
+				IF GdY.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			33:
+				GdZ.AbsMove(MovePos, MoveSpeed);
+				IF GdZ.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+				
+			41:
+				Fx.AbsMove(MovePos, MoveSpeed);
+				IF Fx.bBuzy THEN
+					Step := Step + 1;
+				END_IF
+		END_CASE
+		
+	103:
+		
+		Step := 900;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

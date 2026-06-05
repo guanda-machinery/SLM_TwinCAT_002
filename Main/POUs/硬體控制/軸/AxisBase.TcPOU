@@ -1,0 +1,1273 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="AxisBase" Id="{4a28df5e-6b04-4f5b-94ef-e0241a482fc8}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK AxisBase IMPLEMENTS I_Axis
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	// 模式
+	Mode: ActionMode;
+	// 步進
+	step: INT;
+	stepA: INT;
+	// 發生錯誤步
+	ws_step: WSTRING;
+	// 目標位置
+	TargetPos: LREAL;
+	// 動作速度
+	Velocity: LREAL;
+	// 動作減速度
+	Dec : LREAL := 0;
+(*=======================================
+				計時器
+=======================================*)
+	
+	tmr1: TON := (PT := TIME#100MS);
+	tmr2: TON := (PT := TIME#100MS);
+	tmr100: TON;
+	tmr200: TON := (PT := TIME#1S);
+	tmr201: TON := (PT := TIME#1S);
+	tmr800: TON := (PT := TIME#100MS);
+	
+	// 超時監視計時器
+	tmrWdt: Ton := (PT := TIME#10S0MS);
+  	
+	
+(*=======================================
+				軸IO
+=======================================*)
+
+	
+	Estop_Old: BOOL;
+	
+	Estop_Trig : R_TRIG;
+
+(*==============================================
+					MC 功能快
+==============================================*)
+	
+
+	Axis1Power	: MC_Power;
+	Axis1Reset	: MC_Reset;
+	Axis1Stop	: MC_Stop;
+	Axis1Halt	: MC_Halt;
+	
+	fb_AbsMove	: MC_MoveAbsolute;
+	fb_RelMove	: MC_MoveRelative;
+	fb_Home		: MC_Home;
+	fb_BacklashCompensation	: MC_BacklashCompensation;
+	
+	fb_Axis1_NcIoOutput : MC_WriteNcIoOutput;
+	
+	
+	fb_WriteBoolParameter : MC_WriteBoolParameterPersistent;
+	fb_WriteParameter: MC_WriteParameterPersistent;
+(*==============================================*)
+
+	Origin_pos: LREAL;
+	
+	// 軸名稱
+	scAxisName : WSTRING;
+	
+	// 運動距離
+	total_Move : POINTER TO LREAL;
+	
+	
+	move_Start_Pos : LREAL;
+	move_RTrig : R_TRIG;
+	move_FTrig : F_TRIG;
+END_VAR
+
+VAR_OUTPUT
+	// 功能執行中
+	bBuzy 	: BOOL;
+	// 功能結束
+	bDone	: BOOL;
+	// 發生錯誤
+	bError	: BOOL;
+	// 錯誤步驟
+	iErrorID	: INT;
+	// 功能錯誤碼
+	iFbErrorID	: INT;
+	// 已歸零
+	bHome	: BOOL;
+	// 位置
+	fPos : LREAL;
+	
+	b_ISVALIDREF : BOOL;
+END_VAR
+
+VAR_INPUT
+	bJogMode: BOOL;
+	// 移動軸
+	Axis1: REFERENCE TO AXIS_REF;
+	// 負極限
+	inLimiter: BOOL;
+	// 正極限
+	outLimiter: BOOL;
+	// 原點
+	origin : BOOL;
+	
+	
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF __ISVALIDREF(Axis1) THEN
+	b_ISVALIDREF := TRUE;
+	Main();
+END_IF]]></ST>
+    </Implementation>
+    <Folder Name="內部程式" Id="{6297c5c6-8a76-4616-a358-09d84e0022a7}" />
+    <Folder Name="設定" Id="{406c011a-222e-4998-a714-244a8cbc48eb}" />
+    <Method Name="AbsMove" Id="{6b35f866-9611-483b-aa45-8bbce575d68d}">
+      <Declaration><![CDATA[METHOD AbsMove : BOOL
+VAR_INPUT
+	// 目標位置
+	_Position : LREAL;
+	
+	// 移動速度
+	_Velocity : LREAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step:=1;
+Mode := ActionMode.AbsMove;
+TargetPos := _Position;
+
+IF _Velocity = 0 THEN
+	Velocity := 10;
+ELSE
+	Velocity := _Velocity;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="Axis_States" Id="{df6e4bcd-8d81-4f11-a5a4-6246208ce1fe}">
+      <Declaration><![CDATA[PROPERTY Axis_States : ST_AxisStatus]]></Declaration>
+      <Get Name="Get" Id="{02f07e73-7f55-4c7a-895b-4799f6b65f0e}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Axis1.ReadStatus();
+Axis_States := Axis1.Status;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Homing" Id="{abce250f-ea38-4fb8-80e0-ef1eeaec195c}">
+      <Declaration><![CDATA[METHOD Homing : BOOL
+VAR
+END_VAR
+
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step:=1;
+Mode := ActionMode.Home;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Main" Id="{d6d523ce-605f-4fc7-b327-0b4f9cd44eef}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[Estop_Trig(CLK:= (SystemError OR Estop) AND bBuzy );
+
+IF Estop_Trig.Q THEN
+	iErrorId := step;
+	step:=800;
+	bDone := FALSE;
+END_IF
+
+bBuzy := step > 0 AND step < 10000;
+berror := step >= 10000;
+IF bBuzy OR berror THEN
+	bDone := FALSE;
+END_IF
+IF bError THEN
+	iErrorID := step - 10000;
+	
+END_IF
+
+ws_step := INT_TO_WSTRING(step);
+
+CASE step OF
+	0://程式待命
+		tmr1.IN					:= FALSE;
+		tmr100.IN				:= FALSE;
+		tmr200.IN				:= FALSE;
+		tmr201.IN				:= FALSE;
+		tmr800.IN				:= FALSE;
+		tmrWdt.in 				:= FALSE;
+		
+END_CASE
+
+IF step > 0 THEN
+	Step0_Start();
+	Step1_1_AbsMove();
+	Step1_2_RelMove();
+	Step1_3_Home();
+	Step8_End();
+END_IF
+
+IF stepA > 0 THEN
+	Step9_SetLimit();
+END_IF
+
+MC_FB();
+fPos := LREAL_TO_REAL(Axis1.NcToPlc.ActPos);
+timer();
+
+
+move_RTrig(CLK := Axis1.Status.Moving);
+move_FTrig(CLK := Axis1.Status.Moving);
+IF move_RTrig.Q THEN
+	move_Start_Pos := fPos;
+END_IF 
+
+IF move_FTrig.Q AND total_Move <> 0 THEN
+	total_Move^ := total_Move^ + ABS(fPos - move_Start_Pos);
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="MC_FB" Id="{c73e9891-8da6-4f44-aaa3-828dea3e5949}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[// 正轉極限
+Axis1Power.Enable_Positive:= OutLimiter;
+// 反轉極限
+Axis1Power.Enable_Negative:= inLimiter;
+
+Axis1.ReadStatus();
+
+// 軸速度百分比
+IF hmi.Auto_Pause THEN
+	Axis1Power.Override := 0;
+ELSE
+	Axis1Power.Override := Axis.Override;
+END_IF
+
+
+(*===================== 軸電源 =====================*)
+Axis1Power(Axis:= Axis1);
+
+
+(*===================== 軸重置 =====================*)
+Axis1Reset(Axis:= Axis1);
+
+
+(*===================== 軸停止 =====================*)
+Axis1Stop(Axis:= Axis1);
+
+
+(*===================== 軸命令取消 =====================*)
+Axis1Halt(Axis:= Axis1);
+
+
+(*===================== 軸絕對移動 =====================*)
+fb_AbsMove(Axis:= Axis1);
+
+
+(*===================== 軸相對移動 =====================*)
+fb_RelMove(Axis:= Axis1);
+
+(*===================== 軸歸零 =====================*)
+fb_Axis1_NcIoOutput(Axis:= Axis1, Device := NcIoDeviceDrive, NcIoOutput := NcIoOutputnCtrl2);
+
+(*===================== 軸歸零 =====================*)
+fb_Home(Axis:= Axis1, HomingMode:= MC_Direct);
+
+(*===================== 軸寫入BOOL參數 =====================*)
+fb_WriteBoolParameter(Axis:= Axis1);
+
+(*===================== 軸寫入參數 =====================*)
+fb_WriteParameter(Axis:= Axis1);
+
+(*===================== 背隙補償 =====================*)
+fb_BacklashCompensation(Axis:= Axis1);]]></ST>
+      </Implementation>
+    </Action>
+    <Property Name="Name" Id="{fb526f60-aa37-4060-9367-9c07c8346da0}" FolderPath="設定\">
+      <Declaration><![CDATA[PROPERTY Name : WSTRING]]></Declaration>
+      <Get Name="Get" Id="{51385d05-3054-4c2c-ae31-756bd45f590c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Name := scAxisName;
+
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{df9b3488-74ec-4202-9d5d-6ae1871e6979}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[scAxisName := Name;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="Pos" Id="{09cdd36d-ad23-43b6-85df-84beb7849146}">
+      <Declaration><![CDATA[PROPERTY Pos : LREAL]]></Declaration>
+      <Get Name="Get" Id="{a58bf893-2cfe-418f-a8b0-4eafe6322613}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[pos := fPos;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="PowerOff" Id="{3cbd279f-2379-44ad-ba71-65902abf265e}">
+      <Declaration><![CDATA[METHOD PowerOff : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*===============================
+			關閉馬達
+  ===============================*)
+step:=800;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="PowerOn" Id="{f0ab2c36-778c-49f6-9742-3aedf4ff3c80}">
+      <Declaration><![CDATA[METHOD PowerOn : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step:=1;
+Mode := ActionMode.DoNothing;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="RelMove" Id="{a4b4f739-7d84-4360-8875-5ba6873c9611}">
+      <Declaration><![CDATA[METHOD RelMove : BOOL
+VAR_INPUT
+	// 目標位置
+	_Position : LREAL;
+	
+	// 移動速度
+	_Velocity : LREAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step:=1;
+Mode := ActionMode.RelMove;
+TargetPos := _Position;
+
+IF _Velocity = 0 THEN
+	Velocity := 10;
+ELSE
+	Velocity := _Velocity;
+END_IF
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Recoder" Id="{d0b62eb4-8d21-49fb-b612-ac9be58b9fa2}" FolderPath="設定\">
+      <Declaration><![CDATA[METHOD Set_Recoder : BOOL
+VAR_INPUT
+	total_Move_var : PVOID;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[total_Move := total_Move_var;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetDyn" Id="{813e4259-c82d-4c1e-aea1-09467ed50ce3}">
+      <Declaration><![CDATA[METHOD SetDyn : BOOL
+VAR_INPUT
+	SetJog : BOOL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[//IF SetJog THEN
+// 	fb_AbsMove.Acceleration := 0;
+// 	fb_AbsMove.Deceleration := 0;
+// 	fb_RelMove.Acceleration := 0;
+// 	fb_RelMove.Deceleration := 0;
+//ELSE
+//	fb_AbsMove.Acceleration := SpdC.DnZ_Accelerated;
+//	fb_AbsMove.Deceleration := SpdC.DnZ_Deceleration;
+//	fb_RelMove.Acceleration := SpdC.DnZ_Accelerated;
+//	fb_RelMove.Deceleration := SpdC.DnZ_Deceleration;
+//end_if]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="SetLimit" Id="{078024fe-efe1-41ef-9f15-5edea06602c7}">
+      <Declaration><![CDATA[METHOD SetLimit : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[stepA := 1;]]></ST>
+      </Implementation>
+    </Method>
+    <Property Name="State" Id="{6f269ead-535f-4ad6-918b-e53ead305303}">
+      <Declaration><![CDATA[PROPERTY State : Sub_Step
+]]></Declaration>
+      <Get Name="Get" Id="{c16a6fcf-fc7e-466a-be0b-6e1921289e75}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[State.bBuzy := bBuzy;
+State.bError := bError;
+State.bDone := bDone;
+State.Step := step;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Action Name="Step0_Start" Id="{bc1878ef-2e1d-44d1-812d-da129561a225}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*============================
+				啟動馬達
+	  ============================*)
+CASE step OF
+	
+	1://開始移動流程
+		// 設定狀態
+		bDone := FALSE;
+		tmrWdt.IN := FALSE;
+//		SetDyn(bJogMode);
+		Axis1Reset.Execute :=FALSE;
+		
+		IF NOT bDone THEN
+			step := 10;
+		END_IF
+		
+	10:
+		IF axis1.Status.Error THEN
+			step := step + 1;
+		ELSE
+			step := 20;
+		END_IF
+		
+	11:
+		Axis1Reset.Execute :=TRUE;
+		step := step + 1;
+		
+	12:
+		IF NOT axis1.Status.Error AND Axis1Reset.Done THEN
+			Axis1Reset.Execute :=FALSE;
+			step := 20;
+		ELSIF Axis1Reset.Error THEN
+			pMsg.Push_Error(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 馬達無法重置", ErrorCode:= Axis1Reset.ErrorID)
+			);
+			Axis1Reset.Execute :=FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	20: // 檢查馬達1是否已啟動
+		IF NOT Axis1Power.Status  THEN
+			step := step + 1;
+		ELSE
+			step := 60;
+		END_IF
+		
+	21:// 啟動馬達1
+		Axis1Power.Enable := TRUE;
+		tmrWdt.IN := TRUE;
+		step := step + 1;
+		
+	22:// 等待馬達啟動完成
+		IF Axis1Power.Status THEN
+			step := step + 1;
+			tmrWdt.IN := FALSE;
+			
+		ELSIF tmrWdt.Q OR Axis1Power.Error THEN
+			pMsg.Push_Error(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 啟動失敗", ErrorCode:= Axis1Power.ErrorID)
+			);
+			tmrWdt.IN := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	23:// 馬達啟動後延遲
+		tmr1.in:=TRUE;
+		IF tmr1.Q THEN
+			tmr1.IN:=FALSE;
+			step:=60;
+		END_IF
+		
+	
+			
+
+	60: 
+		fb_BacklashCompensation.Enable := FALSE;
+		step := step + 1;
+		
+		
+	61:	
+		// 背隙值 (mm)
+		fb_BacklashCompensation.Backlash := 0.05;
+		// 正向補償 (往正方向移動時補償，預設是反方向移動時補償)
+		fb_BacklashCompensation.CompensationInPositiveDirection := FALSE;
+		// 背隙補償的速度 (mm/s)
+		fb_BacklashCompensation.Ramp := 1;
+		// 解除時機
+		fb_BacklashCompensation.DisableMode  := E_DisableMode.DisableModeReset;
+		// 功能啟動
+		fb_BacklashCompensation.Enable := TRUE;
+		step := step + 1;
+		
+	62:
+		IF fb_BacklashCompensation.Enabled THEN
+			step := step + 1;
+		ELSIF fb_BacklashCompensation.Error THEN
+			fb_BacklashCompensation.Enable := FALSE;
+			step := step + 1;
+		END_IF
+		
+	63:
+		step := 80;
+		
+	80: //模式選擇
+		CASE Mode OF
+			ActionMode.AbsMove:
+				step := 100;
+				
+			ActionMode.RelMove:
+				step := 200;
+				
+			ActionMode.Home:
+				step := 300;
+				
+			ActionMode.Find:
+				step := 400;
+				
+			ActionMode.DoNothing:
+				step := step + 1;
+		END_CASE
+		
+	81:
+		bdone := TRUE;
+		step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step1_1_AbsMove" Id="{42d640a5-e8aa-48ec-8c01-1dc9650dec20}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*========================================
+					開始移動
+	=========================================*)	
+CASE step OF
+	100:
+		fb_AbsMove.Execute := FALSE;
+		Axis1Halt.Execute := FALSE;
+		Axis1Stop.Execute := FALSE;
+		step := step + 1;
+		
+	101:
+		IF Velocity = 0 THEN
+			pMsg.Push_Error( WStrConcat(str0:= scAxisName, str1:= ": Abs設定速度為0")
+			);
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	102:
+		IF fPos > TargetPos - 0.1 AND fPos < TargetPos + 0.1 THEN 
+			step:= 190;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	103:
+		IF Axis1.Status.HasJob THEN
+			Axis1Halt.Deceleration := 0;
+			Axis1Halt.Execute := TRUE;
+			step := step + 1;
+		ELSE
+			step:= 109;
+		END_IF
+		
+	104:
+		IF Axis1Halt.Busy OR Axis1Halt.Done OR Axis1Halt.Error THEN
+			step:=step + 1;
+		END_IF
+		
+	105:
+		IF Axis1Halt.Done THEN
+			Axis1Halt.Execute := FALSE;
+			step:=step + 1;
+		ELSIF Axis1Halt.Error THEN
+			Axis1Halt.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	106:
+		step:= 109;
+		
+	109:
+		step:= 110;
+		
+
+	110: // 設定移動位置
+		fb_AbsMove.Position := TargetPos;
+		fb_AbsMove.Velocity:= Velocity;
+		fb_AbsMove.BufferMode:= MC_Aborting;
+		step:=step + 1;
+		
+	111:
+		fb_AbsMove.Execute := TRUE;
+		step:=step + 1;
+		
+	112:
+		IF fb_AbsMove.Busy OR fb_AbsMove.Done OR fb_AbsMove.Error THEN
+			step:=step + 1;
+		END_IF
+		
+	113:
+		IF fb_AbsMove.Done OR (TargetPos <= 0 AND pos < 2 AND Origin) THEN
+			fb_AbsMove.Execute := FALSE;
+			step:=step + 1;
+		ELSIF fb_AbsMove.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ": Abs移動失敗", ErrorCode:= fb_AbsMove.ErrorID)
+			);
+			fb_AbsMove.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	114:
+		step := 190;
+		
+	190:
+		bDone := TRUE;
+		step:=890;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step1_2_RelMove" Id="{ead45a52-fc74-418f-a27c-54623d26ad80}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*========================================
+					開始移動
+	=========================================*)	
+CASE step OF
+	200:
+		fb_RelMove.Execute := FALSE;
+		Axis1Halt.Execute := FALSE;
+		Axis1Stop.Execute := FALSE;
+		step := step + 1;
+		
+	201:
+		IF Velocity = 0 THEN
+			pMsg.Push_Error(
+				WStrConcat(scAxisName, ":Rel設定速度為0")
+			);
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	202:
+		IF TargetPos = 0 THEN 
+			step:= 280;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	203:
+		IF Axis1.Status.HasJob THEN
+			Axis1Halt.Deceleration := 0;
+			Axis1Halt.Execute := TRUE;
+			step := step + 1;
+		ELSE
+			step:= 209;
+		END_IF
+		
+	204:
+		IF Axis1Halt.Busy OR Axis1Halt.Done OR Axis1Halt.Error THEN
+			step:=step + 1;
+		END_IF
+		
+	205:
+		IF Axis1Halt.Done THEN
+			Axis1Halt.Execute := FALSE;
+			step:=step + 1;
+		ELSIF Axis1Halt.Error THEN
+			Axis1Halt.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	206:
+		step:= 209;
+		
+	209:
+		step:= 210;
+		
+
+	210: // 設定移動位置
+		fb_RelMove.Distance := TargetPos;
+		fb_RelMove.Velocity:= Velocity;
+		fb_RelMove.BufferMode:= MC_Aborting;
+		step:=step + 1;
+		
+	211:
+		fb_RelMove.Execute := TRUE;
+		step:=step + 1;
+		
+	212:
+		IF fb_RelMove.Busy OR fb_RelMove.Done OR fb_RelMove.Error THEN
+			step:=step + 1;
+		END_IF
+		
+	213:
+		IF fb_RelMove.Done THEN
+			fb_RelMove.Execute := FALSE;
+			step:=step + 1;
+		ELSIF fb_RelMove.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ":Rel移動失敗", ErrorCode:= fb_RelMove.ErrorID)
+			);
+			fb_RelMove.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	214:
+		step:=290;
+		
+	280:
+		tmr1.PT := T#500MS;
+		tmr1.IN := TRUE;
+		IF tmr1.Q THEN
+			tmr1.IN := FALSE;
+			step:=step + 1;
+		END_IF
+		
+	281:
+		step := 290;
+		
+	290:
+		bDone := TRUE;
+		step:=890;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step1_3_Home" Id="{b2035636-cb34-485b-be84-8ff968707bdb}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[(*========================================
+				歸零
+=========================================*)	
+CASE step OF
+	300:
+		fb_Axis1_NcIoOutput.Execute := FALSE;
+		fb_Home.Execute := FALSE;
+		step := step + 1;
+		
+	301: // 關閉負軟體極限
+		fb_WriteBoolParameter.ParameterNumber := MC_AxisParameter.EnableLimitNeg;
+		fb_WriteBoolParameter.Value := FALSE;
+		fb_WriteBoolParameter.Execute := TRUE;
+		step := step + 1;
+		
+	302:
+		IF fb_WriteBoolParameter.Done OR fb_WriteBoolParameter.Error THEN
+			fb_WriteBoolParameter.Execute := FALSE;
+			IF fb_WriteBoolParameter.Error THEN
+				pMsg.Push_Alarm_NoPause(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 寫入 使用負方向極限 參數發生錯誤", str2:= ws_step, ErrorCode := fb_WriteBoolParameter.ErrorID)
+					);
+			END_IF
+			step := step + 1;
+		END_IF
+	
+	303:
+		Origin_pos := Pos;
+		step:= 340;
+		
+// 	310: // 尋找負極限訊號
+// 		fb_RelMove.Distance := -9999;
+// 		fb_RelMove.Velocity:= 1;
+// 		fb_RelMove.BufferMode:= MC_Aborting;
+// 		fb_RelMove.Execute := TRUE;
+// 		step:=step + 1;
+// 		
+// 	311:
+// 		IF fb_RelMove.Busy OR fb_RelMove.Error THEN
+// 			fb_RelMove.Execute := FALSE;
+// 			step:=step + 1;
+// 		END_IF
+// 		
+// 	312:
+// 		IF NOT inLimiter THEN
+// 			Axis1Halt.Execute := TRUE;
+// 			step:=step + 1;
+// 		ELSIF fb_RelMove.Done THEN
+// 			pmsg.Push_Error(ErrorCodeConver.Str2(scAxisName, ":無法找到負極限訊號", 0));
+// 			step:=step + 10000;
+// 		ELSIF fb_RelMove.Error THEN
+// 			pmsg.Push_Error(ErrorCodeConver.Str2(scAxisName, ":歸零移動時發生錯誤", fb_RelMove.ErrorID));
+// 			step:=step + 10000;
+// 		END_IF
+// 		
+// 	313:
+// 		IF Axis1Halt.Busy OR Axis1Halt.Error THEN
+// 			Axis1Halt.Execute := FALSE;
+// 			step:=step + 1;
+// 		END_IF
+// 		
+// 	314:
+// 		IF Axis1Halt.Done THEN
+// 			step:=step + 1;
+// 		ELSIF Axis1Halt.Error THEN
+// 			pmsg.Push_Error(ErrorCodeConver.Str2(scAxisName, ":取消軸移動命令時發生錯誤", Axis1Halt.ErrorID));
+// 			step:=step + 10000;
+// 		END_IF
+// 		
+// 	315:
+// 		tmr200.in :=TRUE;
+// 		IF tmr200.q THEN
+// 			tmr200.in :=FALSE;
+// 			step := step + 1;
+// 		END_IF
+// 		
+// 	316:
+// 		step := 320;
+// 		
+// 		
+// 	320: // 脫離負極限
+// 		fb_RelMove.Distance := 9999;
+// 		fb_RelMove.Velocity:= 0.005;
+// 		fb_RelMove.BufferMode:= MC_Aborting;
+// 		fb_RelMove.Execute := TRUE;
+// 		step:=step + 1;
+// 		
+// 	321:
+// 		IF fb_RelMove.Busy OR fb_RelMove.Error THEN
+// 			fb_RelMove.Execute := FALSE;
+// 			step:=step + 1;
+// 		END_IF
+// 		
+// 	322:
+// 		IF inLimiter THEN
+// 			Axis1Halt.Execute := TRUE;
+// 			step:=step + 1;
+// 		ELSIF fb_RelMove.Done THEN
+// 			pmsg.Push_Error(ErrorCodeConver.Str2(scAxisName, ":無法找到負極限訊號", 0));
+// 			step:=step + 10000;
+// 		ELSIF fb_RelMove.Error THEN
+// 			pmsg.Push_Error(ErrorCodeConver.Str2(scAxisName, ":歸零移動時發生錯誤", fb_RelMove.ErrorID));
+// 			step:=step + 10000;
+// 		END_IF
+// 		
+// 	323:
+// 		IF Axis1Halt.Busy OR Axis1Halt.Error THEN
+// 			Axis1Halt.Execute := FALSE;
+// 			step:=step + 1;
+// 		END_IF
+// 		
+// 	324:
+// 		IF Axis1Halt.Done THEN
+// 			step:=step + 1;
+// 		ELSIF Axis1Halt.Error THEN
+// 			pmsg.Push_Error(ErrorCodeConver.Str2(scAxisName, ":取消軸移動命令時發生錯誤", Axis1Halt.ErrorID));
+// 			step:=step + 10000;
+// 		END_IF
+// 		
+// 	325:
+// 		tmr200.in :=TRUE;
+// 		IF tmr200.q THEN
+// 			tmr200.in :=FALSE;
+// 			step := step + 1;
+// 		END_IF
+// 		
+// 	326:
+// 		step := 330;
+// 		
+// 	330:
+// 		fb_RelMove.Distance := 2;
+// 		fb_RelMove.Velocity:= 2;
+// 		fb_RelMove.BufferMode:= MC_Aborting;
+// 		fb_RelMove.Execute := TRUE;
+// 		step:=step + 1;
+// 		
+// 	331:
+// 		IF fb_RelMove.Busy OR fb_RelMove.Error THEN
+// 			fb_RelMove.Execute := FALSE;
+// 			step:=step + 1;
+// 		END_IF
+// 		
+// 	332:
+// 		IF fb_RelMove.Done THEN
+// 			step:=step + 1;
+// 		ELSIF fb_RelMove.Error THEN
+// 			pmsg.Push_Error(ErrorCodeConver.Str2(scAxisName, ":歸零移動時發生錯誤", fb_RelMove.ErrorID));
+// 			step:=step + 10000;
+// 		END_IF
+// 		
+// 	333:
+// 		tmr200.in :=TRUE;
+// 		IF tmr200.q THEN
+// 			tmr200.in :=FALSE;
+// 			step := step + 1;
+// 		END_IF
+// 		
+// 	334:
+// 		step := 350;
+		
+	340:
+		fb_Axis1_NcIoOutput.BitSelectMask := 128;
+		fb_Axis1_NcIoOutput.BitValues := 128;
+		fb_Axis1_NcIoOutput.Execute := TRUE;
+		IF fb_Axis1_NcIoOutput.Done THEN
+			step := step + 1;
+			fb_Axis1_NcIoOutput.Execute := FALSE;
+		ELSIF fb_Axis1_NcIoOutput.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ":Home寫入驅動器失敗", str2:= ws_step, ErrorCode := fb_Axis1_NcIoOutput.ErrorID)
+			);
+			fb_Axis1_NcIoOutput.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	341:
+		fb_Axis1_NcIoOutput.BitSelectMask := 128;
+		fb_Axis1_NcIoOutput.BitValues := 0;
+		fb_Axis1_NcIoOutput.Execute := TRUE;
+		IF fb_Axis1_NcIoOutput.Done THEN
+			step := step + 1;
+			fb_Axis1_NcIoOutput.Execute := FALSE;
+		ELSIF fb_Axis1_NcIoOutput.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ":Home寫入驅動器失敗", str2:= ws_step, ErrorCode := fb_Axis1_NcIoOutput.ErrorID)
+			);
+			fb_Axis1_NcIoOutput.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	342:
+		tmr200.in :=TRUE;
+		IF tmr200.q THEN
+			tmr200.in :=FALSE;
+			step := step + 1;
+		END_IF
+		
+	343:
+		Axis1Power.Enable := FALSE;
+		tmrWdt.IN := TRUE;
+		IF NOT Axis1Power.Status THEN
+			step := step + 1;
+			tmrWdt.IN := FALSE;
+			
+		ELSIF tmrWdt.Q OR Axis1Power.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ":關閉失敗", str2:= ws_step, ErrorCode := Axis1Power.ErrorID)
+			);
+			step:=step + 10000;
+		END_IF	
+		
+	344:
+		tmr200.in :=TRUE;
+		IF tmr200.q THEN
+			tmr200.in :=FALSE;
+			step := step + 1;
+		END_IF
+		
+	345:
+		step:= 350;
+		
+	
+			
+		
+	350:// 設定原點
+		fb_Home.Execute := TRUE;
+		step:=step + 1;
+		
+	351:
+		IF fb_Home.Done THEN
+			fb_Home.Execute := FALSE;
+			bHome := TRUE;
+			step:=step + 1;
+		ELSIF fb_Home.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ":位置清除失敗", str2:= ws_step, ErrorCode := fb_Home.ErrorID)
+			);
+			fb_Home.Execute := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	352:
+		Axis1Power.Enable := TRUE;
+		tmrWdt.IN := TRUE;
+		IF Axis1Power.Status THEN
+			step := step + 1;
+			tmrWdt.IN := FALSE;
+		ELSIF tmrWdt.Q OR Axis1Power.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ":啟動失敗", str2:= ws_step, ErrorCode := Axis1Power.ErrorID)
+			);
+			step:=step + 10000;
+		END_IF	
+			
+	353:
+		tmr200.in :=TRUE;
+		IF tmr200.q THEN
+			tmr200.in :=FALSE;
+			step:=step + 1;
+		END_IF
+		
+	354:
+		step:= 360;
+		
+	360:// 設定移動位置
+		step:= 390;
+	
+			
+	390://延遲
+		tmr200.in :=TRUE;
+		IF tmr200.q THEN
+			tmr200.in :=FALSE;
+			bDone := TRUE;
+			step:=890;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step8_End" Id="{b5accc1e-d2b4-424a-9cd6-b5985785ae31}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*======================================
+					關閉馬達
+	  ======================================*)
+CASE step OF
+	800:
+		Axis1Reset.Execute	:= FALSE;
+		Axis1Stop.Execute	:= FALSE;
+		Axis1Halt.Execute	:= FALSE;
+		fb_AbsMove.Execute	:=FALSE;
+		fb_RelMove.Execute	:=FALSE;
+		fb_Home.Execute		:=FALSE;
+		step := step + 1;
+			
+	// ============== 停止 + 關閉==============
+	801:
+		IF Axis1.Status.Moving THEN
+			step := step + 1;
+		ELSE
+			step := 810;
+		END_IF
+	
+	802:
+		Axis1Stop.Execute := TRUE;
+		step := step + 1;
+		
+	803:
+		Axis1Stop.Execute := TRUE;
+		step := step + 1;
+		
+	804:
+		IF Axis1Stop.Done OR Axis1Stop.Error THEN
+			Axis1Stop.Execute := FALSE;
+			step := step + 1;
+		END_IF
+		
+	805:
+		tmr800.PT := T#1S;
+		tmr800.in:=TRUE;
+		IF tmr800.Q THEN
+			tmr800.IN:=FALSE;
+			step := step + 1;
+		END_IF
+		
+	806:
+		step:=810;
+		
+	810:
+		Axis1Power.Enable := FALSE;
+		IF Axis1.Status.Disabled THEN
+			step := step + 1;
+		END_IF
+		
+			
+	811:// 馬達關閉後延遲
+		tmr800.in:=TRUE;
+		IF tmr800.Q THEN
+			tmr800.IN:=FALSE;
+			step := step + 1;
+		END_IF
+		
+	812:
+		Mode := ActionMode.DoNothing;
+		step:=890;
+		
+		
+// ==============停止==============
+	850:
+		Axis1Stop.Deceleration := Dec;
+		Axis1Stop.Execute := FALSE;
+		step := step + 1;
+		
+	851:
+		Axis1Stop.Execute := TRUE;
+		step := step + 1;
+		
+	852:
+		IF Axis1Stop.Done OR Axis1Stop.Error THEN
+			Axis1Stop.Execute := FALSE;
+			step := step + 1;
+		END_IF
+		
+	853:
+		tmr800.PT := T#1S;
+		tmr800.in:=TRUE;
+		IF tmr800.Q THEN
+			tmr800.IN:=FALSE;
+			step := step + 1;
+		END_IF
+		
+	854:
+		step:=890;
+		
+		
+			
+	890:// 結束程式
+		Mode := ActionMode.DoNothing;
+		step:=0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step9_SetLimit" Id="{8506be86-679a-460a-81a3-b340471ebc45}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[CASE stepA OF
+	1:
+		fb_WriteParameter.Execute := FALSE;
+		fb_WriteBoolParameter.Execute := FALSE;
+		stepA := stepA + 1;
+		
+	2:
+		stepA := 10;
+	
+(* ================ 設定正方向極限 ================ *)		
+		
+	10: // 設定是否使用 正方向極限 數值為0設為false
+		fb_WriteBoolParameter.ParameterNumber := MC_AxisParameter.EnableLimitPos;
+		fb_WriteBoolParameter.Value := PosC.GaX_P_Limite <> 0;
+		fb_WriteBoolParameter.Execute := TRUE;
+		stepA := stepA + 1;
+		
+		
+	11:
+		IF fb_WriteBoolParameter.Done OR fb_WriteBoolParameter.Error THEN
+			fb_WriteBoolParameter.Execute := FALSE;
+			IF fb_WriteBoolParameter.Error THEN
+				pMsg.Push_Alarm_NoPause(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 寫入 使用正方向極限 參數發生錯誤", ErrorCode:= fb_WriteBoolParameter.ErrorID)
+					);
+			END_IF
+			stepA := stepA + 1;
+		END_IF
+		
+	12:
+		IF PosC.GaX_P_Limite <> 0 THEN
+			stepA := 20;
+		ELSE
+			stepA := 30;
+		END_IF
+			
+		
+	20: // 設定正方向極限
+		fb_WriteParameter.ParameterNumber := MC_AxisParameter.SWLimitPos;
+		fb_WriteParameter.Value := REAL_TO_LREAL(PosC.GaX_P_Limite);
+		fb_WriteParameter.Execute := TRUE;
+		stepA := stepA + 1;
+		
+		
+	21:
+		IF fb_WriteParameter.Done OR fb_WriteParameter.Error THEN
+			fb_WriteParameter.Execute := FALSE;
+			IF fb_WriteParameter.Error THEN
+				pMsg.Push_Alarm_NoPause(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 寫入 正方向極限位置 參數發生錯誤", ErrorCode:= fb_WriteParameter.ErrorID)
+					);
+			END_IF
+			stepA := stepA + 1;
+		END_IF
+		
+	22:
+		stepA := 30;
+		
+(* ================ 設定負方向極限 ================ *)		
+		
+	30: // 設定是否使用 負方向極限 數值為0設為false
+		fb_WriteBoolParameter.ParameterNumber := MC_AxisParameter.EnableLimitNeg;
+		fb_WriteBoolParameter.Value := PosC.GaX_N_Limite <> 0;
+		fb_WriteBoolParameter.Execute := TRUE;
+		stepA := stepA + 1;
+		
+		
+	31:
+		IF fb_WriteBoolParameter.Done OR fb_WriteBoolParameter.Error THEN
+			fb_WriteBoolParameter.Execute := FALSE;
+			IF fb_WriteBoolParameter.Error THEN
+				pMsg.Push_Alarm_NoPause(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 寫入 使用負方向極限 參數發生錯誤", ErrorCode:= fb_WriteBoolParameter.ErrorID)
+					);
+			END_IF
+			stepA := stepA + 1;
+		END_IF
+		
+	32:
+		IF PosC.GaX_N_Limite <> 0 THEN
+			stepA := 40;
+		ELSE
+			stepA := 50;
+		END_IF
+			
+		
+	40: // 設定負方向極限
+		fb_WriteParameter.ParameterNumber := MC_AxisParameter.SWLimitNeg;
+		fb_WriteParameter.Value := REAL_TO_LREAL(PosC.GaX_N_Limite);
+		fb_WriteParameter.Execute := TRUE;
+		stepA := stepA + 1;
+		
+		
+	41:
+		IF fb_WriteParameter.Done OR fb_WriteParameter.Error THEN
+			fb_WriteParameter.Execute := FALSE;
+			IF fb_WriteParameter.Error THEN
+				pMsg.Push_Alarm_NoPause(
+					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 寫入 負方向極限位置 參數發生錯誤", ErrorCode:= fb_WriteParameter.ErrorID)
+					);
+			END_IF
+			stepA := stepA + 1;
+		END_IF
+		
+	42:
+		stepA := 50;
+		
+(* ================ 設定結束 ================ *)	
+	50:
+		stepA := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="Stop" Id="{fb57ff47-9fde-4f82-b195-1f8910f36a08}">
+      <Declaration><![CDATA[METHOD Stop : BOOL
+VAR_INPUT
+	Dec : LREAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[(*===============================
+			關閉馬達
+  ===============================*)
+step:=850;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="timer" Id="{45651d54-971b-44ff-80fe-eafc3ced79d7}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[tmr1();
+tmr2();
+tmr100(PT:=T#50MS);
+tmr200();
+tmr201();
+tmr800();
+tmrWdt();]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

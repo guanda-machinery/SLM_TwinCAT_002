@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <Itf Name="I_DisSensor" Id="{050f86af-adbd-456a-99b1-9194f201a456}">
+    <Declaration><![CDATA[INTERFACE I_DisSensor
+]]></Declaration>
+    <Property Name="Distance" Id="{ed4a445a-f6ea-4bfe-bb8d-fb555743141b}">
+      <Declaration><![CDATA[PROPERTY Distance : REAL]]></Declaration>
+      <Get Name="Get" Id="{4d870a83-a994-4a84-87a2-523ad01d0246}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+  </Itf>
+</TcPlcObject>

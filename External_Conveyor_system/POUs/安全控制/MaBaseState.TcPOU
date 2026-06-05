@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="MaBaseState" Id="{2cb27d17-62c8-49dc-ae69-2dcbde274e31}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MaBaseState
+VAR
+	trig1: R_TRIG;
+	trig2: F_TRIG;
+	tmr01 : TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[E_Stop();
+
+trig1(CLK:= Input.Feed_Reset);
+trig2(CLK:= Input.Feed_Reset);
+
+tmr01(IN:=SystemError, PT := T#2S);
+
+IF trig1.Q THEN
+	SystemError := TRUE;
+END_IF
+
+IF trig2.Q THEN
+	SystemError := FALSE;
+END_IF]]></ST>
+    </Implementation>
+    <Action Name="E_Stop" Id="{ad746bf9-6f53-4293-8f18-3eb7d711311f}">
+      <Implementation>
+        <ST><![CDATA[//	========================================
+//					緊急停止				
+//	========================================
+
+// Estop := NOT(IO.i101);
+// 
+// //// 緊急停止
+// E_stop_trig1(clk:=IO.i616); 
+// IF E_stop_trig1.Q THEN
+// 	pMsg.Push_Error("緊急停止");
+// END_IF
+
+//E_stop_trig2(clk:=io3.X001); 
+//IF E_stop_trig2.Q THEN
+//	pMsg.Push_Error("緊急停止 倉儲面板");
+//END_IF
+
+//E_stop_trig2(clk:=io0.X002 AND io0.X003); 
+//IF E_stop_trig2.Q THEN
+//	pMsg.Push_Error("緊急停止 台車面板");
+//END_IF
+
+//E_stop_trig3(clk:=io0.X101); 
+//IF E_stop_trig3.Q THEN
+//	pMsg.Push_Error("緊急停止 台車");
+//END_IF]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

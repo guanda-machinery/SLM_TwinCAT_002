@@ -1,0 +1,998 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="GroupC" Id="{59dc038b-f6d8-44d0-bdcc-c30dc8348466}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM GroupC
+VAR
+	step		: INT;
+	
+	StepA		: Sub_Step;
+	
+	// X軸映射
+	Ax : I_Axis;
+	Axs: Sub_Step;
+	// Y軸映射
+	Ay : I_Axis;
+	Ays: Sub_Step;
+	// X軸映射
+	Az : I_Axis;
+	Azs: Sub_Step;
+	
+	Ax_P_Limite : LREAL;
+	Ax_N_Limite : LREAL;
+	Ay_P_Limite : LREAL;
+	Ay_N_Limite : LREAL;
+	Az_P_Limite : LREAL;
+	Az_N_Limite : LREAL;
+
+	
+	// 移動命令的 X位置
+	moveCmd_X: LREAL;
+	// 移動命令的 Y位置
+	moveCmd_Y: LREAL;
+	// 移動命令 速度
+	moveCmd_Spd: LREAL;
+	
+	moveZdis	: REAL;
+	tmr01A		: TON;
+	tmr01		: TOF;
+	
+	// 坐標系的參考原點
+	pointRef : XYZ_Point;
+	
+	// 移動位置X 計算結果
+	tmpPos_X: LREAL;
+	// 移動位置Y 計算結果
+	tmpPos_Y: LREAL;
+	// 移動位置Z 計算結果
+	tmpPos_Z: LREAL;
+	
+	// 雷射圖形移動距離 Y
+	Dxf_Y_Move : LREAL;
+	
+
+	// 測量到的Z位置
+	z_PosMeasure: REAL;
+	
+	// 距離感應器IO
+	DisSensor_SSC1: BOOL;
+	// 距離感應器距離
+	DisSensor_Dis: LREAL;
+	
+	Boot : BOOL := TRUE;
+	
+	
+	
+	// 執行中的清單號
+	WorkNum: INT;
+	
+	// 鏡頭 吹氣
+	q_Lens_Blow :BOOL;
+	
+	// 重試計數器
+	_retryCnt: INT;
+	
+	// 可以開始雕刻 (Fx就緒)
+	_ReadyToPrint :BOOL;
+	// 可以開始移動 (Fx就緒)
+	_ReadyToMove :BOOL;
+	
+	
+	// 計算上次打油後的一棟距離
+	X_Move: LREAL;
+	Y_Move: LREAL;
+	Z_Move: LREAL;
+	tmr_oil: TON;
+END_VAR
+
+
+
+VAR_OUTPUT
+	// 工件高度
+	Size_H : REAL;
+	// 工件座標
+	RefPos : XYZ_Point;
+	
+	// 功能執行中
+	bBuzy 	: BOOL;
+	// 功能結束
+	bDone	: BOOL;
+	// 發生錯誤
+	bError	: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF Boot THEN
+	Ax := axis.GcX;
+	Ay := axis.GcY;
+	Az := axis.GcZ;
+	boot := FALSE;
+END_IF
+
+Axs := Ax.State;
+Ays := Ay.State;
+Azs := Az.State;
+
+Ax_P_Limite := posc.GcX_P_Limite;
+Ax_N_Limite := posc.GcX_N_Limite;
+Ay_P_Limite := posc.GcY_P_Limite;
+Ay_N_Limite := posc.GcY_N_Limite;
+Az_P_Limite := posc.GcZ_P_Limite;
+Az_N_Limite := posc.GcZ_N_Limite;
+
+DisSensor_SSC1	:= Sensor.sensorC.SSC1_1;
+DisSensor_Dis	:= Sensor.sensorC.Distance;
+
+IF (EStop OR SystemError) THEN
+	IF bBuzy THEN
+		step := step  + 10000;
+	END_IF
+	IF StepA.bBuzy THEN
+		StepA.step := StepA.step  + 10000;
+	END_IF
+	q_Lens_Blow := FALSE;
+END_IF
+
+bBuzy := step > 0 AND step < 10000;
+bError := step >= 10000;
+IF bBuzy OR bError THEN
+	bDone := FALSE;
+END_IF
+
+Step_01_DoPayloadList();
+Step_02_Do_2nd_in_list();
+Step_03_DoLaserAction();
+
+
+
+StepA.bBuzy := StepA.step > 0 AND StepA.step < 10000;
+StepA.bError := StepA.step >= 10000;
+IF StepA.bBuzy OR StepA.bError THEN
+	StepA.bDone := FALSE;
+END_IF
+
+Step_A_01_MoveToXY();
+Step_A_02_FindZ();
+Step_A_03_FindY();
+Step_A_10_MoveToXY_REF();
+Step_A_20_ToStanbyPos();
+
+Timer();
+
+RefPos.X := Ax.Pos - pointRef.X;
+RefPos.Y := Ay.Pos - pointRef.Y;
+RefPos.Z := Az.Pos - pointRef.Z;
+
+ProjectData.Now_Steel_Payload_C_DataNumberDone := WorkNum;
+
+io.q307 := q_Lens_Blow;]]></ST>
+    </Implementation>
+    <Folder Name="入口" Id="{56fd9996-ca33-4e87-82dd-87bd258bcd6b}" />
+    <Folder Name="內部功能" Id="{85bfdaed-ecde-4732-af15-8d72bb4974b7}" />
+    <Method Name="Do_WorkList" Id="{785985b4-8930-4666-890e-2979271ff84a}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Do_WorkList : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+
+Step := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FindZ" Id="{1a466763-2316-45b8-9ad5-dbd78c600d05}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD FindZ : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[StepA.bDone := FALSE;
+StepA.step := 200;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FindZ_Fast" Id="{9341ceda-234c-4be3-b033-b07dea09f5f5}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD FindZ_Fast : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[StepA.bDone := FALSE;
+StepA.step := 220;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Oil" Id="{59fa64a2-3044-4ca5-9724-8e6caf4d0105}" FolderPath="入口\">
+      <Implementation>
+        <ST><![CDATA[X_Move := Axis.GcX_total_Move - Axis.GcX_Last_Oil;
+Y_Move := Axis.GcY_total_Move - Axis.GcY_Last_Oil;
+Z_Move := Axis.GcZ_total_Move - Axis.GcZ_Last_Oil;
+
+IF X_Move > 10000 OR Y_Move > 10000 OR Z_Move > 10000 THEN
+	IO.q206 := TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Property Name="ReadyToMove" Id="{e8ab15ac-165e-4608-96e3-8e4e36b1e807}" FolderPath="入口\">
+      <Declaration><![CDATA[PROPERTY ReadyToMove : BOOL]]></Declaration>
+      <Get Name="Get" Id="{1847a151-81ce-448d-9c72-426c22997ff0}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ReadyToMove := _ReadyToMove;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{4bf574c0-a80f-4ae4-be7d-decdeb21f672}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_ReadyToMove := ReadyToMove;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Property Name="ReadyToPrint" Id="{1f5b82a0-470c-4064-8073-5608d64fd4a4}" FolderPath="入口\">
+      <Declaration><![CDATA[PROPERTY ReadyToPrint : BOOL]]></Declaration>
+      <Get Name="Get" Id="{651e4709-05eb-4d5a-a4cb-a646c3e5bc5c}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[ReadyToPrint := _ReadyToPrint;]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{00f996c9-e86a-4a31-aa44-3b6aa1013d1b}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[_ReadyToPrint := ReadyToPrint;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Method Name="Set_X_Ref" Id="{5fb91d3a-1979-44ff-87c7-b363c91de2a4}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Set_X_Ref
+VAR_INPUT
+	Value : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[pointRef.X := Value;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Y_Ref" Id="{82e2d5cf-3d0b-4132-996e-39b3ac968e9d}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Set_Y_Ref
+VAR_INPUT
+	Value : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[pointRef.Y := Value;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Step_01_DoPayloadList" Id="{ea6589cf-7111-4f67-be8a-d0a161d575f0}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+(*	===============================================
+		開始做 Payload_B_Data_buff 清單內的工作
+	===============================================*)
+	100: // 以數量判斷是否有工作
+		WorkNum := 0;
+		IF ProjectData.Now_Steel_Payload_C_DataNumber > 0 THEN
+			step := step + 1;
+		ELSE
+			bDone := TRUE;
+			Step := 0;
+		END_IF
+ 
+			
+	101:
+		// 初始化工作暫存器
+		WorkNum := 0;
+		step := 110;
+		
+(*	===============================================
+					設定工作中的專案
+	===============================================*)
+	110:
+		ProjectData.Payload_C_Data_Now := ProjectData.Payload_C_Data_buff[WorkNum];
+		Hmi_Web.Process_Data_UUID_A := ProjectData.Payload_C_Data_buff[WorkNum].data_uid;
+		step := step + 1;
+	
+	111:
+		step := 120;
+		
+(*	===============================================
+					移動到位置
+	===============================================*)
+	120:
+		IF ReadyToMove THEN
+			step := step + 1;
+		END_IF
+		
+	121:
+		XY_Move_Ref(
+			ProjectData.Payload_C_Data_Now.Point_X, 
+			ProjectData.Payload_C_Data_Now.Point_Y, 
+			SpdC.HighSpeed
+		);
+		step := step + 1;
+		
+	122:
+		IF stepA.bBuzy OR stepA.bError THEN
+			step := step + 1;
+		END_IF
+		
+	123:
+		IF stepA.bDone THEN
+			step := step + 1;
+		ELSIF stepA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	124:
+		step := 130;
+	
+
+(*	===============================================
+				雷射主機 啟動 預覽/雕刻 動作
+	===============================================*)	
+	130:
+		step := 300;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_02_Do_2nd_in_list" Id="{d127e02a-538f-47e1-bb28-1deb12ebb89e}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	200:
+		step := 210;
+		
+(*	===============================================
+					設定工作中的專案
+	===============================================*)
+	210:
+		ProjectData.Payload_C_Data_Now := ProjectData.Payload_C_Data_buff[WorkNum];
+		Hmi_Web.Process_Data_UUID_A := ProjectData.Payload_C_Data_buff[WorkNum].data_uid;
+		step := step + 1;
+	
+	211:
+		step := 220;
+		
+(*	===============================================
+					移動到位置
+	===============================================*)
+	220:
+		XY_Move_Ref(
+			ProjectData.Payload_C_Data_Now.Point_X, 
+			ProjectData.Payload_C_Data_Now.Point_Y, 
+			SpdC.HighSpeed
+		);
+		step := step + 1;
+		
+	221:
+		IF stepA.bBuzy OR stepA.bError THEN
+			step := step + 1;
+		END_IF
+		
+	222:
+		IF stepA.bDone THEN
+			step := step + 1;
+		ELSIF stepA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	223:
+		step := 230;
+
+(*	===============================================
+				雷射主機 啟動 預覽/雕刻 動作
+	===============================================*)	
+	230:
+		step := 300;
+		
+END_CASE
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_03_DoLaserAction" Id="{00c6d7a9-8355-4260-98a3-25c56550b256}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	300:
+		IF ReadyToPrint THEN
+			step := step + 1;
+		END_IF
+		
+	301:
+		IF  ReadSQLData.Set_Payload_Start(ProjectData.Payload_C_Data_Now.data_uid) THEN
+			step := step + 1;
+		END_IF
+		
+	302:
+		step := 310;
+
+(*	===============================================
+				雷射主機 啟動 預覽/雕刻 動作
+	===============================================*)	
+	310:
+		q_Lens_Blow := TRUE;
+		step := step + 1;
+		
+	311:
+		Hmi_Web.Process_Data_UUID_A_Start := TRUE;
+		step := step + 1;
+		
+	312:	
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	313:
+		IF NOT Hmi_Web.Process_Data_UUID_A_Start THEN
+			Hmi_Web.Process_Data_UUID_A :='';
+			step := step + 1;
+		END_IF
+	
+	314:
+		WorkNum := WorkNum + 1;
+		q_Lens_Blow := FALSE;
+		step := 320;
+		
+(*	================================================
+				開始下個循環或此區域結束
+	================================================*)	
+	320:
+		IF  ReadSQLData.Set_Payload_Finish(ProjectData.Payload_C_Data_Now.data_uid) THEN
+			step := step + 1;
+		END_IF
+	
+	321:
+		IF WorkNum < ProjectData.Now_Steel_Payload_C_DataNumber THEN
+		// 這個區域還有工作
+			step := step + 1;
+		ELSE
+		// 這個區域工作結束
+			step := 390;
+		END_IF
+		
+	322:
+		// 設定工作中的專案
+		step := 200;
+		
+(*	================================================
+				此區域結束
+	================================================*)		
+	390:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_A_01_MoveToXY" Id="{7104e274-c1cc-429a-ac5a-bb70cadf0511}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE StepA.step OF
+	100:
+		IF moveCmd_X < Ax_P_Limite AND moveCmd_X > Ax_N_Limite THEN
+			StepA.step := StepA.step + 1;
+		ELSIF moveCmd_X >= Ax_P_Limite THEN
+			StepA.step := StepA.step + 10000;
+			pMsg.Push_Alarm("GroupA MoveXY:命令位置超出X軸+極限");
+		ELSE
+			StepA.step := StepA.step + 10000;
+			pMsg.Push_Alarm("GroupA MoveXY:命令位置超出X軸-極限");
+		END_IF
+ 
+			
+	101:
+		IF moveCmd_Y < Ay_P_Limite AND moveCmd_Y > Ay_N_Limite THEN
+			StepA.step := StepA.step + 1;
+		ELSIF moveCmd_Y >= Ay_P_Limite THEN
+			StepA.step := StepA.step + 10000;
+			pMsg.Push_Alarm("GroupA MoveXY:命令位置超出Y軸+極限");
+		ELSE
+			StepA.step := StepA.step + 10000;
+			pMsg.Push_Alarm("GroupA MoveXY:命令位置超出Y軸-極限");
+		END_IF
+		
+	102:
+		StepA.step := 110;
+		
+	110:
+		Ax.AbsMove(moveCmd_X, moveCmd_Spd);
+		Ay.AbsMove(moveCmd_Y, moveCmd_Spd);
+		StepA.step := StepA.step + 1;
+		
+	111:
+		IF (Axs.bBuzy OR Axs.bError) AND (Ays.bBuzy OR Ays.bError) THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	112:
+		IF Axs.bDone AND Ays.bDone THEN
+			StepA.step := StepA.step + 1;
+		ELSIF Axs.bError OR Ays.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	113:
+		StepA.bDone := TRUE;
+		StepA.step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_A_02_FindZ" Id="{81c7d054-d9dc-4243-a06b-7545dd3c9cee}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE StepA.step OF
+	200:
+		StepA.step := 220;
+		
+	220:
+		tmpPos_X := 0;
+		tmpPos_Y := (ProjectData.Now_Steel.Width / 2) + pointRef.Y;
+		tmpPos_Z := ProjectData.Now_Steel.Height + MaCfg.laserC_Dis + MaCfg.laserC_Z_ReferencePos;
+		StepA.step := StepA.step + 1;
+		
+	221:
+		Ax.AbsMove(tmpPos_X, SpdC.HighSpeed);
+		Ay.AbsMove(tmpPos_Y, SpdC.HighSpeed);
+		Az.AbsMove(tmpPos_Z, SpdC.HighSpeed);
+		StepA.step := StepA.step + 1;
+		
+	222:
+		IF (Axs.bBuzy OR Axs.bError) AND 
+			(Ays.bBuzy OR Ays.bError) AND
+			(Azs.bBuzy OR Azs.bError) THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	223:
+		IF Axs.bDone AND Ays.bDone AND Azs.bDone THEN
+			StepA.step := StepA.step + 1;
+		ELSIF Axs.bError OR Ays.bError OR Azs.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	224:
+		StepA.step := 230;
+		
+	
+	230: // 再280-310之間
+		IF 280 < DisSensor_Dis AND DisSensor_Dis < 310 THEN
+			StepA.step := 240;
+		ELSE
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	231:
+		Ay.RelMove(60, SpdC.DotSpeed);
+		StepA.step := StepA.step + 1;
+		
+	232:
+		IF (280 < DisSensor_Dis AND DisSensor_Dis < 310) OR Ays.bBuzy OR Ays.bError THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	233:
+		IF (280 < DisSensor_Dis AND DisSensor_Dis < 310) THEN
+			Ay.Stop();
+			StepA.step := StepA.step + 1;
+		ELSIF Ays.bDone THEN
+			pMsg.Push_Error("GroupB_FindZ:再有效距離內找不到可量測的點");
+			StepA.step := StepA.step + 10000;
+		ELSIF Ays.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	234:
+		tmr01A.IN := TRUE;
+		tmr01A.PT := T#2S;
+		IF tmr01A.Q THEN
+			tmr01A.IN := FALSE;
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	235:
+		Ay.RelMove(3, SpdC.LowSpeed);
+		StepA.step := StepA.step + 1;
+		
+	236:
+		IF Ays.bBuzy OR Ays.bError THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	237:
+		IF Ays.bDone THEN
+			StepA.step := StepA.step + 1;
+		ELSIF Ays.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	238:
+		StepA.step := 240;
+	
+		
+	240:
+		moveZdis := DisSensor_Dis - Macfg.laserC_Dis;
+		StepA.step := StepA.step + 1;
+		
+		
+	241:
+		Az.RelMove(moveZdis * -1, SpdC.HighSpeed);
+		StepA.step := StepA.step + 1;
+		
+	242:
+		IF Azs.bBuzy OR Azs.bError THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	243:
+		IF Azs.bDone THEN
+			StepA.step := StepA.step + 1;
+		ELSIF Azs.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	244:
+		tmr01A.IN := TRUE;
+		tmr01A.PT := T#2S;
+		IF tmr01A.Q THEN
+			tmr01A.IN := FALSE;
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	245:
+		StepA.step := 250;
+		
+		
+	250:
+		moveZdis := DisSensor_Dis - Macfg.laserC_Dis;
+		StepA.step := StepA.step + 1;
+		
+	251:
+		Az.RelMove(moveZdis * -1, SpdC.LowSpeed);
+		StepA.step := StepA.step + 1;
+		
+	252:
+		IF Azs.bBuzy OR Azs.bError THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	253:
+		IF Azs.bDone THEN
+			StepA.step := StepA.step + 1;
+		ELSIF Azs.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	254:
+		StepA.step := 260;
+		
+	260:
+		z_PosMeasure := Az.Pos;
+		StepA.bDone := TRUE;
+		StepA.step	:= 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_A_03_FindY" Id="{9cafe139-366f-4204-ba36-5ad443574bdd}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE StepA.step OF
+	300: // 判斷當距離再200~400間，才做偵測
+		IF DisSensor_Dis > 200 OR DisSensor_Dis < 400 THEN
+			StepA.step := StepA.step + 1;
+		ELSE
+			pmsg.Push_Alarm_NoPause("GroupC:Z軸距離感應器不再感應範圍內，取消Y軸原點偵測，使用預設值");
+			StepA.step	:= 380;
+		END_IF
+		
+	301:
+		StepA.step := 310;
+		
+	310: 
+		Ay.AbsMove(100, 50);
+		StepA.step := StepA.step + 1;
+		
+	311:
+		IF Ays.bBuzy OR Ays.bError THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	312:
+		IF NOT DisSensor_SSC1 THEN
+			Ay.Stop();
+			StepA.step := StepA.step + 1;
+		ELSIF Ays.bDone THEN
+			pmsg.Push_Alarm_NoPause("GroupC:Z軸距離感應器訊號錯誤");
+			StepA.step := 380;
+		ELSIF Ays.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	313:
+		tmr01A.IN := TRUE;
+		tmr01A.PT := T#500MS;
+		IF tmr01A.Q THEN
+			tmr01A.IN := FALSE;
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	314:
+		StepA.step := 320;
+		
+	320:
+		Ay.AbsMove(Ay_P_Limite - 5, 5);
+		StepA.step := StepA.step + 1;
+		
+	321:
+		IF (Ays.bBuzy OR Ays.bError) THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	322:
+		IF DisSensor_SSC1 THEN
+			Ay.Stop();
+			StepA.step := StepA.step + 1;
+		ELSIF Ays.bDone THEN
+			pmsg.Push_Alarm_NoPause("GroupC:Z軸距離感應器訊號錯誤");
+			StepA.step := 380;
+		ELSIF Ays.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	323:
+		tmr01A.IN := TRUE;
+		tmr01A.PT := T#500MS;
+		IF tmr01A.Q THEN
+			tmr01A.IN := FALSE;
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	324:
+		StepA.step := 330;
+		
+		
+	330:
+		Ay.AbsMove(100, 0.5);
+		StepA.step := StepA.step + 1;
+		
+	331:
+		IF Ays.bBuzy OR Ays.bError THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	332:
+		IF NOT DisSensor_SSC1 THEN
+			Ay.Stop();
+			StepA.step := StepA.step + 1;
+		ELSIF Ays.bDone THEN
+			pmsg.Push_Alarm_NoPause("GroupC:Z軸距離感應器訊號錯誤");
+			StepA.step := 380;
+		ELSIF Ays.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	333:
+		tmr01A.IN := TRUE;
+		tmr01A.PT := T#500MS;
+		IF tmr01A.Q THEN
+			tmr01A.IN := FALSE;
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	334:
+		StepA.step := 340;
+		
+		
+	340:
+		Set_Y_Ref(Ay.Pos);
+		StepA.step := StepA.step + 1;
+		
+	341:
+		StepA.step := 390;
+		
+	
+	380:
+		IF projectData.Now_Steel.Width > 0 THEN
+			Set_Y_Ref(Ay_P_Limite + 56 - projectData.Now_Steel.Width);
+		ELSE
+			Set_Y_Ref(Ay_P_Limite + 56 - 500);
+		END_IF
+		StepA.step := StepA.step + 1;
+		
+	381:
+		StepA.step	:= 390;
+	
+	390:
+		z_PosMeasure := GaZ.Pos;
+		StepA.bDone := TRUE;
+		StepA.step	:= 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_A_10_MoveToXY_REF" Id="{996d0e7a-eea4-43b0-8d7f-bfe00b8edeaf}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE StepA.step OF
+	1000:// 計算相對距離
+		tmpPos_X := moveCmd_X - pointRef.X;
+		tmpPos_Y := moveCmd_Y + pointRef.Y;
+		Dxf_Y_Move := 0;
+		StepA.step := StepA.step + 1;
+		
+	1001:
+		IF tmpPos_X < Ax_P_Limite AND tmpPos_X > Ax_N_Limite THEN
+			StepA.step := StepA.step + 1;
+		ELSIF tmpPos_X >= Ax_P_Limite THEN
+			StepA.step := StepA.step + 10000;
+			pMsg.Push_Alarm("GroupC MoveXY:命令位置超出X軸+極限");
+		ELSE
+			StepA.step := StepA.step + 10000;
+			pMsg.Push_Alarm("GroupC MoveXY:命令位置超出X軸-極限");
+		END_IF
+ 
+			
+	1002:
+		IF tmpPos_Y < Ay_P_Limite AND tmpPos_Y > Ay_N_Limite THEN
+			StepA.step := StepA.step + 1;
+		ELSIF tmpPos_Y >= Ay_P_Limite THEN
+			StepA.step := StepA.step + 10000;
+			pMsg.Push_Alarm("GroupC MoveXY_Ref:命令位置超出Y軸+極限");
+		ELSE
+			Dxf_Y_Move := 5 - tmpPos_Y;
+			Dxf_Y_Move := Dxf_Y_Move * -1;	// 雷射Y軸相反
+			IF Dxf_Y_Move <= -70 THEN 
+				StepA.step := StepA.step + 10000;
+				pMsg.Push_Alarm("GroupC MoveXY_Ref:命令位置超出Y軸-極限");
+			ELSE
+				tmpPos_Y := 5;
+			END_IF
+		END_IF
+		
+	1003:
+		StepA.step := 1010;
+		
+	1010:
+		Ax.AbsMove(tmpPos_X, moveCmd_Spd);
+		Ay.AbsMove(tmpPos_Y, moveCmd_Spd);
+		StepA.step := StepA.step + 1;
+		
+	1011:
+		IF (Axs.bBuzy OR Axs.bError) AND (Ays.bBuzy OR Ays.bError) THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	1012:
+		IF Axs.bDone AND Ays.bDone THEN
+			StepA.step := StepA.step + 1;
+		ELSIF Axs.bError OR Ays.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	1013:
+		tmr01A.IN := TRUE;
+		tmr01A.PT := T#1S;
+		IF tmr01A.Q THEN
+			tmr01A.IN := FALSE;
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	1014:
+		StepA.step := 1020;
+		
+	1020:
+		StepA.bDone := TRUE;
+		StepA.step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_A_20_ToStanbyPos" Id="{c24ae81f-ecb3-41f7-bc7e-e84e48130dc4}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[CASE StepA.step OF
+	2000:
+		StepA.step := 2030;
+	
+	2030:
+		Ax.AbsMove(posc.pos_GcX_stanby, moveCmd_Spd);
+		Ay.AbsMove(posc.pos_GcY_stanby, moveCmd_Spd);
+		Az.AbsMove(posc.pos_GcZ_stanby, moveCmd_Spd);
+		StepA.step := StepA.step + 1;
+		
+	2031:
+		IF (Axs.bBuzy OR Axs.bError) AND (Ays.bBuzy OR Ays.bError) AND (Azs.bBuzy OR Azs.bError) THEN
+			StepA.step := StepA.step + 1;
+		END_IF
+		
+	2032:
+		IF Axs.bDone AND Ays.bDone AND Azs.bDone THEN
+			StepA.step := StepA.step + 1;
+		ELSIF Axs.bError OR Ays.bError OR Azs.bError THEN
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	2033:
+		StepA.step := 2040;
+		
+		
+	2040:
+		StepA.bDone := TRUE;
+		StepA.step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Timer" Id="{805ed916-2a0c-42ac-90a5-4ec5f11e1168}" FolderPath="內部功能\">
+      <Implementation>
+        <ST><![CDATA[tmr01A();
+tmr01();
+
+// tmr_oil(in := IO.q206 AND IO.i410, PT:=T#2S);
+tmr_oil(in := IO.q206, PT:=T#2S);
+
+IF tmr_oil.Q THEN
+	IO.q206 := FALSE;
+	
+	Axis.GcX_Last_Oil := Axis.GcX_total_Move;
+	
+	Axis.GcY_Last_Oil := Axis.GcY_total_Move;
+	
+	Axis.GcZ_Last_Oil := Axis.GcZ_total_Move;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Method Name="ToStanby" Id="{1f63538e-bcfb-4cb2-bcaf-1353c53d52de}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD ToStanby : BOOL
+VAR_INPUT
+	Speed : LREAL := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[StepA.bDone := FALSE;
+IF Speed > 0 THEN
+	moveCmd_Spd := Speed;
+ELSE
+	moveCmd_Spd := SpdC.HomeSpeed;
+END_IF
+StepA.step := 2000;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="XY_Move" Id="{5b6f99ba-c22c-4bbb-a673-e46faba70ace}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD XY_Move : BOOL
+VAR_INPUT
+	X_Point : LREAL;
+	Y_Point	: LREAL;
+	Speed : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[moveCmd_X := X_Point;
+moveCmd_Y := Y_Point;
+moveCmd_Spd := Speed;
+
+StepA.bDone := FALSE;
+StepA.step := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="XY_Move_Ref" Id="{ff2ae105-d815-401b-8dc2-92182ecfe38c}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD XY_Move_Ref : BOOL
+VAR_INPUT
+	X_Point : LREAL;
+	Y_Point	: LREAL;
+	Speed : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[moveCmd_X := X_Point;
+moveCmd_Y := Y_Point;
+moveCmd_Spd := Speed;
+
+StepA.bDone := FALSE;
+StepA.step := 1000;]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

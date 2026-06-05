@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="WorkOrder_Data" Id="{ef45ee19-a357-49ec-ba3d-ea49d31f3305}">
+    <Declaration><![CDATA[// 專案資料結構
+TYPE WorkOrder_Data :
+STRUCT
+	// 加工順序
+	SN			: DINT;
+	// 高
+	Height		: LREAL;
+	// 寬
+	Width		: LREAL;
+	// 素材編號 (uuid)
+	steel_id	: STRING(36);
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

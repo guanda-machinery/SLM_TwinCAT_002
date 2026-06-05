@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="Hmi_Web" Id="{e3064d9a-b6f5-45cb-ac61-bf5d84692f1c}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL
+(* ================= 模式選擇 ================= *)
+	// 人機 > PLC WatchDog
+	Watchdog_in : BOOL;
+	
+	// PLC > 人機 WatchDog
+	Watchdog_Out : BOOL;
+	
+	// 錯誤重置
+	SysErrorRest: BOOL;
+	
+	// 自動模式
+	Auto_Mode : BOOL;
+	
+	// 單步模式
+	Auto_Step_mode_Enable :BOOL;
+	
+	
+	// 單步模式生效
+	Auto_Step_active :BOOL;
+
+	// Jog模式
+	Jog_Mode : BOOL;
+	
+	// 手輪模式
+	MPG_Mode : BOOL;
+	
+	// 選擇的模式
+	Mode_Select : DINT;
+	
+
+(* ================= 自動模式 ================= *)
+	// 自動流程 開始的專案UUID
+	Auto_ProjectWorkOrder_uuid : STRING(36);
+	// 自動流程 開始的專案UUID
+	Start_WorkOrder_UUID : STRING(36);
+
+	// 自動流程 開始執行
+	Auto_Start : BOOL;
+	
+	Auto_OneCycle_Start : BOOL;
+	
+	
+	
+
+
+	
+	// 自動流程 暫停/繼續
+	Auto_Pause:BOOL;
+
+	// 自動流程 動作選擇
+	Auto_ProgramSelect : DINT;
+
+	// 自動流程 動作執行中
+	Auto_bBuzy : BOOL;
+	
+	// 自動流程 動作完成
+	Auto_bDone : BOOL;
+	
+	// 自動流程 原點復歸
+	Auto_homming : BOOL;
+	
+	// 動作狀態通知
+	ActinoNow:WSTRING;
+	
+	// 狀態欄 機器動作中
+	State: MachineState := MACHINESTATE.standby;
+	
+	
+	// 雷射A 控制
+	Process_Data_UUID_A				: STRING(36);
+ 	Process_Data_UUID_A_Start		: BOOL;
+	// 雷射B 控制
+	Process_Data_UUID_B				: STRING(36);
+ 	Process_Data_UUID_B_Start		: BOOL;
+	// 雷射C 控制
+	Process_Data_UUID_C				: STRING(36);
+ 	Process_Data_UUID_C_Start		: BOOL;
+	// 雷射D 控制
+	Process_Data_UUID_D				: STRING(36);
+ 	Process_Data_UUID_D_Start		: BOOL;
+	
+(*==================== Jog模式====================*)
+	// Jog模式 軸組選擇
+	Jog_GroupSelect : DINT;
+	
+	// Jog模式 互鎖解除
+	Jog_UnLimite : BOOL;
+	
+	// Jog模式 速度
+	Jog_Speed: REAL := 30;
+	
+	
+	
+(*==================== Ga Jog模式====================*)	
+	// Jog模式Ga X軸 前進
+	Jog_Ga : Jog_Laser_Group;
+	
+
+(*==================== Gb Jog模式====================*)	
+	// Jog模式Gb X軸 前進
+	Jog_Gb : Jog_Laser_Group;
+
+(*==================== Gc Jog模式====================*)	
+	// Jog模式Gc
+	Jog_Gc : Jog_Laser_Group;
+
+(*==================== Gd Jog模式====================*)	
+	// Jog模式Gd
+	Jog_Gd : Jog_Laser_Group;
+	
+(*==================== FX A Jog模式====================*)	
+	// Jog模式FxA
+	Jog_FxA : Jog_Fx_Group;
+	
+(*==================== FX A Jog模式====================*)	
+	// Jog模式FxB
+	Jog_FxB : Jog_Fx_Group;
+	
+	// 油壓幫浦
+	Oil_Pump:BOOL;
+(*==================== Fx 目前位置====================*)	
+	Fx_Pos			:LREAL;		// Fx 馬達位置
+	FxA_Ex_Pos		:LREAL;		// FxA 測長盤
+	FxB_Ex_Pos		:LREAL;		// FxB 測長盤
+
+	FxA_H_Pos		:LREAL;		// FxA 油壓夾輪位置
+	FxB_H_Pos		:LREAL;		// FxB 油壓夾輪位置
+(*==================== Ga 目前位置====================*)	
+	Ga_Pos : XYZ_Point;
+(*==================== Ga 目前位置====================*)	
+	Gb_Pos : XYZ_Point;
+(*==================== Ga 目前位置====================*)	
+	Gc_Pos : XYZ_Point;
+(*==================== Ga 目前位置====================*)	
+	Gd_Pos : XYZ_Point;
+	
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

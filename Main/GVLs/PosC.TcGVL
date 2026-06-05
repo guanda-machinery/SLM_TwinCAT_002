@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="PosC" Id="{f48d449e-2abd-42dc-a32e-4c29e8e902bd}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL PERSISTENT
+	
+	// 設定 A區X軸 正極限
+	GaX_P_Limite : REAL;
+	// 設定 A區X軸 負極限
+	GaX_N_Limite : REAL;
+	// 設定 A區Y軸 正極限
+	GaY_P_Limite : REAL;
+	// 設定 A區Y軸 負極限
+	GaY_N_Limite : REAL;
+	// 設定 A區Z軸 正極限
+	GaZ_P_Limite : REAL;
+	// 設定 A區Z軸 負極限
+	GaZ_N_Limite : REAL;
+	
+	// 設定 A區Z軸 兩軸差
+	GaZ_Diff :REAL;
+	
+	// GaX待機位置
+	pos_GaX_stanby : REAL;
+	// GaY待機位置
+	pos_GaY_stanby : REAL;
+	// GaZ待機位置
+	pos_GaZ_stanby : REAL;
+	
+	// 設定 B區X軸 正極限
+	GbX_P_Limite : REAL;
+	// 設定 B區X軸 負極限
+	GbX_N_Limite : REAL;
+	// 設定 B區Y軸 正極限
+	GbY_P_Limite : REAL;
+	// 設定 B區Y軸 負極限
+	GbY_N_Limite : REAL;
+	// 設定 B區Z軸 正極限
+	GbZ_P_Limite : REAL;
+	// 設定 B區Z軸 負極限
+	GbZ_N_Limite : REAL;
+	
+	// 設定 B區Y軸 兩軸差
+	GbY_Diff :REAL;
+	
+	// GbX待機位置
+	pos_GbX_stanby : REAL;
+	// GbY待機位置
+	pos_GbY_stanby : REAL;
+	// GbZ待機位置
+	pos_GbZ_stanby : REAL;
+	
+	// 設定 C區X軸 正極限
+	GcX_P_Limite : REAL;
+	// 設定 C區X軸 負極限
+	GcX_N_Limite : REAL;
+	// 設定 C區Y軸 正極限
+	GcY_P_Limite : REAL;
+	// 設定 C區Y軸 負極限
+	GcY_N_Limite : REAL;
+	// 設定 C區Z軸 正極限
+	GcZ_P_Limite : REAL;
+	// 設定 C區Z軸 負極限
+	GcZ_N_Limite : REAL;
+	
+	// 設定 C區Z軸 兩軸差
+	GcZ_Diff :REAL;
+	
+	// GcX待機位置
+	pos_GcX_stanby : REAL;
+	// GcY待機位置
+	pos_GcY_stanby : REAL;
+	// GcZ待機位置
+	pos_GcZ_stanby : REAL;
+	
+	// 設定 D區X軸 正極限
+	GdX_P_Limite : REAL;
+	// 設定 D區X軸 負極限
+	GdX_N_Limite : REAL;
+	// 設定 D區Y軸 正極限
+	GdY_P_Limite : REAL;
+	// 設定 D區Y軸 負極限
+	GdY_N_Limite : REAL;
+	// 設定 D區Z軸 正極限
+	GdZ_P_Limite : REAL;
+	// 設定 D區Z軸 負極限
+	GdZ_N_Limite : REAL;
+	
+	// GdX待機位置
+	pos_GdX_stanby : REAL;
+	// GdY待機位置
+	pos_GdY_stanby : REAL;
+	// GdZ待機位置
+	pos_GdZ_stanby : REAL;
+	
+	Fx_HomeOffset : REAL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

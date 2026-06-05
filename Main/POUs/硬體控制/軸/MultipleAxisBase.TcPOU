@@ -1,0 +1,461 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="MultipleAxisBase" Id="{6f7e96b9-a44b-48a8-8956-66890bc1d551}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK MultipleAxisBase EXTENDS AxisBase IMPLEMENTS I_Axis
+VAR_INPUT
+	Axis2 : REFERENCE TO AXIS_REF;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	
+(*==============================================
+				MC 功能快
+==============================================*)
+	Axis2Power	: MC_Power;
+	Axis2Reset	: MC_Reset;
+	
+	AxisGearIn	: MC_GearIn;
+	AxisGearOut : MC_GearOut;
+	
+	fb_Axis2_NcIoOutput : MC_WriteNcIoOutput;
+(*==============================================*)
+	scAxisName2 : wstring;
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(* =================== 繼承至 AxisBase ===================*)
+
+// 確定兩個軸都有映射才執行
+IF __ISVALIDREF(Axis1) AND __ISVALIDREF(Axis2) THEN
+	b_ISVALIDREF := TRUE;
+	Main();
+END_IF]]></ST>
+    </Implementation>
+    <Folder Name="內部程式" Id="{72011f77-07d9-4224-b976-08d5a0043eef}" />
+    <Folder Name="設定" Id="{4118d2b1-1f95-4906-8931-a50ab4355ed7}" />
+    <Action Name="MC_FB" Id="{a7c971de-fe03-4667-a871-54e09fb6fcde}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[// 正轉極限
+Axis1Power.Enable_Positive:= OutLimiter;
+Axis2Power.Enable_Positive:= OutLimiter;
+// 反轉極限
+Axis1Power.Enable_Negative:= inLimiter;
+Axis2Power.Enable_Negative:= inLimiter;
+
+Axis1.ReadStatus();
+Axis2.ReadStatus();
+
+// 軸速度百分比
+
+IF hmi.Auto_Pause THEN
+	Axis1Power.Override := 0;
+ELSE
+	Axis1Power.Override := Axis.Override;
+END_IF
+
+Axis2Power.Override := Axis.Override;
+
+(*===================== 軸電源 =====================*)
+Axis1Power(Axis:= Axis1);
+Axis2Power(Axis:= Axis2);
+
+(*===================== 軸重置 =====================*)
+Axis1Reset(Axis:= Axis1);
+Axis2Reset(Axis:= Axis2);
+
+(*===================== 軸耦合 =====================*)
+AxisGearIn(master := Axis1, slave := Axis2);
+
+(*===================== 軸解耦 =====================*)
+AxisGearOut(slave := Axis2);
+
+(*===================== 軸停止 =====================*)
+Axis1Stop(Axis:= Axis1);
+
+(*===================== 軸命令取消 =====================*)
+Axis1Halt(Axis:= Axis1);
+
+(*===================== 軸絕對移動 =====================*)
+fb_AbsMove(Axis:= Axis1);
+
+(*===================== 軸相對移動 =====================*)
+fb_RelMove(Axis:= Axis1);
+
+(*===================== 軸歸零 =====================*)
+fb_Axis1_NcIoOutput(Axis:= Axis1, Device := NcIoDeviceDrive, NcIoOutput := NcIoOutputnCtrl2);
+fb_Axis2_NcIoOutput(Axis:= Axis2, Device := NcIoDeviceDrive, NcIoOutput := NcIoOutputnCtrl2);
+
+(*===================== 軸歸零 =====================*)
+fb_Home(Axis:= Axis1, HomingMode:= MC_Direct);
+
+(*===================== 軸寫入BOOL參數 =====================*)
+fb_WriteBoolParameter(Axis:= Axis1);
+
+(*===================== 軸寫入參數 =====================*)
+fb_WriteParameter(Axis:= Axis1);
+
+(*===================== 背隙補償 =====================*)
+fb_BacklashCompensation(Axis:= Axis1);]]></ST>
+      </Implementation>
+    </Action>
+    <Property Name="Name2" Id="{8fbbf692-10b9-4842-ab0c-097c523d0427}" FolderPath="設定\">
+      <Declaration><![CDATA[PROPERTY Name2 : WSTRING]]></Declaration>
+      <Get Name="Get" Id="{e44f7080-51b3-4113-8264-fcb3279359c6}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Name2 := scAxisName2;
+
+]]></ST>
+        </Implementation>
+      </Get>
+      <Set Name="Set" Id="{4e44be30-010c-4b8b-989b-df8e32cc4f93}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[scAxisName2 := Name2;]]></ST>
+        </Implementation>
+      </Set>
+    </Property>
+    <Action Name="Step0_Start" Id="{a4f8e0b9-527b-4ca4-ae45-fd668043f976}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*============================
+				啟動馬達
+	  ============================*)
+CASE step OF
+	
+	1://開始移動流程
+		// 設定狀態
+		bDone := FALSE;
+		tmrWdt.IN := FALSE;
+// 		SetDyn(bJogMode);
+		Axis1Reset.Execute :=FALSE;
+		Axis2Reset.Execute :=FALSE;
+		AxisGearIn.Execute := FALSE;
+		IF NOT bDone THEN
+			step := 10;
+		END_IF
+		
+	10:
+		IF axis1.Status.Error OR axis2.Status.Error THEN
+			step := step + 1;
+		ELSE
+			step := 20;
+		END_IF
+		
+	11:
+		IF axis1.Status.Error THEN
+			Axis1Reset.Execute :=TRUE;
+			step := step + 1;
+		ELSE
+			step := 13;
+		END_IF
+		
+		
+	12:
+		IF NOT axis1.Status.Error AND Axis1Reset.Done THEN
+			Axis1Reset.Execute :=FALSE;
+			step := step + 1;
+		ELSIF Axis1Reset.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 馬達無法重置", ErrorCode:= Axis1Reset.ErrorID)
+			);
+			Axis1Reset.Execute :=FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	13:
+		IF axis2.Status.Error THEN
+			Axis2Reset.Execute :=TRUE;
+			step := step + 1;
+		ELSE
+			step := 15;
+		END_IF
+		
+		
+	14:
+		IF NOT axis2.Status.Error AND Axis2Reset.Done THEN
+			Axis2Reset.Execute :=FALSE;
+			step := step + 1;
+		ELSIF Axis2Reset.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ":馬達無法重置", ErrorCode:= Axis2Reset.ErrorID)
+			);
+			Axis2Reset.Execute :=FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	15:
+		step := 20;
+
+		
+	20: // 檢查馬達1是否已啟動
+		IF NOT Axis1Power.Status  THEN
+			step := step + 1;
+		ELSE
+			step := 24;
+		END_IF
+		
+	21:// 啟動馬達1
+		Axis1Power.Enable := TRUE;
+		tmrWdt.IN := TRUE;
+		step := step + 1;
+		
+	22:// 等待馬達啟動完成
+		IF Axis1Power.Status THEN
+			step := step + 1;
+			tmrWdt.IN := FALSE;
+			
+		ELSIF tmrWdt.Q OR Axis1Power.Error THEN
+			pMsg.Push_Error(ErrorCodeConver.Str(
+				str0:= scAxisName, str1:= ": 馬達1啟動失敗", ErrorCode:= Axis1Power.ErrorID)
+			);
+			tmrWdt.IN := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	23:// 馬達啟動後延遲
+		tmr1.in:=TRUE;
+		IF tmr1.Q THEN
+			tmr1.IN:=FALSE;
+			step := step + 1;
+		END_IF
+		
+	24: // 啟動馬達2
+		Axis2Power.Enable := TRUE;
+		tmrWdt.IN := TRUE;
+		step := step + 1;
+		
+	25:// 等待馬達啟動完成
+		IF Axis2Power.Status THEN
+			step := step + 1;
+			tmrWdt.IN := FALSE;
+			
+		ELSIF tmrWdt.Q OR Axis2Power.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 馬達2達啟動失敗", ErrorCode:= Axis2Power.ErrorID)
+			);
+			tmrWdt.IN := FALSE;
+			step:=step + 10000;
+		END_IF
+		
+	26:// 馬達啟動後延遲
+		tmr1.in:=TRUE;
+		IF tmr1.Q THEN
+			tmr1.IN:=FALSE;
+			step:=50;
+		END_IF
+		
+	40:
+		fb_BacklashCompensation.Enable := FALSE;
+		step := step + 1;
+		
+	41:
+		// 背隙值 (mm)
+		fb_BacklashCompensation.Backlash := 0.05;
+		// 正向補償 (往正方向移動時補償，預設是反方向移動時補償)
+		fb_BacklashCompensation.CompensationInPositiveDirection := FALSE;
+		// 背隙補償的速度 (mm/s)
+		fb_BacklashCompensation.Ramp := 1;
+		// 解除時機
+		fb_BacklashCompensation.DisableMode  := E_DisableMode.DisableModeReset;
+		// 功能啟動
+		fb_BacklashCompensation.Enable := TRUE;
+		step := step + 1;
+		
+	42:
+		IF fb_BacklashCompensation.Enabled THEN
+			step := step + 1;
+		ELSIF fb_BacklashCompensation.Error THEN
+			fb_BacklashCompensation.Enable := FALSE;
+			step := step + 1;
+		END_IF
+		
+	43:
+		step := 50;
+			
+		
+	50:
+		IF axis2.Status.Coupled THEN
+			step := 60;
+		ELSE
+			step := step + 1;
+		END_IF 
+
+	51: // 軸耦合
+		AxisGearIn.RatioNumerator := 1;
+		AxisGearIn.RatioDenominator := 1;
+		AxisGearIn.Execute := TRUE;
+		step := step + 1;
+		
+	52:
+		IF AxisGearIn.InGear THEN
+			AxisGearIn.Execute := FALSE;
+			step := step + 1;
+		ELSIF AxisGearIn.Error THEN
+			pMsg.Push_Error(
+				ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 耦合失敗", ErrorCode:= AxisGearIn.ErrorID)
+			);
+			AxisGearIn.Execute := FALSE;
+			step := step + 10000;
+		END_IF
+		
+	53:
+		step := 60;
+		
+	60: //模式選擇
+		CASE Mode OF
+			ActionMode.DoNothing:
+				bdone := TRUE;
+				step := 0;
+			
+			ActionMode.AbsMove:
+				step := 100;
+				
+			ActionMode.RelMove:
+				step := 200;
+				
+			ActionMode.Home:
+				step := 300;
+		END_CASE
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step8_End" Id="{52a9a6c1-3453-4457-970d-b37952bdbff0}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[	(*======================================
+					關閉馬達
+	  ======================================*)
+CASE step OF
+	// ============== 停止 + 關閉==============
+	800:
+		Axis1Reset.Execute	:= FALSE;
+		Axis1Stop.Execute	:= FALSE;
+		Axis1Halt.Execute	:= FALSE;
+		fb_AbsMove.Execute	:= FALSE;
+		fb_RelMove.Execute	:= FALSE;
+		fb_Home.Execute		:= FALSE;
+		Axis1Stop.Execute	:= FALSE;
+		step := step + 1;
+		
+	801:
+		IF Axis1.Status.Moving THEN
+			step := step + 1;
+		ELSE
+			step := 810;
+		END_IF
+	
+	802:
+		Axis1Stop.Execute := TRUE;
+		step := step + 1;
+		
+	803:
+		Axis1Stop.Execute := TRUE;
+		step := step + 1;
+		
+	804:
+		IF Axis1Stop.Done OR Axis1Stop.Error THEN
+			Axis1Stop.Execute := FALSE;
+			step := step + 1;
+		END_IF
+		
+	805:
+		tmr800.PT := T#1S;
+		tmr800.in:=TRUE;
+		IF tmr800.Q THEN
+			tmr800.IN:=FALSE;
+			step := step + 1;
+		END_IF
+		
+	806:
+		step:=810;
+		
+	
+	810:
+		Axis1Power.Enable := FALSE;
+		IF Axis1.Status.Disabled THEN
+			step := step + 1;
+		END_IF
+		
+	811:
+		Axis2Power.Enable := FALSE;
+		IF Axis2.Status.Disabled THEN
+			step := step + 1;
+		END_IF
+			
+	812:// 馬達關閉後延遲
+		tmr800.in:=TRUE;
+		IF tmr800.Q THEN
+			tmr800.IN:=FALSE;
+			step := step + 1;
+		END_IF
+		
+	813:
+		Mode := ActionMode.DoNothing;
+		step:=820;
+		
+	820:
+		IF axis2.Status.Coupled THEN
+			step := step + 1;
+		ELSE
+			step := 890;
+		END_IF
+		
+	821:
+		AxisGearOut.Execute := TRUE;
+		step := step + 1;
+		
+	822:
+		IF AxisGearOut.Done OR AxisGearOut.Error THEN
+			AxisGearOut.Execute := FALSE;
+			step := step + 1;
+		END_IF
+		
+	823:
+		step:=890;
+		
+		
+// ==============停止==============
+	850:
+		Axis1Stop.Deceleration := Dec;
+		Axis1Stop.Jerk := Dec * 5;
+		Axis1Stop.Execute := FALSE;
+		step := step + 1;
+	
+	851:
+		Axis1Stop.Execute := TRUE;
+		step := step + 1;
+		
+	852:
+		IF Axis1Stop.Done OR Axis1Stop.Error THEN
+			Axis1Stop.Execute := FALSE;
+			step := step + 1;
+		END_IF
+		
+	853:
+		tmr800.PT := T#1S;
+		tmr800.in:=TRUE;
+		IF tmr800.Q THEN
+			tmr800.IN:=FALSE;
+			step := step + 1;
+		END_IF
+		
+	854:
+		step:=890;
+		
+		
+			
+	890:// 結束程式
+		Mode := ActionMode.DoNothing;
+		step:=0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

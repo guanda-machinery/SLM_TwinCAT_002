@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="SpdC" Id="{0301182c-116f-4f25-9281-12bbcc779eb0}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+VAR_GLOBAL PERSISTENT
+// 上行架水平軸
+	// 手動模式速度
+	Jog_Speed :LREAL;
+	// 手動模式加速度
+	Jog_Accelerated :LREAL;
+	// 手動模式減速度
+	Jog_Deceleration :LREAL;
+	
+	// 自動模式 FX軸高速
+	HighSpeed_FX :LREAL;
+	// 自動模式高速
+	HighSpeed :LREAL;
+	// 自動模式低速
+	LowSpeed :LREAL;
+	// 回原點速度
+	HomeSpeed :LREAL;
+	// 離開原點速度
+	DotSpeed :LREAL;
+	// 手動模式加速度
+	Accelerated :LREAL;
+	// 手動模式減速度
+	Deceleration :LREAL;
+
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

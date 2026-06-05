@@ -1,0 +1,317 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="HeightMeasurer" Id="{7f8a998c-f2d1-4152-a6a1-577c47f96d3c}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM HeightMeasurer
+VAR
+	// 程式流程
+	step : INT;
+	
+	// 已歸零
+	bHome: BOOL;
+	
+	tmr01 : TON;
+	// 位置
+	_pos: LREAL;
+	// 上次的位置 計算速度用
+	_lastPos: LREAL;
+	// 速度
+	_speed: LREAL;
+	bBoot: BOOL := true;
+	tmpTargetPos: LREAL;
+END_VAR
+
+VAR_OUTPUT
+	bDone : BOOL;
+	bBuzy : BOOL;
+	bError : BOOL;
+	MeasureValue : Lreal;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF bBoot THEN
+	initAction();
+	bBoot := FALSE;
+END_IF
+
+Axis.Axis_H_Measure(outLimiter := TRUE, inLimiter := NOT IO.i314, origin := IO.i314);
+
+Step_000_Measure();
+Step_100_Measure_Error();
+Step_3_homming();
+
+bBuzy := step > 0 AND step < 10000;
+bError := step > 10000;
+
+IF bError OR bBuzy THEN
+	bDone := FALSE;
+END_IF
+
+output.Feed_Workpiace_W := MeasureValue;
+
+Axis.Axis_H_Measure();
+
+tmrAct();]]></ST>
+    </Implementation>
+    <Folder Name="內部程式" Id="{18be13d9-f4e5-46fd-8c51-dfb2c449d95f}" />
+    <Property Name="at_Home" Id="{a96e2a2f-76e5-407a-be75-7610c5d0b95f}">
+      <Declaration><![CDATA[PROPERTY at_Home : bool]]></Declaration>
+      <Get Name="Get" Id="{5052592e-877c-457e-87a2-e78e3d6dae75}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[at_Home := IO.i314;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="Homing" Id="{dd57b7f4-a9cc-46fc-ac6e-d002b832b0d1}">
+      <Declaration><![CDATA[METHOD Homing : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 300;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="initAction" Id="{720842c1-a644-4e87-9f8e-817e1272c86b}" FolderPath="內部程式\">
+      <Declaration><![CDATA[METHOD initAction : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Axis.Axis_H_Measure.Name := "H_Measure";
+
+Axis.Axis_H_Measure.Axis1 REF= Axis.Axis_StepMoter;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Measure" Id="{f126e68e-59ca-49d9-96f7-33aacfa47d39}">
+      <Declaration><![CDATA[METHOD Measure : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 1;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Step_000_Measure" Id="{a8b23434-8364-4f57-a80e-4d8d459c80a8}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	1:
+		
+		step := step + 1;
+		
+	2:
+		IF NOT Axis.Axis_H_Measure.bHome THEN
+			step := 10;
+		ELSE
+			step := 30;
+		END_IF
+		
+	10:
+		Axis.Axis_H_Measure.Homing();
+		step := step + 1;
+	
+	11:
+		IF  Axis.Axis_H_Measure.bBuzy OR Axis.Axis_H_Measure.bError THEN
+			step := step + 1;
+		END_IF
+		
+	12:
+		IF Axis.Axis_H_Measure.bDone THEN
+			step := step + 1;
+		ELSIF Axis.Axis_H_Measure.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	13:
+		step := 30;
+		
+	20:
+		IF ProjectData.WorkOrder_At_holding[0].Height > 0 THEN
+			tmpTargetPos := config.H_Measure_ZeroPoint - (ProjectData.WorkOrder_At_holding[0].Height + 50);
+			step := step + 1;
+		ELSE
+			step := 30;
+		END_IF
+		
+	21:
+		IF tmpTargetPos > 0 THEN
+			Axis.Axis_H_Measure.AbsMove(tmpTargetPos, 200);
+			step := step + 1;
+		ELSE
+			step := 30;
+		END_IF
+		
+	22:
+		IF  Axis.Axis_H_Measure.bBuzy OR Axis.Axis_H_Measure.bError THEN
+			step := step + 1;
+		END_IF
+		
+	23:
+		IF Axis.Axis_H_Measure.bDone THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		ELSIF Axis.Axis_H_Measure.bError THEN
+			tmr01.IN := FALSE;
+			step := step + 10000;
+		END_IF
+		
+	24:
+		step := 30;
+		
+	30:
+		Axis.Axis_H_Measure.AbsMove(config.H_Measure_ZeroPoint, 60);
+		step := step + 1;
+		
+	31:
+		IF  Axis.Axis_H_Measure.bBuzy OR Axis.Axis_H_Measure.bError THEN
+			step := step + 1;
+		END_IF
+		
+	32:
+		tmr01.PT := T#500MS;
+		tmr01.IN := abs(Axis.Axis_H_Measure.Axis1.NcToPlc.ActVelo) < 1;
+		
+		IF tmr01.Q THEN
+			Axis.Axis_H_Measure.Stop();
+			tmr01.IN := FALSE;
+			step := step + 1;
+		ELSIF Axis.Axis_H_Measure.bDone THEN
+			tmr01.IN := FALSE;
+			step := 100;
+		ELSIF Axis.Axis_H_Measure.bError THEN
+			tmr01.IN := FALSE;
+			step := step + 10000;
+		END_IF
+		
+	33:
+		IF NOT Axis.Axis_H_Measure.bBuzy THEN
+			step := step + 1;
+		END_IF
+		
+	34:
+		step := 40;
+		
+	40:
+		MeasureValue := config.H_Measure_ZeroPoint - Axis.Axis_H_Measure.fPos;
+		step := step + 1;
+		
+	41:
+		Axis.Axis_H_Measure.AbsMove(-5, 200);
+		step := step + 1;
+		
+	42:
+		IF  Axis.Axis_H_Measure.bBuzy OR Axis.Axis_H_Measure.bError THEN
+			step := step + 1;
+		END_IF
+		
+	43:
+		IF Axis.Axis_H_Measure.bDone OR Axis.Axis_H_Measure.origin THEN
+			step := step + 1;
+		ELSIF Axis.Axis_H_Measure.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	44:
+		step := 90;
+	
+	90:
+		bdone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_100_Measure_Error" Id="{9ac4c2a5-f0c0-4aae-8ac2-93896d616dc8}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	100:
+		step := 110;
+		
+	
+	110:
+		Axis.Axis_H_Measure.AbsMove(-5, 200);
+		step := step + 1;
+		
+	111:
+		IF  Axis.Axis_H_Measure.bBuzy OR Axis.Axis_H_Measure.bError THEN
+			step := step + 1;
+		END_IF
+		
+	112:
+		IF Axis.Axis_H_Measure.bDone THEN
+			step := step + 1;
+		ELSIF Axis.Axis_H_Measure.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	113:
+		step := 190;
+	
+	190:
+		pMsg.Push_Error("未檢測到工件");
+		step := step + 10000;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_3_homming" Id="{5c9deb4f-b11d-4641-85d5-20b8168bdabe}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	300:
+		IF Axis.Axis_H_Measure.bHome THEN
+			step := 380;
+		ELSE
+			step := 310;
+		END_IF
+		
+	310:
+		Axis.Axis_H_Measure.Homing();
+		step := step + 1;
+	
+	311:
+		IF  Axis.Axis_H_Measure.bBuzy OR Axis.Axis_H_Measure.bError THEN
+			step := step + 1;
+		END_IF
+		
+	312:
+		IF Axis.Axis_H_Measure.bDone THEN
+			step := step + 1;
+		ELSIF Axis.Axis_H_Measure.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	313:
+		step := 380;
+
+	380:
+		Axis.Axis_H_Measure.AbsMove(-5, 100);
+		step := step + 1;
+		
+	381:
+		IF  Axis.Axis_H_Measure.bBuzy OR Axis.Axis_H_Measure.bError THEN
+			step := step + 1;
+		END_IF
+		
+	382:
+		IF Axis.Axis_H_Measure.bDone THEN
+			step := step + 1;
+		ELSIF Axis.Axis_H_Measure.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	383:
+		step := 390;
+		
+	390:
+		bhome := TRUE;
+		bdone := TRUE;
+		step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="tmrAct" Id="{34849624-9ff7-4b33-9d7f-2dcefa092ef6}" FolderPath="內部程式\">
+      <Implementation>
+        <ST><![CDATA[tmr01();]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

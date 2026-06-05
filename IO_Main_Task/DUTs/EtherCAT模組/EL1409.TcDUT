@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.14">
+  <DUT Name="EL1409" Id="{2e77417c-85cb-4d85-95b5-298a000005a3}">
+    <Declaration><![CDATA[TYPE EL1409 :
+STRUCT
+	ModType : STRING := 'EL1409';
+	Input AT %I*:ARRAY [1..16] OF BOOL;
+	WcState AT %I*:BOOL;
+	InputToggle AT %I*:BOOL;
+	State AT %I*:UINT;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

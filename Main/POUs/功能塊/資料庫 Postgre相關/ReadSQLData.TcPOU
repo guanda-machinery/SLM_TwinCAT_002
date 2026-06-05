@@ -1,0 +1,1889 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="ReadSQLData" Id="{d43e31a7-a3d2-4d43-836e-907fbae18eb2}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM ReadSQLData
+VAR
+	step : INT;	
+
+	_fb_PLCDBCmdEvt : FB_PLCDBCmdEvt(sNetID:= '', tTimeout:= T#5S );
+	
+	_SqlCommand : STRING(1024);
+	
+	// 讀回的資料筆數
+	read_num: UDINT;
+	
+	// 帶入參數
+	_stPara		: ARRAY [0..5] OF ST_ExpParameter;
+	
+	tcMessage     : I_TcMessage;
+	
+	database_server_id: UDINT := 2;
+	
+	_uuid : STRING(36);
+	
+	// 取得加工起始點的 SQL資料查詢結構
+	_GetPosX : SQL_GetPosX_Struct;
+	
+	// 取得加工資料 的 資料查詢結構
+	_Get_Payload : SQL_Get_Payload_Struct;
+	
+	_DataExists :BOOL;
+	
+	// 使用暫存器
+	_FileBuffNumber	: INT;
+	
+	
+	// 寫入啟動時間
+	Write_Time_para : Payload_Write_Time;
+	
+	
+	// 使用雷射參數
+	_ParaNum : INT;
+	
+	// 使用暫存器
+	_ParaBuffNumber	: INT;
+	
+	_fb_FileOpen : FB_FileOpen ;
+	
+	_e_OpenPath : E_OpenPath;
+	
+	_fb_FileWrite : FB_FileWrite;
+	
+	_fb_FileClose : FB_FileClose;
+	
+	test: PVOID;
+	TmrWdt: TON;
+	
+	systime         : FB_LocalSystemTime;
+	currentTime     : DT;
+	
+	cnt1 : INT;
+END_VAR
+
+VAR_OUTPUT
+	bBuzy	: BOOL;
+	bDone	: BOOL;
+	bError	: BOOL;
+	
+	fNext_XPos	: LREAL;
+	
+	stLaserParameter : LaserParameter_Data;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+bBuzy := step > 0 AND step < 10000;
+
+bError := step > 10000;
+
+IF bBuzy OR bError THEN
+	bDone := FALSE;
+END_IF
+
+TmrWdt(in := bBuzy, PT:=T#20S);
+IF TmrWdt.Q THEN
+	pMsg.Push_Alarm_NoPause(
+				WStrConcat("ReadSQLData", ":功能執行超時", TO_WSTRING(step))
+			);
+	step := step + 10000;
+END_IF
+
+IF step = 0 THEN
+	RETURN;
+END_IF
+
+systime(
+	bEnable:= TRUE, 
+	dwCycle:= 1,
+	systemTime=> );
+currentTime := SYSTEMTIME_TO_DT(systime.systemTime);
+
+Stap_0100_Get_Work_Order();
+	
+Stap_0200_Get_SteelData_X();
+
+Stap_0300_Get_Payload_DataNum();
+
+Stap_0400_Get_Payload_Data();
+
+Stap_0500_Get_X_Next_StartPos();
+
+Stap_1200_Get_Steel_Num_On_Wait();
+
+Stap_2000_Set_Payload_Start();
+
+Stap_2100_Set_Payload_Finish();
+
+Stap_3000_Set_Steel_Start();
+
+Stap_3100_Set_Steel_Finish();
+
+Stap_3200_Set_Steel_SN();]]></ST>
+    </Implementation>
+    <Folder Name="入口" Id="{7aed78ff-99e8-43c5-9f19-76feff82cf22}" />
+    <Method Name="Get_DxfFile" Id="{ff9b2820-aed3-4d5f-b7e7-21fd3c99f9db}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Get_DxfFile : BOOL
+VAR_INPUT
+	// 檔案的UUID
+	dataUuid : STRING(36);
+	
+	// 使用DXF檔案暫存
+	BufferNumber : int;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+IF NOT bBuzy THEN
+	_uuid := dataUuid;
+	
+	_FileBuffNumber := BufferNumber;
+	
+	bdone := FALSE;
+	
+	bBuzy := TRUE;
+	
+	step := 1000;
+	
+	Get_DxfFile := TRUE;
+ELSE
+	Get_DxfFile := FALSE;
+END_IF
+
+]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Get_LaserParame" Id="{cfe2c40e-9618-4fa7-8d3c-3c148bfca207}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Get_LaserParame : BOOL
+VAR_INPUT
+	// 讀取的參數ID
+	paramNum : INT;
+	// 放到暫存區位置
+	PutToMem :INT;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy THEN
+	_ParaNum := paramNum;
+	
+	_ParaBuffNumber := PutToMem;
+	
+	bdone := FALSE;
+	
+	bBuzy := TRUE;
+	
+	step := 600;
+	
+	Get_LaserParame := TRUE;
+ELSE
+	Get_LaserParame := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Get_Payload" Id="{24dc8ee3-a1bc-4965-91df-ba611e739680}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Get_Payload
+VAR_INPUT
+	// 區間的起始位置
+	Start_Pos : LREAL;
+	// 區間的結束位置
+	End_Pos : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+_Get_Payload.PosBegain := Start_Pos;
+_Get_Payload.PosEnd := End_Pos;
+
+bdone := FALSE;
+
+step := 300;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Get_Steel_Num_On_Wait" Id="{5a687366-71b0-4780-82cf-99880d9e46f7}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Get_Steel_Num_On_Wait : bool
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy THEN
+	bdone := FALSE;
+	
+	bBuzy := TRUE;
+	
+	step := 1200;
+	
+	Get_Steel_Num_On_Wait := TRUE;
+ELSE
+	Get_Steel_Num_On_Wait := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Get_SteelData" Id="{2765480f-ff87-499a-969b-e7a2109fbebf}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Get_SteelData
+VAR_INPUT
+	UUID : STRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_uuid := UUID;
+
+bdone := FALSE;
+
+step := 200;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Get_WorkkOrder" Id="{919e7d54-941f-401d-9603-395e4f199b03}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Get_WorkkOrder : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy THEN
+	
+	bdone := FALSE;
+	
+	bBuzy := TRUE;
+	
+	
+	
+	step := 100;
+	
+	Get_WorkkOrder := TRUE;
+ELSE
+	Get_WorkkOrder := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Get_X_NextPos" Id="{8535e66a-efe2-49b0-a0f9-e8e18e7b506e}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Get_X_NextPos : bool
+VAR_INPUT
+	Pos : LREAL;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy THEN
+	_GetPosX.Pos := Pos;
+	
+	bdone := FALSE;
+	
+	bBuzy := TRUE;
+	
+	step := 500;
+	
+	Get_X_NextPos := TRUE;
+ELSE
+	Get_X_NextPos := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Payload_Finish" Id="{dad24b78-defb-46bb-90ea-63d3571d3f3d}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Set_Payload_Finish : BOOL
+VAR_INPUT
+	uid : STRING(36);
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy THEN
+	_uuid := uid;
+	
+	bdone := FALSE;
+	
+	bBuzy := TRUE;
+	
+	step := 2100;
+	
+	Set_Payload_Finish := TRUE;
+ELSE
+	Set_Payload_Finish := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Payload_Start" Id="{a13a7af0-5d44-43f0-aa27-c3aa0f321e17}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Set_Payload_Start : BOOL
+VAR_INPUT
+	uid : STRING(36);
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy THEN
+	_uuid := uid;
+	
+	bdone := FALSE;
+	
+	bBuzy := TRUE;
+	
+	step := 2000;
+	
+	Set_Payload_Start := TRUE;
+ELSE
+	Set_Payload_Start := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Steel_Finish" Id="{37330fb1-66f9-4df7-9eb3-ff33516dee19}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Set_Steel_Finish : BOOL
+VAR_INPUT
+	uid : STRING(36);
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy THEN
+	_uuid := uid;
+	
+	bdone := FALSE;
+	
+	bBuzy := TRUE;
+	
+	step := 3100;
+	
+	Set_Steel_Finish := TRUE;
+ELSE
+	Set_Steel_Finish := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Steel_Start" Id="{475467e3-3dcf-4891-89c7-c689c4a8df91}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Set_Steel_Start : BOOL
+VAR_INPUT
+	uid : STRING(36);
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy THEN
+	_uuid := uid;
+	
+	bdone := FALSE;
+	
+	bBuzy := TRUE;
+	
+	step := 3000;
+	
+	Set_Steel_Start := TRUE;
+ELSE
+	Set_Steel_Start := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Stap_0100_Get_Work_Order" Id="{dafccf73-339d-4ca2-9edf-7bf7974b91a5}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	
+	100:
+		ProjectData.WorkOrder_inSide.SN := 0;
+		ProjectData.WorkOrder_inSide.steel_id := ''; 
+		ProjectData.WorkOrder_inSide.Width := 0; 
+		ProjectData.WorkOrder_inSide.Height := 0; 
+		step := step + 1;
+		
+	101:
+		ProjectData.WorkOrder_alignment.SN := 0;
+		ProjectData.WorkOrder_alignment.steel_id := ''; 
+		ProjectData.WorkOrder_alignment.Width := 0; 
+		ProjectData.WorkOrder_alignment.Height := 0; 
+		step := step + 1;
+		
+	102:
+		ProjectData.WorkOrder_inserts.SN := 0;
+		ProjectData.WorkOrder_inserts.steel_id := ''; 
+		ProjectData.WorkOrder_inserts.Width := 0; 
+		ProjectData.WorkOrder_inserts.Height := 0; 
+		step := step + 1;
+		
+	103:
+		step := 110;
+
+(*	===========================================
+				抓取　inSide(入料)　資料
+	===========================================*)	
+	110:
+		// SQL命令
+		_SqlCommand := 
+		'
+		SELECT 
+			"sequence_number", 
+			s.height, 
+			s.width, 
+			CAST("part_nest_id" as char(36))
+		FROM 
+			"public"."work_order_data" 
+		LEFT JOIN 
+			"public"."steeldata" s 
+		ON 
+			s.id = part_nest_id::uuid
+		WHERE
+ 			"steel_status" = $'inSide$'
+		ORDER BY 
+			"sequence_number"
+		';
+
+		
+//		'SELECT  FROM dxf_data WHERE id = {id}::UUID';
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := SIZEOF(_uuid);
+		step := step + 1;
+		
+	111:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 1,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 32,
+				pReturnData := ADR(ProjectData.WorkOrder_inSide),
+				cbReturnData := SIZEOF(ProjectData.WorkOrder_inSide),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	112:
+		step := 120;
+
+(*	===========================================
+				抓取　inserts(差單)　資料
+	===========================================*)	
+	120:
+		// SQL命令
+		_SqlCommand := 
+		'
+		SELECT 
+			"sequence_number", 
+			s.height, 
+			s.width, 
+			CAST("part_nest_id" as char(36))
+		FROM 
+			"public"."work_order_data" 
+		LEFT JOIN 
+			"public"."steeldata" s 
+		ON 
+			s.id = part_nest_id::uuid
+		WHERE
+ 			"steel_status" = $'inserts$' OR "steel_status" = $'continue$'
+		ORDER BY 
+			"sequence_number"
+		';
+
+		
+//		'SELECT  FROM dxf_data WHERE id = {id}::UUID';
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := SIZEOF(_uuid);
+		step := step + 1;
+		
+	121:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 0,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 32,
+				pReturnData := ADR(ProjectData.WorkOrder_inserts),
+				cbReturnData := SIZEOF(ProjectData.WorkOrder_inserts),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	122:
+		step := 130;
+		
+(*	===========================================
+				抓取無靠邊差單資料
+	===========================================*)		
+		
+	130:
+		// SQL命令
+		_SqlCommand := 
+		'
+		SELECT 
+			"sequence_number", 
+			s.height, 
+			s.width, 
+			CAST("part_nest_id" as char(36))
+		FROM 
+			"public"."work_order_data" 
+		LEFT JOIN 
+			"public"."steeldata" s 
+		ON 
+			s.id = part_nest_id::uuid
+		WHERE
+ 			"steel_status" = $'alignment$'
+		ORDER BY 
+			"sequence_number"
+		';
+
+		
+//		'SELECT  FROM dxf_data WHERE id = {id}::UUID';
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := SIZEOF(_uuid);
+		step := step + 1;
+		
+	131:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 0,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 32,
+				pReturnData := ADR(ProjectData.WorkOrder_alignment),
+				cbReturnData := SIZEOF(ProjectData.WorkOrder_alignment),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	132:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_0200_Get_SteelData_X" Id="{be3c7100-e23b-403f-a776-92307406b9b3}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	200:
+		step := step + 1;
+
+	201:
+		// SQL命令
+		_SqlCommand := 
+		'SELECT 
+			CAST("id" as char(36)),
+			"steeltype", 
+			"length", 
+			"height", 
+			"width", 
+			"t1", 
+			"t2", 
+			"origin_offset", 
+			"preview_enabled", 
+			"preview_mode", 
+			"preview_tme", 
+			"designate_area_range_begin", 
+			"designate_area_range_end", 
+			CAST("payloadtop" as char(36)), 
+			CAST("payloadbottom" as char(36)), 
+			CAST("payloadleft" as char(36)), 
+			CAST("payloadright" as char(36)), 
+			"is_job_finish"
+		FROM 
+			"public"."steeldata"
+		WHERE
+			"id" = {id}::UUID';
+//		'SELECT  FROM dxf_data WHERE id = {id}::UUID';
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := SIZEOF(_uuid);
+		step := step + 1;
+		
+	202:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 1,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(ProjectData.Now_Steel),
+				cbReturnData := SIZEOF(ProjectData.Now_Steel),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	203:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_0300_Get_Payload_DataNum" Id="{d94088be-99b5-49d9-af63-49b72448b880}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	300:
+		IF _Get_Payload.PosEnd <= _Get_Payload.PosBegain THEN
+			_Get_Payload.PosEnd := _Get_Payload.PosBegain + 300;
+		END_IF
+		step := step + 1;
+		
+		
+(*	===============================
+		取得左面(Ga)的資料數量
+	===============================	*)
+	301: 
+		_Get_Payload.Payload_Uid := ProjectData.Now_Steel.payloadLeft;
+		// SQL命令
+		_SqlCommand := 
+		'SELECT
+			Count(*)::int2
+		FROM 
+			payloaddata
+		WHERE
+			payload_uid = {id} AND
+			"point_x" >= {PosBegain} AND
+			"point_x" < {PosEnd} AND
+			is_stage_finish = false
+			';
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		_stPara[1].sParaName := 'PosBegain'; 	_stPara[1].eParaType := E_ExpParameterType.Double64; 		_stPara[1].nParaSize := 8;
+		_stPara[2].sParaName := 'PosEnd'; 		_stPara[2].eParaType := E_ExpParameterType.Double64; 		_stPara[2].nParaSize := 8;
+		step := step + 1;
+		
+	302:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_Get_Payload),							// 帶入的參數值
+				cbData:= SIZEOF(_Get_Payload),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 3,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(ProjectData.Now_Steel_Payload_A_DataNumber),
+				cbReturnData := SIZEOF(ProjectData.Now_Steel_Payload_A_DataNumber),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	303:
+		step := 310;
+		
+(*	===============================
+		取得上面(Gb)的資料數量
+	===============================	*)
+	310: // 取得此面的資料數量
+		_Get_Payload.Payload_Uid := ProjectData.Now_Steel.payloadTop;
+		step := step + 1;
+		
+	311:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_Get_Payload),							// 帶入的參數值
+				cbData:= SIZEOF(_Get_Payload),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 3,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(ProjectData.Now_Steel_Payload_B_DataNumber),
+				cbReturnData := SIZEOF(ProjectData.Now_Steel_Payload_B_DataNumber),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	312:
+		step := 320;
+		
+(*	===============================
+		取得右面(Gc)的資料數量
+	===============================	*)
+	320: // 取得此面的資料數量
+		_Get_Payload.Payload_Uid := ProjectData.Now_Steel.payloadRight;
+		step := step + 1;
+		
+	321:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_Get_Payload),							// 帶入的參數值
+				cbData:= SIZEOF(_Get_Payload),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 3,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(ProjectData.Now_Steel_Payload_C_DataNumber),
+				cbReturnData := SIZEOF(ProjectData.Now_Steel_Payload_C_DataNumber),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	322:
+		step := 330;
+		
+(*	===============================
+		取得底面(Gd)的資料數量
+	===============================	*)
+	330:
+		_Get_Payload.Payload_Uid := ProjectData.Now_Steel.payloadBottom;
+		step := step + 1;
+		
+	331:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_Get_Payload),							// 帶入的參數值
+				cbData:= SIZEOF(_Get_Payload),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 3,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(ProjectData.Now_Steel_Payload_D_DataNumber),
+				cbReturnData := SIZEOF(ProjectData.Now_Steel_Payload_D_DataNumber),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	332:
+		step := 340;
+		
+	340:
+		step := 400;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_0400_Get_Payload_Data" Id="{3fdf216a-bd07-422a-8417-610aaeefa97f}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	400:
+		step := step + 1;
+	
+	401:
+		// SQL命令
+		_SqlCommand := 
+		'SELECT
+			CAST("data_uuid" as char(36)), 
+			CAST("payload_uid" as char(36)), 
+			"payload_serial", 
+			0, 
+			"point_x", 
+			"point_y", 
+			"width", 
+			"height", 
+			"is_qrcode",
+			"is_stage_finish",
+			CAST("qrcode_data" as char(100))
+		FROM
+			"public"."payloaddata"
+		WHERE
+			payload_uid = {id} AND
+			"point_x" >= {PosBegain} AND "point_x" < {PosEnd} AND
+			is_stage_finish = false
+		ORDER BY
+			"payload_serial"';
+			
+		// 設定對應參數
+		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		_stPara[1].sParaName := 'PosBegain'; 	_stPara[1].eParaType := E_ExpParameterType.Double64; 		_stPara[1].nParaSize := 8;
+		_stPara[2].sParaName := 'PosEnd'; 		_stPara[2].eParaType := E_ExpParameterType.Double64; 		_stPara[2].nParaSize := 8;
+			
+		step := step + 1;
+		
+	402:
+		step := 410;
+
+(*	===============================
+		取得左側面(Ga)的資料
+	===============================	*)
+	410:
+		IF ProjectData.Now_Steel_Payload_A_DataNumber > 0 THEN
+			step := step + 1;
+		ELSE
+			step := step + 10;
+		END_IF
+	
+	411: // SQL命令
+		_Get_Payload.Payload_Uid := ProjectData.Now_Steel.payloadLeft;
+		step := step + 1;
+		
+	412:
+		IF 
+		MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+			hDBID := database_server_id,
+			pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+			cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+			pData:= ADR(_Get_Payload),							// 帶入的參數值
+			cbData:= SIZEOF(_Get_Payload),						// 帶入的參數值大小
+			pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+			cbParameter:= SIZEOF(_stPara[0]) * 3,			// 帶入的參數類型設定的大小
+			nStartIndex := 0,
+			nRecordCount := 100,
+			pReturnData := ADR(ProjectData.Payload_A_Data_buff),
+			cbReturnData := SIZEOF(ProjectData.Payload_A_Data_buff),
+			pRecords := ADR(read_num)
+		)
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+		END_IF
+		
+	413:
+		step := 420;
+		
+(*	===============================
+		取得頂部面(Gb)的資料
+	===============================	*)
+	420:
+		IF ProjectData.Now_Steel_Payload_B_DataNumber > 0 THEN
+			step := step + 1;
+		ELSE
+			step := step + 10;
+		END_IF
+	
+	421: // SQL命令
+		_Get_Payload.Payload_Uid := ProjectData.Now_Steel.payloadTop;
+		step := step + 1;
+		
+	422:
+		IF 
+		MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+			hDBID := database_server_id,
+			pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+			cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+			pData:= ADR(_Get_Payload),							// 帶入的參數值
+			cbData:= SIZEOF(_Get_Payload),						// 帶入的參數值大小
+			pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+			cbParameter:= SIZEOF(_stPara[0]) * 3,			// 帶入的參數類型設定的大小
+			nStartIndex := 0,
+			nRecordCount := 100,
+			pReturnData := ADR(ProjectData.Payload_B_Data_buff),
+			cbReturnData := SIZEOF(ProjectData.Payload_B_Data_buff),
+			pRecords := ADR(read_num)
+		)
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+		END_IF
+		
+	423:
+		step := 430;
+		
+(*	===============================
+		取得頂部面(Gc)的資料
+	===============================	*)
+	430:
+		IF ProjectData.Now_Steel_Payload_C_DataNumber > 0 THEN
+			step := step + 1;
+		ELSE
+			step := step + 10;
+		END_IF
+	
+	431: // SQL命令
+		_Get_Payload.Payload_Uid := ProjectData.Now_Steel.payloadRight;
+		step := step + 1;
+		
+	432:
+		IF 
+		MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+			hDBID := database_server_id,
+			pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+			cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+			pData:= ADR(_Get_Payload),							// 帶入的參數值
+			cbData:= SIZEOF(_Get_Payload),						// 帶入的參數值大小
+			pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+			cbParameter:= SIZEOF(_stPara[0]) * 3,			// 帶入的參數類型設定的大小
+			nStartIndex := 0,
+			nRecordCount := 100,
+			pReturnData := ADR(ProjectData.Payload_C_Data_buff),
+			cbReturnData := SIZEOF(ProjectData.Payload_C_Data_buff),
+			pRecords := ADR(read_num)
+		)
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+		END_IF
+		
+	433:
+		step := 440;
+		
+(*	===============================
+		取得底部面(Gd)的資料
+	===============================	*)
+	440:
+		IF ProjectData.Now_Steel_Payload_D_DataNumber > 0 THEN
+			step := step + 1;
+		ELSE
+			step := step + 10;
+		END_IF
+	
+	441: // SQL命令
+		_Get_Payload.Payload_Uid := ProjectData.Now_Steel.payloadBottom;
+		step := step + 1;
+		
+	442:
+		IF 
+		MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+			hDBID := database_server_id,
+			pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+			cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+			pData:= ADR(_Get_Payload),							// 帶入的參數值
+			cbData:= SIZEOF(_Get_Payload),						// 帶入的參數值大小
+			pParameter:= ADR(_stPara), 									// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+			cbParameter:= SIZEOF(_stPara[0]) * 3,							// 帶入的參數類型設定的大小
+			nStartIndex := 0,	// 起始的資料序號
+			nRecordCount := 100,
+			pReturnData := ADR(ProjectData.Payload_D_Data_buff),
+			cbReturnData := SIZEOF(ProjectData.Payload_D_Data_buff),
+			pRecords := ADR(read_num)
+		)
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+		END_IF
+		
+	443:
+		step := 450;
+		
+	450:
+		bDone := TRUE;
+		step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_0500_Get_X_Next_StartPos" Id="{6976f1b1-41ca-4ce2-b7e9-8bfd0556821f}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+ 500:
+		step := step + 1;
+	
+ 501: 
+		step := 510;
+
+(*	===============================
+		取得X最近點
+	===============================	*)
+ 510:
+		_GetPosX.Payload_A_Uid := ProjectData.Now_Steel.payloadTop;
+		_GetPosX.Payload_B_Uid := ProjectData.Now_Steel.payloadBottom;
+		_GetPosX.Payload_C_Uid := ProjectData.Now_Steel.payloadLeft;
+		_GetPosX.Payload_D_Uid := ProjectData.Now_Steel.payloadRight;
+		step := step + 1;
+	
+ 511: // SQL命令
+		_SqlCommand := 
+		'SELECT
+			"point_x"
+		FROM
+			"public"."payloaddata"
+		WHERE
+			(	
+				"payload_uid" = {payload_uid_A} OR
+				"payload_uid" = {payload_uid_B} OR 
+				"payload_uid" = {payload_uid_C} OR 
+				"payload_uid" = {payload_uid_D}
+			) 
+			AND
+				is_stage_finish = false
+			AND
+				"point_x" > {PosX}
+		ORDER BY
+			"point_x"
+		LIMIT 1';
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'payload_uid_A';			_stPara[0].eParaType := E_ExpParameterType.STRING_;		_stPara[0].nParaSize := 37;
+		_stPara[1].sParaName := 'payload_uid_B';			_stPara[1].eParaType := E_ExpParameterType.STRING_;		_stPara[1].nParaSize := 37;
+		_stPara[2].sParaName := 'payload_uid_C';			_stPara[2].eParaType := E_ExpParameterType.STRING_;		_stPara[2].nParaSize := 37;
+		_stPara[3].sParaName := 'payload_uid_D';			_stPara[3].eParaType := E_ExpParameterType.STRING_;		_stPara[3].nParaSize := 37;
+		_stPara[4].sParaName := 'PosX';					_stPara[4].eParaType := E_ExpParameterType.Double64;	_stPara[4].nParaSize := 8;
+		step := step + 1;
+		
+ 512:
+		IF 
+		MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+			hDBID := database_server_id,
+			pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+			cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+			pData:= ADR(_GetPosX),						// 帶入的參數值
+			cbData:= SIZEOF(_GetPosX),					// 帶入的參數值大小
+			pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+			cbParameter:= SIZEOF(_stPara[0]) * 5,			// 帶入的參數類型設定的大小
+			nStartIndex := 0,
+			nRecordCount := 1,
+			pReturnData := ADR(fNext_XPos),
+			cbReturnData := SIZEOF(fNext_XPos),
+			pRecords := ADR(read_num)
+		)
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				IF read_num = 0 THEN
+					fNext_XPos := -1;
+				END_IF
+				step := step + 1;
+			END_IF
+		END_IF
+		
+ 513:
+		bDone := TRUE;
+		step := 0;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_1200_Get_Steel_Num_On_Wait" Id="{ec59b772-c39d-4f36-9355-075086f94a36}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	
+	1200:
+		// SQL命令
+		_SqlCommand := 
+		'
+		SELECT 
+			Count(*)::int2
+		FROM 
+			"public"."work_order_data" 
+		WHERE
+ 			"steel_status" = $'holding$' OR "steel_status" = $'waitLoading$'
+		';
+
+		step := step + 1;
+		
+	1201:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= 0,							// 帶入的參數值
+				cbData:= 0,						// 帶入的參數值大小
+				pParameter:= 0, 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= 0,		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(ProjectData.WorkOrder_Num_On_Wait),
+				cbReturnData := SIZEOF(ProjectData.WorkOrder_Num_On_Wait),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	1202:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_2000_Set_Payload_Start" Id="{0020ff15-a64d-4730-90e4-dd887314eab4}">
+      <Implementation>
+        <ST><![CDATA[(*	=================================================================
+						從資料庫讀取 A頭 雷射檔
+	================================================================= *)
+CASE step OF
+	2000:
+		// SQL命令
+		_SqlCommand := 
+		'SELECT EXISTS(
+			SELECT 
+				data_uuid
+			from 
+				public.payloaddata
+			where 
+				data_uuid = {uuid}::uuid
+		);';
+		// 設定對應參數
+		_stPara[0].sParaName := 'uuid'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		
+		step := step + 1;
+		
+	2001:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]),		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(_DataExists),
+				cbReturnData := SIZEOF(_DataExists),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	2002:
+		IF _DataExists THEN
+			step := step + 1;
+		ELSE
+			pmsg.Push_Alarm_NoPause(WStrConcat(str0:= "ReadSQLData.Set_Payload_Start: 讀取的UUID(", str1:= TO_WSTRING(_uuid), str2:= ")不存在。", str3:= TO_WSTRING(step)));
+			step := step + 10000;
+		END_IF
+		
+	2003:
+			step := 2010;
+			
+	2010:
+		Write_Time_para.Start_TIME := currentTime;
+		Write_Time_para.Uid := _uuid;
+	
+		// SQL命令
+		_SqlCommand := 
+		'
+		UPDATE 
+			public.payloaddata 
+		SET 
+			stage_start = {timestamp}
+		WHERE
+			data_uuid = {id}::UUID
+		';
+		
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'timestamp'; 			_stPara[0].eParaType := E_ExpParameterType.DateTime; 		_stPara[0].nParaSize := SIZEOF(Write_Time_para.Start_TIME);
+		_stPara[1].sParaName := 'id'; 					_stPara[1].eParaType := E_ExpParameterType.STRING_; 		_stPara[1].nParaSize := 37;
+		
+		step := step + 1;
+		
+	2011:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.Execute(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(Write_Time_para),							// 帶入的參數值
+				cbData:= SIZEOF(Write_Time_para),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 2		// 帶入的參數類型設定的大小
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+	
+		
+	2012:
+		bDone := TRUE;
+		step := 0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_2100_Set_Payload_Finish" Id="{9f34b1cb-0dd2-4ebd-8a66-6568a5246bff}">
+      <Implementation>
+        <ST><![CDATA[(*	=================================================================
+						從資料庫讀取 A頭 雷射檔
+	================================================================= *)
+CASE step OF
+	2100:
+		// SQL命令
+		_SqlCommand := 
+		'SELECT EXISTS(
+			SELECT 
+				data_uuid
+			from 
+				public.payloaddata
+			where 
+				data_uuid = {uuid}::uuid
+		);';
+				
+		
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'uuid'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		
+		step := step + 1;
+		
+	2101:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]),		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(_DataExists),
+				cbReturnData := SIZEOF(_DataExists),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	2102:
+		IF _DataExists THEN
+			step := step + 1;
+		ELSE
+			pmsg.Push_Alarm_NoPause(WStrConcat(str0:= "ReadSQLData.Set_Payload_Finish: 讀取的UUID(", str1:= TO_WSTRING(_uuid), str2:= ")不存在。", str3:= TO_WSTRING(step)));
+			step := step + 10000;
+		END_IF
+		
+	2103:
+			step := 2110;
+			
+	2110:
+		Write_Time_para.Start_TIME := currentTime;
+		Write_Time_para.Uid := _uuid;
+	
+		// SQL命令
+		_SqlCommand := 
+		'
+		UPDATE 
+			public.payloaddata 
+		SET 
+			stage_finish = {timestamp}, is_stage_finish = true
+		WHERE
+			data_uuid = {id}::UUID
+		';
+		
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'timestamp'; 			_stPara[0].eParaType := E_ExpParameterType.DateTime; 		_stPara[0].nParaSize := SIZEOF(Write_Time_para.Start_TIME);
+		_stPara[1].sParaName := 'id'; 					_stPara[1].eParaType := E_ExpParameterType.STRING_; 		_stPara[1].nParaSize := 37;
+		
+		step := step + 1;
+		
+	2111:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.Execute(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(Write_Time_para),							// 帶入的參數值
+				cbData:= SIZEOF(Write_Time_para),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 2		// 帶入的參數類型設定的大小
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+	
+		
+	2112:
+		bDone := TRUE;
+		step := 0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_3000_Set_Steel_Start" Id="{d7ce3e45-1142-406b-b1e5-3547fe4e94c3}">
+      <Implementation>
+        <ST><![CDATA[(*	=================================================================
+						寫入 steel 加工開始時間
+	================================================================= *)
+CASE step OF
+	3000:
+		// SQL命令
+		_SqlCommand := 
+		'SELECT EXISTS(
+			SELECT 
+				steel_id
+			from 
+				public.work_order_data
+			where 
+				steel_id = {uuid}::uuid
+		);';
+				
+		
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'uuid'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		
+		step := step + 1;
+		
+	3001:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]),		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(_DataExists),
+				cbReturnData := SIZEOF(_DataExists),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	3002:
+		IF _DataExists THEN
+			step := step + 1;
+		ELSE
+			pmsg.Push_Alarm(WStrConcat(str0:= "ReadSQLData.Set_Steel_Start: 讀取的UUID(", str1:= TO_WSTRING(_uuid), str2:= ")不存在。", str3:= TO_WSTRING(step)));
+		END_IF
+		
+	3003:
+			step := 3010;
+			
+	3010:
+		Write_Time_para.Start_TIME := currentTime;
+		Write_Time_para.Uid := _uuid;
+	
+		// SQL命令
+		_SqlCommand := 
+		'
+		UPDATE 
+			public.work_order_data 
+		SET 
+			steel_status = $'machining$', steel_location = $'machine$'
+		WHERE
+			steel_id = {id}::UUID
+		';
+		
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		
+		step := step + 1;
+		
+	3011:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.Execute(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0])		// 帶入的參數類型設定的大小
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+	
+		
+	3012:
+		pMsg.Push_Info(WStrConcat(
+				"Set_Steel_Start: ",
+				WLEFT(STR:= TO_WSTRING(_uuid), SIZE:= 8),
+				" :狀態設定為:加工中(machining), "
+				));
+		step := 3020;	
+
+
+	3020:
+		// SQL命令
+		_SqlCommand := 
+		'SELECT EXISTS(
+			SELECT 
+				id
+			from 
+				public.steeldata
+			where 
+				id = {uuid}::uuid
+		);';
+				
+		
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'uuid'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		
+		step := step + 1;
+		
+	3021:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]),		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(_DataExists),
+				cbReturnData := SIZEOF(_DataExists),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	3022:
+		IF _DataExists THEN
+			step := step + 1;
+		ELSE
+			pmsg.Push_Alarm(WStrConcat(str0:= "ReadSQLData.Get_DxfData: 讀取的UUID(", str1:= TO_WSTRING(_uuid), str2:= ")不存在。", str3:= TO_WSTRING(step)));
+		END_IF
+		
+	3023:
+			step := 3030;
+			
+	3030:
+		Write_Time_para.Start_TIME := currentTime;
+		Write_Time_para.Uid := _uuid;
+	
+		// SQL命令
+		_SqlCommand := 
+		'
+		UPDATE 
+			public.steeldata 
+		SET 
+			job_start_time = {timestamp}
+		WHERE
+			id = {id}::UUID
+		';
+		
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'timestamp'; 			_stPara[0].eParaType := E_ExpParameterType.DateTime; 		_stPara[0].nParaSize := SIZEOF(Write_Time_para.Start_TIME);
+		_stPara[1].sParaName := 'id'; 					_stPara[1].eParaType := E_ExpParameterType.STRING_; 		_stPara[1].nParaSize := 37;
+		
+		step := step + 1;
+		
+	3031:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.Execute(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(Write_Time_para),							// 帶入的參數值
+				cbData:= SIZEOF(Write_Time_para),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 2		// 帶入的參數類型設定的大小
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+	
+		
+	3032:
+		bDone := TRUE;
+		step := 0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_3100_Set_Steel_Finish" Id="{ab4764c2-e21b-46f3-aa9a-4310f48c9722}">
+      <Implementation>
+        <ST><![CDATA[(*	=================================================================
+						從資料庫讀取 A頭 雷射檔
+	================================================================= *)
+CASE step OF
+	3100:
+		// SQL命令
+		_SqlCommand := 
+		'SELECT EXISTS(
+			SELECT 
+				id
+			from 
+				public.steeldata
+			where 
+				id = {uuid}::uuid
+		);';
+				
+		
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'uuid'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		
+		step := step + 1;
+		
+	3101:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]),		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(_DataExists),
+				cbReturnData := SIZEOF(_DataExists),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	3102:
+		IF _DataExists THEN
+			step := step + 1;
+		ELSE
+			pmsg.Push_Alarm(WStrConcat(str0:= "ReadSQLData.Get_DxfData: 讀取的UUID(", str1:= TO_WSTRING(_uuid), str2:= ")不存在。", str3:= TO_WSTRING(step)));
+		END_IF
+		
+	3103:
+			step := 3110;
+			
+	3110:
+		Write_Time_para.Start_TIME := currentTime;
+		Write_Time_para.Uid := _uuid;
+	
+		// SQL命令
+		_SqlCommand := 
+		'
+		
+		UPDATE 
+			public.steeldata 
+		SET 
+			job_finish_time = {timestamp}, is_job_finish = true
+		WHERE
+			id = {id}::UUID
+		';
+			
+		// 設定對應參數
+		_stPara[0].sParaName := 'timestamp'; 			_stPara[0].eParaType := E_ExpParameterType.DateTime; 		_stPara[0].nParaSize := SIZEOF(Write_Time_para.Start_TIME);
+		_stPara[1].sParaName := 'id'; 					_stPara[1].eParaType := E_ExpParameterType.STRING_; 		_stPara[1].nParaSize := 37;
+		
+		step := step + 1;
+		
+	3111:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.Execute(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(Write_Time_para),							// 帶入的參數值
+				cbData:= SIZEOF(Write_Time_para),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]) * 2		// 帶入的參數類型設定的大小
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+	
+		
+	3112:
+		step := 3120;
+		
+	3120:
+		// SQL命令
+		_SqlCommand := 
+		'SELECT EXISTS(
+			SELECT 
+				steel_id
+			from 
+				public.work_order_data
+			where 
+				steel_id = {uuid}::uuid
+		);';
+				
+		
+	
+		// 設定對應參數
+		_stPara[0].sParaName := 'uuid'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		
+		step := step + 1;
+		
+	3121:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.ExecuteDataReturn(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0]),		// 帶入的參數類型設定的大小
+				nStartIndex := 0,
+				nRecordCount := 1,
+				pReturnData := ADR(_DataExists),
+				cbReturnData := SIZEOF(_DataExists),
+				pRecords := ADR(read_num)
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+		
+	3122:
+		IF _DataExists THEN
+			step := step + 1;
+		ELSE
+			pmsg.Push_Alarm(WStrConcat(str0:= "ReadSQLData.Get_DxfData: 讀取的UUID(", str1:= TO_WSTRING(_uuid), str2:= ")不存在。", str3:= TO_WSTRING(step)));
+		END_IF
+		
+	3123:
+			step := 3130;
+			
+	3130:
+		Write_Time_para.Start_TIME := currentTime;
+		Write_Time_para.Uid := _uuid;
+	
+		// SQL命令
+		_SqlCommand := 
+		'
+		
+		UPDATE 
+			public.work_order_data 
+		SET 
+			steel_status = $'finish$', steel_location = $'exitRack$', sequence_number = 0, steel_process_is_job_finish = true
+		WHERE
+			steel_id = {id}::UUID
+		';
+			
+		// 設定對應參數
+		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
+		
+		step := step + 1;
+		
+	3131:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.Execute(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= ADR(_uuid),							// 帶入的參數值
+				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= SIZEOF(_stPara[0])			// 帶入的參數類型設定的大小
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+	
+		
+	3132:
+		pMsg.Push_Info(WStrConcat(
+				"Set_Steel_Start: ",
+				WLEFT(STR:= TO_WSTRING(_uuid), SIZE:= 8),
+				" :狀態設定為:完成(finish), "
+				));
+		step := 3200;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Stap_3200_Set_Steel_SN" Id="{71cf110c-ae9a-4d56-bfdd-f53021490205}">
+      <Implementation>
+        <ST><![CDATA[(*	=================================================================
+						從資料庫讀取 A頭 雷射檔
+	================================================================= *)
+CASE step OF
+	3200: 
+		step := 3220;
+
+
+	3220:
+		// SQL命令
+		_SqlCommand := 
+		'
+		UPDATE
+			public.work_order_data
+		SET 
+			sequence_number = sequence_number - 1
+		WHERE
+			sequence_number > 1
+		
+		';
+
+		step := step + 1;
+		
+	3221:
+		IF 
+			MsgMain._fb_PLCDBCmdEvt.Execute(
+				hDBID := database_server_id,
+				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+				pData:= 0,							// 帶入的參數值
+				cbData:= 0,						// 帶入的參數值大小
+				pParameter:= 0, 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+				cbParameter:= 0			// 帶入的參數類型設定的大小
+			) 
+		THEN
+			IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+				tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+				step := step + 10000;
+			ELSE
+				step := step + 1;
+			END_IF
+			
+		END_IF
+	
+		
+	3222:
+		step := 3230;
+		
+	3230:
+		bDone := TRUE;
+		step := 0;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

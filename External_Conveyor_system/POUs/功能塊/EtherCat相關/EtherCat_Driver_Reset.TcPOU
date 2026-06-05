@@ -1,0 +1,328 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="EtherCat_Driver_Reset" Id="{f27f15ae-0dfd-47b4-8565-29da8e1c1a77}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM EtherCat_Driver_Reset
+VAR
+	step: INT;
+END_VAR
+
+VAR_OUTPUT
+	bBuzy: BOOL;
+	bError: BOOL;
+	bDone: BOOL;
+	iErrorId : INT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[bBuzy := step > 0 AND step < 10000;
+bError := step >= 10000;
+
+// 緊急狀態
+IF (EStop OR SystemError) THEN
+	bDone := FALSE;
+	IF bBuzy THEN
+		step := step  + 10000;
+	END_IF
+END_IF
+
+IF ProgramReset THEN
+	iErrorId := step;
+	step := 0;
+END_IF
+
+CASE step OF
+	1:
+		bDone := FALSE;
+		step := step + 1;
+		
+	2:
+		step := 10;
+		
+	10:
+		IF GetEtherSta.devStates[0].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	11:
+		GetEtherSta.ResetECat1(1001);
+		step := step + 1;
+		
+	12:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	13:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver1-1 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	14:
+		step := 20;
+		
+	20:
+		IF GetEtherSta.devStates[1].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	21:
+		GetEtherSta.ResetECat1(1002);
+		step := step + 1;
+		
+	22:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	23:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver1-2 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	24:
+		step := 30;
+		
+	30:
+		IF GetEtherSta.devStates[2].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	31:
+		GetEtherSta.ResetECat1(1002);
+		step := step + 1;
+		
+	32:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	33:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver1-3 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	34:
+		step := 40;
+		
+	40:
+		IF GetEtherSta.devStates[3].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	41:
+		GetEtherSta.ResetECat1(1004);
+		step := step + 1;
+		
+	42:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	43:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver1-4 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	44:
+		step := 50;
+		
+	50:
+		step := 100;
+		
+// 塔電櫃驅動器
+	100:
+		IF GetEtherSta.devStates2[5].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	101:
+		GetEtherSta.ResetECat2(1006);
+		step := step + 1;
+		
+	102:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	103:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver2-1 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	104:
+		step := 110;
+		
+	110:
+		IF GetEtherSta.devStates2[6].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	111:
+		GetEtherSta.ResetECat2(1007);
+		step := step + 1;
+		
+	112:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	113:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver2-2 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	114:
+		step := 120;
+	// CarRailln	
+	120:
+		IF GetEtherSta.devStates2[7].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	121:
+		GetEtherSta.ResetECat2(1008);
+		step := step + 1;
+		
+	122:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	123:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver2-3 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	124:
+		step := 130;
+		
+	130:
+		IF GetEtherSta.devStates2[8].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	131:
+		GetEtherSta.ResetECat2(1009);
+		step := step + 1;
+		
+	132:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	133:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver2-4 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	134:
+		step := 140;
+	
+	140:
+		IF GetEtherSta.devStates2[9].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	141:
+		GetEtherSta.ResetECat2(1010);
+		step := step + 1;
+		
+	142:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	143:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver2-5 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	144:
+		step := 150;
+		
+	150:
+		IF GetEtherSta.devStates2[10].deviceState = 8 THEN
+			step := step + 10;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	151:
+		GetEtherSta.ResetECat2(1011);
+		step := step + 1;
+		
+	152:
+		IF GetEtherSta.bBuzy OR GetEtherSta.bError THEN
+			step := step + 1;
+		END_IF
+		
+	153:
+		IF GetEtherSta.bDone THEN
+			step := step + 1;
+		ELSIF GetEtherSta.bError THEN
+			pMsg.Push_Alarm("重置Driver2-6 EtherCat狀態失敗");
+			step := step + 10000;
+		END_IF
+		
+	154:
+		bDone := TRUE;
+		step := 0;
+END_CASE]]></ST>
+    </Implementation>
+    <Method Name="Start" Id="{bf472c0d-cec5-459d-8774-9005b5062f53}">
+      <Declaration><![CDATA[METHOD Start : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

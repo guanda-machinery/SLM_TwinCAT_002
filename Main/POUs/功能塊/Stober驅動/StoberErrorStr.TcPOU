@@ -1,0 +1,995 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.14">
+  <POU Name="StoberErrorStr" Id="{088c1f4c-c293-4bb3-88f9-ba95ec5dd8ee}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION StoberErrorStr : WSTRING
+VAR_INPUT
+	in_Event	: UDINT;
+	in_Case		: UDINT;
+END_VAR
+VAR
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[CASE in_Event OF
+	31:	
+		StoberErrorStr := "Short/ground";
+		
+	32:	
+		StoberErrorStr := "Short/ground internal";
+		
+	33:	
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Overcurrent(Normal)";
+			2:
+				StoberErrorStr := "Overcurrent(Fast)";
+		END_CASE
+		
+	34:
+		CASE in_Case OF
+			1,23,24,25:
+				StoberErrorStr := "Hardware fault(FPGA)";
+			2:
+				StoberErrorStr := "Hardware fault(NOV control unit)";
+			3:
+				StoberErrorStr := "Hardware fault(NOV-Power Unit)";
+			4,5:
+				StoberErrorStr := "Hardware fault(Inactive)";
+			6:
+				StoberErrorStr := "Hardware fault(NOV safety module)";
+			7:
+				StoberErrorStr := "Hardware fault(Current measurement)";
+			8,9,10,11,30:
+				StoberErrorStr := "Hardware fault(power supply)";
+			12:
+				StoberErrorStr := "Hardware fault(Timer control board)";
+			13:
+				StoberErrorStr := "Hardware fault(Communication module adress-/databus)";
+			14:
+				StoberErrorStr := "Hardware fault(Communication module signal lines)";
+			15:
+				StoberErrorStr := "Hardware fault(Communication module clock error)";
+			16:
+				StoberErrorStr := "Hardware fault(Communication module voltage missing)";
+			17:
+				StoberErrorStr := "Hardware fault(Communication module databus)";
+			18:
+				StoberErrorStr := "Hardware fault(Terminal module adress-/databus)";
+			19:
+				StoberErrorStr := "Hardware fault(Terminal module signal lines)";
+			20:
+				StoberErrorStr := "Hardware fault(Terminal module clock error)";
+			21:
+				StoberErrorStr := "Hardware fault(Terminal module voltage is missing)";
+			22:
+				StoberErrorStr := "Hardware fault(Terminal module databus)";
+			26,27,28:
+				StoberErrorStr := "Hardware fault(CPU)";
+			29:
+				StoberErrorStr := "Hardware fault(Communication)";
+			31:
+				StoberErrorStr := "Hardware fault(Operating unit)";
+		END_CASE
+		
+	35:	
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Watchdog(Core 0)";
+			2:
+				StoberErrorStr := "Watchdog(Core 1)";
+		END_CASE
+		
+	36:	
+		StoberErrorStr := "High voltage";
+		
+	37:	
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Motor encoder(Parameter <-> encoder)";
+			2:
+				StoberErrorStr := "Motor encoder(Maximum speed)";
+			3,5:
+				StoberErrorStr := "Motor encoder(AX6)";
+			4:
+				StoberErrorStr := "Motor encoder(Required AX6)";
+			6:
+				StoberErrorStr := "Motor encoder(X4 EnDat encoder found)";
+			7:
+				StoberErrorStr := "Motor encoder(X4 A track/Incremental)";
+			8:
+				StoberErrorStr := "Motor encoder(X4 no encoder found)";
+			10:
+				StoberErrorStr := "Motor encoder(X4 A track/Clk)";
+			11:
+				StoberErrorStr := "Motor encoder(X4 B track/Dat)";
+			12:
+				StoberErrorStr := "Motor encoder(X4 N track)";
+			13:
+				StoberErrorStr := "Motor encoder(X4-EnDat alarm)";
+			14:
+				StoberErrorStr := "Motor encoder(X4 EnDat CRC)";
+			15:
+				StoberErrorStr := "Motor encoder(X4 double transmission)";
+			16:
+				StoberErrorStr := "Motor encoder(X4 busy)";
+			17:
+				StoberErrorStr := "Motor encoder(EBI encoder low battery)";
+			18:
+				StoberErrorStr := "Motor encoder(EBI encoder battery empty)";
+			19:
+				StoberErrorStr := "Motor encoder(Alarm bit)";
+			20:
+				StoberErrorStr := "Motor encoder(Resolver carrier)";
+			21:
+				StoberErrorStr := "Motor encoder(Low voltage)";
+			22:
+				StoberErrorStr := "Motor encoder(Resolver sin/cos overvoltage)";
+			23,24:
+				StoberErrorStr := "Motor encoder(Resolver failure)";
+			30:
+				StoberErrorStr := "Motor encoder(X120 wire break)";
+			35:
+				StoberErrorStr := "Motor encoder(X120 double transmission)";
+			36:
+				StoberErrorStr := "Motor encoder(X120 busy)";
+			38:
+				StoberErrorStr := "Motor encoder(X120 timeout)";
+			43:
+				StoberErrorStr := "Motor encoder(X140 EnDat alarm)";
+			44:
+				StoberErrorStr := "Motor encoder(X140 EnDat CRC)";
+			48:
+				StoberErrorStr := "Motor encoder(X4 zero pulse missing)";
+			49:
+				StoberErrorStr := "Motor encoder(X4 zero pulse distance too small)";
+			60:
+				StoberErrorStr := "Motor encoder(Hiperface synchronisation)";
+			61:
+				StoberErrorStr := "Motor encoder(Hiperface timeout)";
+			62:
+				StoberErrorStr := "Motor encoder(Hiperface signal quality)";
+			63:
+				StoberErrorStr := "Motor encoder(Hiperface link)";
+			64:
+				StoberErrorStr := "Motor encoder(EnDat3 Timeout)";
+			65:
+				StoberErrorStr := "Motor encoder(EnDat3 invalid Request)";
+			66:
+				StoberErrorStr := "Motor encoder(EnDat3 Position Check)";
+		END_CASE
+		
+	38:	
+		StoberErrorStr := "Temperature drive controller sensor";
+	39:	
+		StoberErrorStr := "Temperature drive controller sensor";
+		
+	40:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Invalid data(Fault)";
+			2,7:
+				StoberErrorStr := "Invalid data(Block missing)";
+			3:
+				StoberErrorStr := "Invalid data(Data security)";
+			4:
+				StoberErrorStr := "Invalid data(Checksum)";
+			5:
+				StoberErrorStr := "Invalid data(Read only)";
+			6:
+				StoberErrorStr := "Invalid data(Read error)";
+			8:
+				StoberErrorStr := "Invalid data(Wrong/illegal serial number)";
+			9:
+				StoberErrorStr := "Invalid data(A00 interrupted - data loss)";
+			32:
+				StoberErrorStr := "Invalid data(Electronic nameplate)";
+			33:
+				StoberErrorStr := "Invalid data(Electronic nameplate limit)";
+			48:
+				StoberErrorStr := "Invalid data(Reverse documentation)";
+		END_CASE
+		
+	41:
+		StoberErrorStr := "Temp.MotorTMP";
+	24:
+		StoberErrorStr := "TempBrakeRes";
+	43:
+		StoberErrorStr := "AI1 wire break";
+	44:
+		StoberErrorStr := "External fault 1";
+	45:
+		StoberErrorStr := "Overtemp.motor i2t";
+	46:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Low voltage(DC link voltage below limit)";
+			2:
+				StoberErrorStr := "Low voltage(Failure of one/ all phases (mains))";
+			3:
+				StoberErrorStr := "Low voltage(Drop in network voltage when power section active)";
+		END_CASE
+	
+	47:
+		StoberErrorStr := "Torque/force-max. limit";
+	48:
+		StoberErrorStr := "Brake release monitoring";
+	49:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Brake(Brake supply voltage too low)";
+			2:
+				StoberErrorStr := "Brake(Brake 1: no feedback)";
+			3:
+				StoberErrorStr := "Brake(Brake 1: short circuit)";
+			4:
+				StoberErrorStr := "Brake(Brake 1: open load)";
+			5:
+				StoberErrorStr := "Brake(Brake 2: no feedback)";
+			6:
+				StoberErrorStr := "Brake(Brake 2: short circuit)";
+			7:
+				StoberErrorStr := "Brake(Brake 2: open load)";
+			8:
+				StoberErrorStr := "Brake(F92 switchover not permitted for opened brake)";
+			9:
+				StoberErrorStr := "Brake(Brake 1 slips)";
+			10:
+				StoberErrorStr := "Brake(Brake monitoring with engaged brake)";
+			11:
+				StoberErrorStr := "Brake(Brake monitoring with released brake)";
+			12:
+				StoberErrorStr := "Brake(Brake monitoring during engaging time)";
+			13:
+				StoberErrorStr := "Brake(Brake monitoring during release time)";
+		END_CASE
+	50:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Safety module(Inconsistent request (single channel))";
+			2:
+				StoberErrorStr := "Safety module(Wrong safety module)";
+			3:
+				StoberErrorStr := "Safety module(Internal error)";
+			4:
+				StoberErrorStr := "Safety module(PowerUp sequence error)";
+			5:
+				StoberErrorStr := "Safety module(Wrong interface version)";
+			6:
+				StoberErrorStr := "Safety module(Fatal error)";
+			7:
+				StoberErrorStr := "Safety module(Different CRCs in safety config of SafetyModule and DS6)";
+			8:
+				StoberErrorStr := "Safety module(Safety module startup error)";
+			9:
+				StoberErrorStr := "Safety module(Safety module failure)";
+			10:
+				StoberErrorStr := "Safety module(Safety config. missing in ParaModul)";
+			11:
+				StoberErrorStr := "Safety module(Safety config. from ParaModul activated)";
+			12:
+				StoberErrorStr := "Safety module(Safety config. missing in Paramodul&safety module)";
+			13:
+				StoberErrorStr := "Safety module(Safety module activation error)";
+			14:
+				StoberErrorStr := "Safety module(Command drive to safety module timeout)";
+			15:
+				StoberErrorStr := "Safety module(Safety module error)";
+			16:
+				StoberErrorStr := "Safety module(Remove enable!)";
+			17:
+				StoberErrorStr := "Safety module(Error class LIMIT)";
+			18:
+				StoberErrorStr := "Safety module(Error class OTHER)";
+			19:
+				StoberErrorStr := "Safety module(Safety module invalid FSoE address)";
+			20:
+				StoberErrorStr := "Safety module(Safety control word Error)";
+		END_CASE
+	51:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Virtual master software limit switch(SW-limit switch positive)";
+			2:
+				StoberErrorStr := "Virtual master software limit switch(SW-limit switch negative)";
+			3:
+				StoberErrorStr := "Virtual master software limit switch(+/- 31 bit computing limit reached)";
+		END_CASE
+	52:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Communication(CAN Life Guarding Event)";
+			2:
+				StoberErrorStr := "Communication(CAN Sync Error)";
+			3:
+				StoberErrorStr := "Communication(CAN Bus Off)";
+			4:
+				StoberErrorStr := "Communication(PZD-Timeout)";
+			5:
+				StoberErrorStr := "Communication(Wrong or missing X3 firmware)";
+			6:
+				StoberErrorStr := "Communication(EtherCAT PDO-Timeout)";
+			7:
+				StoberErrorStr := "Communication(Reserved)";
+			8:
+				StoberErrorStr := "Communication(IGB µC failure)";
+			9:
+				StoberErrorStr := "Communication(IGB serie lost frames)";
+			10:
+				StoberErrorStr := "Communication(IGB partner serie lost frames)";
+			11:
+				StoberErrorStr := "Communication(IGB synchronization error)";
+			12:
+				StoberErrorStr := "Communication(IGB configuration timing)";
+			13:
+				StoberErrorStr := "Communication(IGB partner synchronization)";
+			14:
+				StoberErrorStr := "Communication(PZD parameter figure faulty)";
+			15:
+				StoberErrorStr := "Communication(Wrong firmware for applicataion)";
+			16:
+				StoberErrorStr := "Communication(PROFINET Sign-of-Life synchronisation failed)";
+		END_CASE
+	53:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Limit switch(Hardware-Limit-Switch positive)";
+			2:
+				StoberErrorStr := "Limit switch(Hardware-Limit-Switch negative)";
+			3:
+				StoberErrorStr := "Limit switch(SW-limit switch positive)";
+			4:
+				StoberErrorStr := "Limit switch(SW-limit switch negative)";
+			5:
+				StoberErrorStr := "Limit switch(+/- 31 bit computing limit reached)";
+			6:
+				StoberErrorStr := "Limit switch(Linear motor moving range)";
+			7:
+				StoberErrorStr := "Limit switch(Both limit switches not connected)";
+		END_CASE
+	54:
+		StoberErrorStr := "Following error";
+	55:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Option module(Communication module wrong/missing)";
+			2:
+				StoberErrorStr := "Option module(EC6 failure)";
+			3:
+				StoberErrorStr := "Option module(CA6 failure)";
+			4:
+				StoberErrorStr := "Option module(DP6 failure)";
+			5:
+				StoberErrorStr := "Option module(PN6 failure)";
+			6:
+				StoberErrorStr := "Option module(Communication module incompatible)";
+			7:
+				StoberErrorStr := "Option module(Terminal module wrong/ missing)";
+			8:
+				StoberErrorStr := "Option module(IO6 failure)";
+			9:
+				StoberErrorStr := "Option module(RI6 failure)";
+			10:
+				StoberErrorStr := "Option module(XB6 failure)";
+			11:
+				StoberErrorStr := "Option module(XB6 encoder simulation initialization)";
+			12:
+				StoberErrorStr := "Option module(XB6 24V supply)";
+			13:
+				StoberErrorStr := "Option module(Terminal module incompatible)";
+		END_CASE
+	56:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Overspeed(Motor encoder)";
+			2:
+				StoberErrorStr := "Overspeed(Position encoder)";
+			3:
+				StoberErrorStr := "Overspeed(Motor & position encoder)";
+		END_CASE
+	57:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Runtime requirement(RT0)";
+			2:
+				StoberErrorStr := "Runtime requirement(RT2)";
+			3:
+				StoberErrorStr := "Runtime requirement(RT3)";
+			4:
+				StoberErrorStr := "Runtime requirement(RT4)";
+			5:
+				StoberErrorStr := "Runtime requirement(RT5)";
+			6:
+				StoberErrorStr := "Runtime requirement(RT2 (Core1))";
+			7:
+				StoberErrorStr := "Runtime requirement(RT4 (Core1))";
+		END_CASE
+	58:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Encoder simulation(Maximum speed)";
+			2:
+				StoberErrorStr := "Encoder simulation(Timeout)";
+			3:
+				StoberErrorStr := "Encoder simulation(X120 wire break)";
+		END_CASE
+	
+	59:
+		StoberErrorStr := "Overtemperature drive controller i2t";
+	60:
+		StoberErrorStr := "Application event 0";
+	61:
+		StoberErrorStr := "Application event 1";
+	62:
+		StoberErrorStr := "Application event 2";
+	63:
+		StoberErrorStr := "Application event 3";
+	64:
+		StoberErrorStr := "Application event 4";
+	65:
+		StoberErrorStr := "Application event 5";
+	66:
+		StoberErrorStr := "Application event 6";
+	67:
+		StoberErrorStr := "Application event 7";
+	68:
+		StoberErrorStr := "External fault 2";
+	69:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Motor connection(Motor not disconnected)";
+			2:
+				StoberErrorStr := "Motor connection(No motor connected)";
+			3:
+				StoberErrorStr := "Motor connection(Wake and Shake failed)";
+			4:
+				StoberErrorStr := "Motor connection(Brake)";
+		END_CASE
+	70:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Parameter consistency(Wrong encoder model)";
+			2:
+				StoberErrorStr := "Parameter consistency(X120 data direction)";
+			3:
+				StoberErrorStr := "Parameter consistency(B12<->B20)";
+			4:
+				StoberErrorStr := "Parameter consistency(B10<->H31)";
+			5:
+				StoberErrorStr := "Parameter consistency(Negative slip frequency)";
+			6:
+				StoberErrorStr := "Parameter consistency(Torque limit too high)";
+			7:
+				StoberErrorStr := "Parameter consistency(SSI passive)";
+			8:
+				StoberErrorStr := "Parameter consistency(v-max (I10) exeeds maximum (B83))";
+			9:
+				StoberErrorStr := "Parameter consistency(E102/E103 missing)";
+			10:
+				StoberErrorStr := "Parameter consistency(G104 <-> G27)";
+			11:
+				StoberErrorStr := "Parameter consistency(Reference retaining)";
+			12:
+				StoberErrorStr := "Parameter consistency(Type of axis)";
+			13:
+				StoberErrorStr := "Parameter consistency(Motor temperature sensor)";
+			14:
+				StoberErrorStr := "Parameter consistency(Max. acceleration I11>B143)";
+			15:
+				StoberErrorStr := "Parameter consistency(Safety watchdog time)";
+			16:
+				StoberErrorStr := "Parameter consistency(I10 > C11)";
+		END_CASE
+	71:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Firmware(Firmware defective)";
+			2:
+				StoberErrorStr := "Firmware(Activate firmware!)";
+			3:
+				StoberErrorStr := "Firmware(CRC-error)";
+			4:
+				StoberErrorStr := "Firmware(CPU)";
+		END_CASE
+	72:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Brake test timeout(B311timeout:B300 mandatory)";
+			2:
+				StoberErrorStr := "Brake test timeout(Brake defective:B300 mandatory)";
+			3:
+				StoberErrorStr := "Brake test timeout(Brake test necessary)";
+		END_CASE
+	73:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Axis 2 brake test timeout(B311timeout:B300 mandatory)";
+			2:
+				StoberErrorStr := "Axis 2 brake test timeout(Brake defective:B300 mandatory)";
+			3:
+				StoberErrorStr := "Axis 2 brake test timeout(Brake test necessary)";
+		END_CASE
+	74:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Axis 3 brake test timeout(B311timeout:B300 mandatory)";
+			2:
+				StoberErrorStr := "Axis 3 brake test timeout(Brake defective:B300 mandatory)";
+			3:
+				StoberErrorStr := "Axis 3 brake test timeout(Brake test necessary)";
+			
+		END_CASE
+	75:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Axis 4 brake test timeout(B311timeout:B300 mandatory)";
+			2:
+				StoberErrorStr := "Axis 4 brake test timeout(Brake defective:B300 mandatory)";
+			3:
+				StoberErrorStr := "Axis 4 brake test timeout(Brake test necessary)";
+		END_CASE
+	76:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Position encoder(Parameter <-> encoder)";
+			2:
+				StoberErrorStr := "Position encoder(Maximum speed)";
+			3:
+				StoberErrorStr := "Position encoder(AX6)";
+			4:
+				StoberErrorStr := "Position encoder(Required AX6)";
+			5:
+				StoberErrorStr := "Position encoder(AX6)";
+			6:
+				StoberErrorStr := "Position encoder(X4 EnDat encoder found)";
+			7:
+				StoberErrorStr := "Position encoder(X4 A track/Incremental)";
+			8:
+				StoberErrorStr := "Position encoder(X4 no encoder found)";
+			9:
+				StoberErrorStr := "Position encoder(Referencing failed)";
+			10:
+				StoberErrorStr := "Position encoder(X4 A track/Clk)";
+			11:
+				StoberErrorStr := "Position encoder(X4 B track/Dat)";
+			12:
+				StoberErrorStr := "Position encoder(X4 N track)";
+			13:
+				StoberErrorStr := "Position encoder(X4-EnDat alarm)";
+			14:
+				StoberErrorStr := "Position encoder(X4 EnDat CRC)";
+			15:
+				StoberErrorStr := "Position encoder(X4 double transmission)";
+			16:
+				StoberErrorStr := "Position encoder(X4 busy)";
+			17:
+				StoberErrorStr := "Position encoder(EBI encoder low battery)";
+			18:
+				StoberErrorStr := "Position encoder(EBI encoder battery empty)";
+			19:
+				StoberErrorStr := "Position encoder(Alarm bit)";
+			20:
+				StoberErrorStr := "Position encoder(Resolver carrier)";
+			21:
+				StoberErrorStr := "Position encoder(Resolver sin/cos undervoltage)";
+			22:
+				StoberErrorStr := "Position encoder(Resolver sin/cos overvoltage)";
+			23,24:
+				StoberErrorStr := "Position encoder(Resolver failure)";
+			30:
+				StoberErrorStr := "Position encoder(X120 wire break)";
+			35:
+				StoberErrorStr := "Position encoder(X120 double transmission)";
+			36:
+				StoberErrorStr := "Position encoder(X120 busy)";
+			38:
+				StoberErrorStr := "Position encoder(X120 timeout)";
+			43:
+				StoberErrorStr := "Position encoder(X140 EnDat alarm)";
+			44:
+				StoberErrorStr := "Position encoder(X140 EnDat CRC)";
+			48:
+				StoberErrorStr := "Position encoder(X4 zero pulse missing)";
+			49:
+				StoberErrorStr := "Position encoder(X4 zero pulse distance too small)";
+			60:
+				StoberErrorStr := "Position encoder(Hiperface synchronisation)";
+			61:
+				StoberErrorStr := "Position encoder(Hiperface timeout)";
+			62:
+				StoberErrorStr := "Position encoder(Hiperface signal quality)";
+			63:
+				StoberErrorStr := "Position encoder(Hiperface link)";
+			64:
+				StoberErrorStr := "Position encoder(EnDat3 Timeout)";
+			65:
+				StoberErrorStr := "Position encoder(EnDat3 invalid Request)";
+			66:
+				StoberErrorStr := "Position encoder(EnDat3 Position Check)";
+		END_CASE
+	77:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Master encoder(Parameter <-> encoder)";
+			2:
+				StoberErrorStr := "Master encoder(Maximum speed)";
+			3:
+				StoberErrorStr := "Master encoder(AX6)";
+			4:
+				StoberErrorStr := "Master encoder(Required AX6)";
+			5:
+				StoberErrorStr := "Master encoder(AX6)";
+			6:
+				StoberErrorStr := "Master encoder(X4 EnDat encoder found)";
+			7:
+				StoberErrorStr := "Master encoder(X4 A track/Incremental)";
+			8:
+				StoberErrorStr := "Master encoder(X4 no encoder found)";
+			10:
+				StoberErrorStr := "Master encoder(X4 A track/Clk)";
+			11:
+				StoberErrorStr := "Master encoder(X4 B track/Dat)";
+			12:
+				StoberErrorStr := "Master encoder(X4 N track)";
+			13:
+				StoberErrorStr := "Master encoder(X4-EnDat alarm)";
+			14:
+				StoberErrorStr := "Master encoder(X4 EnDat CRC)";
+			15:
+				StoberErrorStr := "Master encoder(X4 double transmission)";
+			16:
+				StoberErrorStr := "Master encoder(X4 busy)";
+			19:
+				StoberErrorStr := "Master encoder(Alarm bit)";
+			20:
+				StoberErrorStr := "Master encoder(Resolver carrier)";
+			21:
+				StoberErrorStr := "Master encoder(Resolver sin/cos undervoltage)";
+			22:
+				StoberErrorStr := "Master encoder(Resolver sin/cos overvoltage)";
+			23:
+				StoberErrorStr := "Master encoder(Resolver failure)";
+			24:
+				StoberErrorStr := "Master encoder(Resolver failure)";
+			30:
+				StoberErrorStr := "Master encoder(X120 wire break)";
+			35:
+				StoberErrorStr := "Master encoder(X120 double transmission)";
+			36:
+				StoberErrorStr := "Master encoder(X120 busy)";
+			38:
+				StoberErrorStr := "Master encoder(X120 timeout)";
+			43:
+				StoberErrorStr := "Master encoder(X140 EnDat alarm)";
+			44:
+				StoberErrorStr := "Master encoder(X140 EnDat CRC)";
+			50:
+				StoberErrorStr := "Master encoder(Source of position missing)";
+			51:
+				StoberErrorStr := "Master encoder(Timestamp source missing)";
+		END_CASE
+	78:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Position limit cyclic(Illegal direction)";
+			2:
+				StoberErrorStr := "Position limit cyclic(Reference value invalid)";
+			3:
+				StoberErrorStr := "Position limit cyclic(Extrapolation time I423 exceeded)";
+		END_CASE
+	79:
+		StoberErrorStr := "Motor/position encoder plausibility";
+	80:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Illegal action(Brake)";
+			2:
+				StoberErrorStr := "Illegal action(Brake)";
+		END_CASE
+	81:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Motor allocation(Different motor type)";
+			32:
+				StoberErrorStr := "Motor allocation(Different motor)";
+			33:
+				StoberErrorStr := "Motor allocation(Different motor & brake)";
+			34:
+				StoberErrorStr := "Motor allocation(Different motor & temperature sensor)";
+			35:
+				StoberErrorStr := "Motor allocation(Different motor & brake & temperature sensor)";
+			36:
+				StoberErrorStr := "Motor allocation(Different motor & gear unit)";
+			37:
+				StoberErrorStr := "Motor allocation(Different motor, brake & gear unit)";
+			38:
+				StoberErrorStr := "Motor allocation(Different motor, temperature sensor & gear unit)";
+			39:
+				StoberErrorStr := "Motor allocation(Different motor, brake, temperature sensor & gear unit)";
+			64:
+				StoberErrorStr := "Motor allocation(Different commutation)";
+			65:
+				StoberErrorStr := "Motor allocation(Different commutation & brake)";
+			66:
+				StoberErrorStr := "Motor allocation(Different commutation & temperature sensor)";
+			67:
+				StoberErrorStr := "Motor allocation(Different commutation & brake & temperature sensor)";
+			129:
+				StoberErrorStr := "Motor allocation(Different brake)";
+			130:
+				StoberErrorStr := "Motor allocation(Different temperature sensor)";
+			131:
+				StoberErrorStr := "Motor allocation(Different brake & temperature sensor)";
+			150:
+				StoberErrorStr := "Motor allocation(Temperature sensor unknown)";
+			
+		END_CASE
+	82:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Hall sensor(Invalid sample)";
+			2:
+				StoberErrorStr := "Hall sensor(Invalid sequence)";
+			3:
+				StoberErrorStr := "Hall sensor(Signal edge missing)";
+			4:
+				StoberErrorStr := "Hall sensor(X120 wire break)";
+		END_CASE
+	83:
+		StoberErrorStr := "Failure of one/ all phases (mains)";
+	84:
+		StoberErrorStr := "Drop in network voltage when power section active";
+	85:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Excessive jump in reference value(Position)";
+			2:
+				StoberErrorStr := "Excessive jump in reference value(Velocity)";
+		END_CASE
+	86:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Unknown LeanMotor(Motor)";
+			2:
+				StoberErrorStr := "Unknown LeanMotor(Cable length)";
+		END_CASE
+	87:
+		StoberErrorStr := "Reference lostReference loss";
+	88:
+		StoberErrorStr := "Control panel";
+	89:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Maximum current LM(Id)";
+			2:
+				StoberErrorStr := "Maximum current LM(Iq)";
+		END_CASE
+	90:
+		CASE in_Case OF
+			1:
+				StoberErrorStr := "Motion block(Next motion block missing)";
+			2:
+				StoberErrorStr := "Motion block(Target Position in reverse direction)";
+		END_CASE
+	91:
+		StoberErrorStr := "PM geared motor replacement";
+	
+END_CASE]]></ST>
+    </Implementation>
+    <LineIds Name="StoberErrorStr">
+      <LineId Id="7" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="42" Count="4" />
+      <LineId Id="51" Count="5" />
+      <LineId Id="58" Count="3" />
+      <LineId Id="63" Count="1" />
+      <LineId Id="83" Count="13" />
+      <LineId Id="107" Count="1" />
+      <LineId Id="117" Count="9" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="129" Count="7" />
+      <LineId Id="139" Count="9" />
+      <LineId Id="150" Count="3" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="172" Count="0" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="173" Count="0" />
+      <LineId Id="161" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="163" Count="0" />
+      <LineId Id="175" Count="0" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="176" Count="23" />
+      <LineId Id="201" Count="0" />
+      <LineId Id="207" Count="29" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="259" Count="1" />
+      <LineId Id="262" Count="1" />
+      <LineId Id="261" Count="0" />
+      <LineId Id="266" Count="0" />
+      <LineId Id="268" Count="4" />
+      <LineId Id="275" Count="1" />
+      <LineId Id="278" Count="4" />
+      <LineId Id="285" Count="10" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="306" Count="1" />
+      <LineId Id="309" Count="7" />
+      <LineId Id="308" Count="0" />
+      <LineId Id="382" Count="1" />
+      <LineId Id="317" Count="0" />
+      <LineId Id="539" Count="3" />
+      <LineId Id="384" Count="1" />
+      <LineId Id="319" Count="3" />
+      <LineId Id="386" Count="1" />
+      <LineId Id="581" Count="0" />
+      <LineId Id="579" Count="0" />
+      <LineId Id="388" Count="1" />
+      <LineId Id="547" Count="14" />
+      <LineId Id="564" Count="6" />
+      <LineId Id="390" Count="4" />
+      <LineId Id="589" Count="6" />
+      <LineId Id="647" Count="0" />
+      <LineId Id="597" Count="29" />
+      <LineId Id="395" Count="4" />
+      <LineId Id="649" Count="3" />
+      <LineId Id="400" Count="4" />
+      <LineId Id="657" Count="24" />
+      <LineId Id="700" Count="0" />
+      <LineId Id="683" Count="3" />
+      <LineId Id="405" Count="4" />
+      <LineId Id="706" Count="11" />
+      <LineId Id="410" Count="0" />
+      <LineId Id="324" Count="1" />
+      <LineId Id="411" Count="3" />
+      <LineId Id="727" Count="23" />
+      <LineId Id="415" Count="4" />
+      <LineId Id="783" Count="3" />
+      <LineId Id="420" Count="4" />
+      <LineId Id="787" Count="11" />
+      <LineId Id="425" Count="4" />
+      <LineId Id="799" Count="3" />
+      <LineId Id="430" Count="0" />
+      <LineId Id="323" Count="0" />
+      <LineId Id="327" Count="19" />
+      <LineId Id="431" Count="3" />
+      <LineId Id="767" Count="0" />
+      <LineId Id="803" Count="4" />
+      <LineId Id="435" Count="4" />
+      <LineId Id="825" Count="29" />
+      <LineId Id="440" Count="4" />
+      <LineId Id="855" Count="5" />
+      <LineId Id="445" Count="4" />
+      <LineId Id="861" Count="3" />
+      <LineId Id="450" Count="4" />
+      <LineId Id="865" Count="3" />
+      <LineId Id="455" Count="4" />
+      <LineId Id="892" Count="2" />
+      <LineId Id="897" Count="0" />
+      <LineId Id="772" Count="0" />
+      <LineId Id="460" Count="4" />
+      <LineId Id="898" Count="2" />
+      <LineId Id="903" Count="0" />
+      <LineId Id="465" Count="4" />
+      <LineId Id="915" Count="0" />
+      <LineId Id="989" Count="0" />
+      <LineId Id="917" Count="0" />
+      <LineId Id="990" Count="0" />
+      <LineId Id="919" Count="0" />
+      <LineId Id="991" Count="0" />
+      <LineId Id="921" Count="0" />
+      <LineId Id="992" Count="0" />
+      <LineId Id="923" Count="0" />
+      <LineId Id="993" Count="0" />
+      <LineId Id="925" Count="0" />
+      <LineId Id="994" Count="0" />
+      <LineId Id="927" Count="0" />
+      <LineId Id="995" Count="0" />
+      <LineId Id="929" Count="0" />
+      <LineId Id="996" Count="0" />
+      <LineId Id="931" Count="0" />
+      <LineId Id="997" Count="0" />
+      <LineId Id="933" Count="0" />
+      <LineId Id="998" Count="0" />
+      <LineId Id="935" Count="0" />
+      <LineId Id="999" Count="0" />
+      <LineId Id="937" Count="0" />
+      <LineId Id="1000" Count="0" />
+      <LineId Id="939" Count="0" />
+      <LineId Id="1001" Count="0" />
+      <LineId Id="941" Count="0" />
+      <LineId Id="1002" Count="0" />
+      <LineId Id="943" Count="0" />
+      <LineId Id="1003" Count="0" />
+      <LineId Id="945" Count="0" />
+      <LineId Id="1004" Count="0" />
+      <LineId Id="947" Count="0" />
+      <LineId Id="1005" Count="0" />
+      <LineId Id="949" Count="0" />
+      <LineId Id="1006" Count="0" />
+      <LineId Id="951" Count="0" />
+      <LineId Id="1007" Count="0" />
+      <LineId Id="953" Count="0" />
+      <LineId Id="1008" Count="0" />
+      <LineId Id="955" Count="0" />
+      <LineId Id="1009" Count="0" />
+      <LineId Id="959" Count="0" />
+      <LineId Id="1041" Count="1" />
+      <LineId Id="1011" Count="0" />
+      <LineId Id="961" Count="0" />
+      <LineId Id="1012" Count="0" />
+      <LineId Id="963" Count="0" />
+      <LineId Id="1013" Count="0" />
+      <LineId Id="965" Count="0" />
+      <LineId Id="1014" Count="0" />
+      <LineId Id="967" Count="0" />
+      <LineId Id="1015" Count="0" />
+      <LineId Id="969" Count="0" />
+      <LineId Id="1016" Count="0" />
+      <LineId Id="971" Count="0" />
+      <LineId Id="1017" Count="0" />
+      <LineId Id="973" Count="0" />
+      <LineId Id="1018" Count="0" />
+      <LineId Id="975" Count="0" />
+      <LineId Id="1019" Count="0" />
+      <LineId Id="977" Count="0" />
+      <LineId Id="1020" Count="0" />
+      <LineId Id="979" Count="0" />
+      <LineId Id="1021" Count="0" />
+      <LineId Id="981" Count="0" />
+      <LineId Id="1022" Count="0" />
+      <LineId Id="983" Count="0" />
+      <LineId Id="1023" Count="0" />
+      <LineId Id="985" Count="0" />
+      <LineId Id="1024" Count="0" />
+      <LineId Id="987" Count="0" />
+      <LineId Id="1025" Count="0" />
+      <LineId Id="470" Count="4" />
+      <LineId Id="1068" Count="26" />
+      <LineId Id="1099" Count="24" />
+      <LineId Id="1128" Count="2" />
+      <LineId Id="1142" Count="0" />
+      <LineId Id="475" Count="4" />
+      <LineId Id="1182" Count="3" />
+      <LineId Id="480" Count="0" />
+      <LineId Id="348" Count="1" />
+      <LineId Id="481" Count="3" />
+      <LineId Id="1189" Count="1" />
+      <LineId Id="485" Count="4" />
+      <LineId Id="1193" Count="7" />
+      <LineId Id="1203" Count="22" />
+      <LineId Id="1202" Count="0" />
+      <LineId Id="777" Count="0" />
+      <LineId Id="490" Count="4" />
+      <LineId Id="1253" Count="5" />
+      <LineId Id="495" Count="0" />
+      <LineId Id="350" Count="3" />
+      <LineId Id="496" Count="3" />
+      <LineId Id="1263" Count="1" />
+      <LineId Id="347" Count="0" />
+      <LineId Id="500" Count="3" />
+      <LineId Id="1265" Count="1" />
+      <LineId Id="355" Count="0" />
+      <LineId Id="357" Count="3" />
+      <LineId Id="504" Count="3" />
+      <LineId Id="1267" Count="1" />
+      <LineId Id="363" Count="0" />
+      <LineId Id="508" Count="3" />
+      <LineId Id="1269" Count="1" />
+      <LineId Id="364" Count="0" />
+      <LineId Id="361" Count="1" />
+      <LineId Id="356" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

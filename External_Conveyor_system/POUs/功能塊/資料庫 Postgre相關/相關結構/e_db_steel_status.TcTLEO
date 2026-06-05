@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <EnumerationTextList Name="e_db_steel_status" Id="{305133de-f98a-44a9-a26a-0fb90dd07f0e}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+{attribute 'to_string'}
+TYPE e_db_steel_status :
+(
+	inSide := 1, // 入料  
+	holding := 2, // 暫存中(在吊掛區等待進入料架)
+	waitLoading := 3, // 等待上料(在料架上等待，後進入機台)
+	alignment := 10, // 無靠邊插單
+	inserts := 11, // 插單
+	machining := 20, // 加工中
+	waitUnloading := 30, // 等待下料(在料架上等待，後進入出料吊掛區或其他機台)
+	finish := 40, //加工完成
+	paired := 100, // 已配對
+	pairing := 101, // 配對中
+	waitPaired := 102, // 等待配對
+	pairedCancel := 108, // 配對取消
+	pairedFailed := 109, // 配對失敗
+	dxfTransferring := 996, // DXF 傳輸中
+	connectedFailed := 997, // 連線失敗
+	transformFailed := 998, // 轉換失敗
+	unknown := 999 // 未知
+);
+END_TYPE
+]]></Declaration>
+    <XmlArchive>
+      <Data>
+        <o xml:space="preserve" t="TextListEnumerationTextListObject">
+          <l n="TextList" t="ArrayList" cet="TextListRow">
+            <o>
+              <v n="TextID">"inSide"</v>
+              <v n="TextDefault">"1"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"holding"</v>
+              <v n="TextDefault">"2"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"waitLoading"</v>
+              <v n="TextDefault">"3"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"alignment"</v>
+              <v n="TextDefault">"10"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"inserts"</v>
+              <v n="TextDefault">"11"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"machining"</v>
+              <v n="TextDefault">"20"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"waitUnloading"</v>
+              <v n="TextDefault">"30"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"finish"</v>
+              <v n="TextDefault">"40"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"paired"</v>
+              <v n="TextDefault">"100"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"pairing"</v>
+              <v n="TextDefault">"101"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"waitPaired"</v>
+              <v n="TextDefault">"102"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"pairedCancel"</v>
+              <v n="TextDefault">"108"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"pairedFailed"</v>
+              <v n="TextDefault">"109"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"dxfTransferring"</v>
+              <v n="TextDefault">"996"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"connectedFailed"</v>
+              <v n="TextDefault">"997"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"transformFailed"</v>
+              <v n="TextDefault">"998"</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">"unknown"</v>
+              <v n="TextDefault">"999 "</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+            <o>
+              <v n="TextID">""</v>
+              <v n="TextDefault">""</v>
+              <l n="LanguageTexts" t="ArrayList" />
+            </o>
+          </l>
+          <l n="Languages" t="ArrayList" />
+          <v n="GuidInit">{d5a2a2c7-3f60-4b53-a5d6-30e816331782}</v>
+          <v n="GuidReInit">{aa6933ff-7c43-457a-bb50-51a533360fde}</v>
+          <v n="GuidExitX">{99eb8262-5f5f-4c7a-82eb-ba8097d6b414}</v>
+        </o>
+      </Data>
+      <TypeList>
+        <Type n="ArrayList">System.Collections.ArrayList</Type>
+        <Type n="Guid">System.Guid</Type>
+        <Type n="String">System.String</Type>
+        <Type n="TextListEnumerationTextListObject">{4b60233c-f940-4beb-b331-82133b520151}</Type>
+        <Type n="TextListRow">{53da1be7-ad25-47c3-b0e8-e26286dad2e0}</Type>
+      </TypeList>
+    </XmlArchive>
+  </EnumerationTextList>
+</TcPlcObject>

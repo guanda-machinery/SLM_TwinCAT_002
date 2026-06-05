@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="StrConcat" Id="{14de9cec-41bd-4ed4-85de-b921f9e59b8d}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION StrConcat : STRING(511)
+VAR_INPUT
+	str0 : STRING(511) := '';
+	str1 : STRING(511) := '';
+	str2 : STRING(511) := '';
+	str3 : STRING(511) := '';
+	str4 : STRING(511) := '';
+	str5 : STRING(511) := '';
+	str6 : STRING(511) := '';
+	str7 : STRING(511) := '';
+	str8 : STRING(511) := '';
+END_VAR
+VAR
+	tmpstr : STRING(511);
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[tmpstr := CONCAT(STR1:= str0, STR2:= str1);
+tmpstr := CONCAT(STR1:= tmpstr, STR2:= str2);
+tmpstr := CONCAT(STR1:= tmpstr, STR2:= str3);
+tmpstr := CONCAT(STR1:= tmpstr, STR2:= str4);
+tmpstr := CONCAT(STR1:= tmpstr, STR2:= str5);
+tmpstr := CONCAT(STR1:= tmpstr, STR2:= str6);
+tmpstr := CONCAT(STR1:= tmpstr, STR2:= str7);
+tmpstr := CONCAT(STR1:= tmpstr, STR2:= str8);
+StrConcat := tmpstr;
+RETURN;
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

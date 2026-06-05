@@ -1,0 +1,188 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="AxisAction" Id="{80200f94-d794-4b70-8908-e53c0d781ce3}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM AxisAction
+VAR
+	bBoot : BOOL := true;
+
+	bMove: BOOL;
+	tof_PowerOff: TOF;
+	ldf_PowerOff: F_TRIG;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF bBoot THEN
+	initAction();
+	IF GaX.b_ISVALIDREF AND GaY.b_ISVALIDREF AND GaZ.b_ISVALIDREF AND
+		GbX.b_ISVALIDREF AND GbY.b_ISVALIDREF AND GbZ.b_ISVALIDREF AND
+		GcX.b_ISVALIDREF AND GcY.b_ISVALIDREF AND GcZ.b_ISVALIDREF AND
+		GdX.b_ISVALIDREF AND GdY.b_ISVALIDREF AND GdZ.b_ISVALIDREF AND
+		Fx.b_ISVALIDREF THEN
+			bBoot := FALSE;
+	END_IF
+END_IF
+
+
+//
+IF MaCfg.bInSite_Invert THEN
+	GaX(outLimiter := IO.i303, inLimiter := IO.i304, origin := FALSE);
+	GaY(outLimiter := IO.i305, inLimiter := IO.i306, origin := FALSE);
+	
+	GbX(outLimiter := IO.i403, inLimiter := IO.i404, origin := FALSE);
+	GbY(outLimiter := IO.i408, inLimiter := IO.i407, origin := FALSE);
+
+	GcX(outLimiter := IO.i411, inLimiter := IO.i412, origin := FALSE);
+	GcY(outLimiter := IO.i413, inLimiter := IO.i414, origin := FALSE);
+
+	GdX(outLimiter := IO.i311, inLimiter := IO.i312, origin := FALSE);
+	GdY(outLimiter := IO.i314, inLimiter := IO.i313, origin := FALSE);
+
+ELSE
+	GaX(outLimiter := IO.i304, inLimiter := IO.i303, origin := FALSE);
+	GaY(outLimiter := IO.i306, inLimiter := IO.i305, origin := FALSE);
+	
+	GbX(outLimiter := IO.i404, inLimiter := IO.i403, origin := FALSE);
+	GbY(outLimiter := IO.i407, inLimiter := IO.i408, origin := FALSE);
+	
+	GcX(outLimiter := IO.i412, inLimiter := IO.i411, origin := FALSE);
+	GcY(outLimiter := IO.i414, inLimiter := IO.i413, origin := FALSE);
+	
+	GdX(outLimiter := IO.i312, inLimiter := IO.i311, origin := FALSE);
+	GdY(outLimiter := IO.i313, inLimiter := IO.i314, origin := FALSE);
+END_IF
+
+
+GaZ(outLimiter := IO.i307, inLimiter := IO.i308 AND IO.i407, origin := FALSE);
+
+GbZ(outLimiter := IO.i406, inLimiter := IO.i405, origin := FALSE);
+
+GcZ(outLimiter := IO.i415, inLimiter := IO.i408, origin := FALSE);
+
+GdZ(outLimiter := IO.i315, inLimiter := IO.i316, origin := FALSE);
+
+Fx(outLimiter := TRUE, inLimiter := TRUE, origin := FALSE);
+
+Jog_MPG();
+
+bIsHome := TRUE;
+			
+bPower :=	GaX.Axis1Power.Status;
+			
+bMove := Axis.Axis_AX.Status.Moving;
+			
+tof_PowerOff(IN:=bMove, PT:=T#30M);
+ldf_PowerOff(CLK:=tof_PowerOff.Q);
+
+IF ldf_PowerOff.Q THEN
+	GaX.PowerOff();
+END_IF
+
+EtherCat_Driver_Reset();
+
+IF HMI.Set_Axis_Limit THEN
+	GaX.SetLimit();
+	GaY.SetLimit();
+	GaZ.SetLimit();
+	
+	GbX.SetLimit();
+	GbZ.SetLimit();
+	GbY.SetLimit();
+	
+	GcX.SetLimit();
+	GcY.SetLimit();
+	GcZ.SetLimit();
+	
+	GdX.SetLimit();
+	GdY.SetLimit();
+	GdZ.SetLimit();
+	
+	HMI.Set_Axis_Limit := FALSE;
+END_IF
+
+ReadStoberError();
+
+Hmi_Web.Jog_Ga.Pos.X := GaX.fPos;
+Hmi_Web.Jog_Ga.Pos.Y := GaY.fPos;
+Hmi_Web.Jog_Ga.Pos.Z := GaZ.fPos;
+
+Hmi_Web.Jog_Gb.Pos.X := GbX.fPos;
+Hmi_Web.Jog_Gb.Pos.Y := GbY.fPos;
+Hmi_Web.Jog_Gb.Pos.Z := GbZ.fPos;
+
+Hmi_Web.Jog_Gc.Pos.X := GcX.fPos;
+Hmi_Web.Jog_Gc.Pos.Y := GcY.fPos;
+Hmi_Web.Jog_Gc.Pos.Z := GcZ.fPos;
+
+Hmi_Web.Jog_Gd.Pos.X := GdX.fPos;
+Hmi_Web.Jog_Gd.Pos.Y := GdY.fPos;
+Hmi_Web.Jog_Gd.Pos.Z := GdZ.fPos;]]></ST>
+    </Implementation>
+    <Method Name="initAction" Id="{9ec4080e-790e-45e1-bd21-8a9034e6c9bc}">
+      <Declaration><![CDATA[METHOD initAction : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[GaX.Axis1 REF= Axis_AX;
+GaY.Axis1 REF= Axis_AY;
+GaZ.Axis1 REF= Axis_AZ1;
+GaZ.Axis2 REF= Axis_AZ2;
+
+GbX.Axis1 REF= Axis_BX;
+GbY.Axis1 REF= Axis_BY1;
+GbY.Axis2 REF= Axis_BY2;
+GbZ.Axis1 REF= Axis_BZ;
+
+GcX.Axis1 REF= Axis_CX;
+GcY.Axis1 REF= Axis_CY;
+GcZ.Axis1 REF= Axis_CZ1;
+GcZ.Axis2 REF= Axis_CZ2;
+
+GdX.Axis1 REF= Axis_DX;
+GdY.Axis1 REF= Axis_DY;
+GdZ.Axis1 REF= Axis_DZ;
+
+Fx.Axis1 REF= Axis_FX1;
+Fx.Axis2 REF= Axis_FX2;
+
+GaX.Name	:= "GaX";
+GaY.Name	:= "GaY";
+GaZ.Name	:= "GaZ1";
+GaZ.Name2	:= "GaZ2";
+
+GbX.Name	:= "GbX";
+GbY.Name	:= "GbY1";
+GbY.Name2	:= "GbY2";
+GbZ.Name	:= "GbZ";
+
+GcX.Name	:= "GcX";
+GcY.Name	:= "GcY";
+GcZ.Name	:= "GcZ1";
+GcZ.Name2	:= "GcZ2";
+
+GdX.Name	:= "GdX";
+GdY.Name	:= "GdY";
+GdZ.Name	:= "GdZ";
+
+Fx.Name := "Fx1";
+Fx.Name2 := "Fx2";
+
+GaX.Set_Recoder(ADR(Axis.GaX_total_Move));
+GaY.Set_Recoder(ADR(Axis.GaY_total_Move));
+GaZ.Set_Recoder(ADR(Axis.GaZ_total_Move));
+
+GbX.Set_Recoder(ADR(Axis.GbX_total_Move));
+GbY.Set_Recoder(ADR(Axis.GbY_total_Move));
+GbZ.Set_Recoder(ADR(Axis.GbZ_total_Move));
+
+GcX.Set_Recoder(ADR(Axis.GcX_total_Move));
+GcY.Set_Recoder(ADR(Axis.GcY_total_Move));
+GcZ.Set_Recoder(ADR(Axis.GcZ_total_Move));
+
+GdX.Set_Recoder(ADR(Axis.GdX_total_Move));
+GdY.Set_Recoder(ADR(Axis.GdY_total_Move));
+GdZ.Set_Recoder(ADR(Axis.GdZ_total_Move));]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

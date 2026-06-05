@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <Itf Name="I_Axis" Id="{a2f5afd8-61ff-4878-816a-4ca5499ac4b6}">
+    <Declaration><![CDATA[INTERFACE I_Axis
+]]></Declaration>
+    <Method Name="AbsMove" Id="{b4dc91c9-c383-4703-bbd3-000f8b7fe4f3}">
+      <Declaration><![CDATA[METHOD AbsMove : BOOL
+VAR_INPUT
+	// 目標位置
+	_Position : LREAL;
+	// 移動速度
+	_Velocity : LREAL := 0;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Property Name="Buzy" Id="{13ff5930-4189-47aa-a91b-2626629d1e7c}">
+      <Declaration><![CDATA[PROPERTY Buzy : bool]]></Declaration>
+      <Get Name="Get" Id="{e52d5f37-31e3-4df1-85fc-b2c530c5e1ff}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Done" Id="{7675a719-25c9-49a8-aa5e-6aeb46792787}">
+      <Declaration><![CDATA[PROPERTY Done : bool]]></Declaration>
+      <Get Name="Get" Id="{4ee689db-aabe-43cd-a417-196e57257012}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Property Name="Error" Id="{80875dbb-22b0-4636-917e-070193a4c627}">
+      <Declaration><![CDATA[PROPERTY Error : bool]]></Declaration>
+      <Get Name="Get" Id="{7d38247e-4677-4f10-a029-7bda424a6f44}">
+        <Declaration><![CDATA[]]></Declaration>
+      </Get>
+    </Property>
+    <Method Name="Homing" Id="{eec6ceac-2926-44c3-8892-6d7043d7a6d5}">
+      <Declaration><![CDATA[METHOD Homing : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="PowerOff" Id="{e8b45e22-e631-4a5d-b7ba-8466121012ec}">
+      <Declaration><![CDATA[METHOD PowerOff : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="PowerOn" Id="{409dea29-ddcf-40de-8413-2c694b940eaf}">
+      <Declaration><![CDATA[METHOD PowerOn : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="RelMove" Id="{eb098bf2-47a0-4747-9431-92eeba89ae7e}">
+      <Declaration><![CDATA[METHOD RelMove : BOOL
+VAR_INPUT
+	// 目標距離
+	_Position : LREAL;
+	
+	// 移動速度
+	_Velocity : LREAL := 0;
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="SetLimit" Id="{42cd9e6b-fcbd-4a85-b878-08cbb0879eeb}">
+      <Declaration><![CDATA[METHOD SetLimit : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+    <Method Name="Stop" Id="{f6d44283-9ee6-4ff4-b3e7-b3991147eb26}">
+      <Declaration><![CDATA[METHOD Stop : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+    </Method>
+  </Itf>
+</TcPlcObject>

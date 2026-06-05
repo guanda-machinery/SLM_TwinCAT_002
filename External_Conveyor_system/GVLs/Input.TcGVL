@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="Input" Id="{966513ea-d4f0-43e6-b3d6-d17b311c604c}">
+    <Declaration><![CDATA[VAR_GLOBAL
+	// 暫停
+	Pause					AT %I*	: BOOL;
+	
+	// 進料機 啟動
+	Feed_Start				AT %I*	: BOOL;
+	
+	// 進料機 執行動作
+	Feed_Mode				AT %I*	: INT;
+	
+	// 進料機 進料的專案UUID
+	Feed_WorkOrder_UUID		AT %I*	: STRING(36);
+	
+	// 進料機 啟動
+	Feed_Enable				AT %I*	: BOOL;
+	
+	// 進料機 重置
+	Feed_Reset				AT %I*	: BOOL;
+	
+	// 靠邊 模式執行
+	PullOver_Start			AT %I*	: BOOL;
+	
+	// 進料滾輪啟動
+	In_Moter_Start 			AT %I*	: BOOL;
+	
+	// 出料滾輪啟動
+	Out_Moter_Start 		AT %I*	: BOOL;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

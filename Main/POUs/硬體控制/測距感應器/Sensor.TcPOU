@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Sensor" Id="{d0d68e7f-7704-44bc-9f8a-72c692921bab}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Sensor
+VAR
+	sensorA	: OMH555_Decoder;
+	sensorB : OMH555_Decoder;
+	sensorC : OMH555_Decoder;
+	sensorD : OMH555_Decoder;
+	
+	
+	
+	Test: BOOL;
+	par : LaserParameter_Data;
+	
+	fb_IolRead : FB_IolRead;
+	testArray : ARRAY [0..7] OF BYTE ;
+	
+	ExpEncA_pos : LREAL;
+	
+	ExpEncB_pos : LREAL;
+	
+	Exp2EncA_pos : LREAL;
+	
+	Exp2EncB_pos : LREAL;
+	
+	sensor_test_StartPos : LREAL;
+	
+	sensor_test_pos : LREAL;
+	
+	test_pos : INT;
+	
+	sensor_test : DT80_Decoder;
+END_VAR
+
+VAR_INPUT
+	Set_SensoeZero: BOOL;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[// 測距感應器
+sensorA();
+sensorB();
+sensorc();
+sensorD();
+
+// sensor_test();
+// 
+// ExpEncB_pos := (TO_LREAL(axis.Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value) - 10000) * 0.5784;
+// 
+// Exp2EncB_pos := (TO_LREAL(axis.Encoder_FxB_PosEnc.MDP5001_511_Input.MDP5001_511_Counter_value ) - 10000) * 0.0461179;
+// 
+// sensor_test_pos := TO_LREAL(sensor_test.fDistance * 1000) - sensor_test_StartPos;
+// 
+// IF Set_SensoeZero THEN
+// 	sensor_test_StartPos := TO_LREAL(sensor_test.fDistance * 1000);
+// END_IF
+
+test_pos := TO_INT(TO_STRING(sensor_test_pos));
+
+fb_IolRead.pDSTBuf := ADR(fb_IolRead);
+fb_IolRead();
+
+
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <Task Name="NC_Task_1_SAF" Id="{aa4f3346-249f-4ad6-aab9-6fe47afdad54}">
+    <!--CycleTime in micro seconds.-->
+    <CycleTime>2000</CycleTime>
+    <Priority>4</Priority>
+    <TaskFBGuid>{3c5a48b6-6255-4f7b-9e0a-f4fbcd37d0bf}</TaskFBGuid>
+    <Fb_init>{781db4c3-e9e4-4400-92cd-459dd44b51c4}</Fb_init>
+    <Fb_exit>{1541e119-ad2c-4d6a-bb86-3a4e32f1915b}</Fb_exit>
+    <CycleUpdate>{1ce8d6f1-086a-4399-b871-a76043594a0c}</CycleUpdate>
+    <PostCycleUpdate>{dee42cec-05e3-45f4-b08a-690df2bc6baa}</PostCycleUpdate>
+  </Task>
+</TcPlcObject>

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="MsgLevel" Id="{6741b6ff-79cc-4e2e-a47c-b5b77b5959b1}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'strict'}
+TYPE MsgLevel :
+(
+	Error	:= 4,
+	Alarm	:= 2,
+	Info	:= 1,
+	None	:= 0
+	
+)INT;
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

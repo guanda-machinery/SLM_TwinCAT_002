@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <FileVersion>1.0.0.0</FileVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{79b5f322-41ca-4489-8a96-7d44e06bfd68}</ProjectGuid>
+    <SubObjectsSortedByName>True</SubObjectsSortedByName>
+    <DownloadApplicationInfo>true</DownloadApplicationInfo>
+    <WriteProductVersion>true</WriteProductVersion>
+    <GenerateTpy>false</GenerateTpy>
+    <Name>External_Conveyor_system</Name>
+    <ProgramVersion>3.1.4026.19</ProgramVersion>
+    <Application>{b6f2675d-9b12-44f9-b966-7b17d1691667}</Application>
+    <TypeSystem>{d238e8e5-a9b4-454e-98ab-9833f9c66e02}</TypeSystem>
+    <Implicit_Task_Info>{265d8e3b-a47e-4ec1-8e9d-f5a3b2b85626}</Implicit_Task_Info>
+    <Implicit_KindOfTask>{9e341b87-42ee-4491-930b-401c1e595033}</Implicit_KindOfTask>
+    <Implicit_Jitter_Distribution>{755dcf26-8dd7-4f16-a187-28183ddcdeda}</Implicit_Jitter_Distribution>
+    <LibraryReferences>{518390a3-0894-46e4-8f22-4326807c2ed5}</LibraryReferences>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DUTs\EtherCAT模組\MM540_Raw.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\JOG用元素\e_Site_Select.TcTLEO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\工單結構\WorkOrder_Data.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\變頻器IO\VFD_E_IO.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="GVLs\Axis.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Config.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Hmi_Web.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Input.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\IO.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Output.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\ProjectData.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="GVLs\Safety.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="MSG\訊息列表\MsgBuff.TcGVL">
+      <SubType>Code</SubType>
+      <LinkAlways>true</LinkAlways>
+    </Compile>
+    <Compile Include="MSG\訊息格式\MsgLevel.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\訊息格式\MsgStruct.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\訊息格式\MsgStruct_RAW.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\通知訊息\MsgMain.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\通知訊息\MsgPush.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MSG\通知訊息\uuidv7_g.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Note.TcPOU">
+      <SubType>Code</SubType>
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </Compile>
+    <Compile Include="PlcTask.TcTTO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\MAIN.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\ErrorCodeConver.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\EtherCat相關\EtherCat_Driver_Reset.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\EtherCat相關\GetEtherSta.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\pMsg.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\RW_Config.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\字串處理功能塊\字串填充\FILLSTRING.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\字串處理功能塊\字串記憶\WStrMem.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\字串處理功能塊\字串連接\StrConcat.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\字串處理功能塊\字串連接\WStrConcat.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\ReadSQLData.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\sc_db_Set_Work_Order_WaitLoading_Pos.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\sc_db_Steel_Status.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\e_db_steel_status.TcTLEO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\e_db_steel_local.TcTLEO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\Alignment_pos.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\FeedMain.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\動作流程控制\滾輪整料\PullOver.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\安全控制\MaBaseState.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\AxisAction.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\出料滾輪\ProductRoller.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\測高\AxisBase.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\測高\HeightMeasurer.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\油壓系統\Hydraulic.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\油壓系統\Hydraulic_Action.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\測寬\I_DisSensor.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\測寬\OGD251_Decoder.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\測寬\Sensor.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\台車\ActionMode.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\台車\Axis_VFD.TcPOU">
+      <SubType>Code</SubType>
+      <ExcludeFromBuild>false</ExcludeFromBuild>
+    </Compile>
+    <Compile Include="POUs\硬體控制\台車\I_Axis.TcIO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\台車\編碼器\MM540.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\定位柱\StopPin.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\進料滾輪\FeedRoller.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\資料轉換\HMI_WEB_dataConver.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DUTs" />
+    <Folder Include="DUTs\EtherCAT模組" />
+    <Folder Include="DUTs\JOG用元素" />
+    <Folder Include="DUTs\工單結構" />
+    <Folder Include="DUTs\變頻器IO" />
+    <Folder Include="GVLs" />
+    <Folder Include="MSG" />
+    <Folder Include="MSG\訊息列表" />
+    <Folder Include="MSG\訊息格式" />
+    <Folder Include="MSG\通知訊息" />
+    <Folder Include="POUs\資料轉換" />
+    <Folder Include="POUs\功能塊" />
+    <Folder Include="POUs\功能塊\EtherCat相關" />
+    <Folder Include="POUs\功能塊\字串處理功能塊" />
+    <Folder Include="POUs\功能塊\字串處理功能塊\字串填充" />
+    <Folder Include="POUs\功能塊\字串處理功能塊\字串記憶" />
+    <Folder Include="POUs\功能塊\字串處理功能塊\字串連接" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構" />
+    <Folder Include="POUs\動作流程控制" />
+    <Folder Include="POUs\動作流程控制\滾輪整料" />
+    <Folder Include="POUs\安全控制" />
+    <Folder Include="POUs\硬體控制" />
+    <Folder Include="POUs\硬體控制\進料滾輪" />
+    <Folder Include="POUs\硬體控制\測高" />
+    <Folder Include="POUs\硬體控制\油壓系統" />
+    <Folder Include="POUs\硬體控制\測寬" />
+    <Folder Include="POUs\硬體控制\台車" />
+    <Folder Include="POUs\硬體控制\台車\編碼器" />
+    <Folder Include="POUs\硬體控制\定位柱" />
+    <Folder Include="POUs\硬體控制\出料滾輪" />
+    <Folder Include="VISUs" />
+    <Folder Include="POUs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PlaceholderReference Include="BreakpointLogging">
+      <DefaultResolution>Breakpoint Logging Functions, 3.5.5.0 (3S - Smart Software Solutions GmbH)</DefaultResolution>
+      <Namespace>BPLog</Namespace>
+      <SystemLibrary>true</SystemLibrary>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_EtherCAT">
+      <DefaultResolution>Tc2_EtherCAT, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_EtherCAT</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_MC2">
+      <DefaultResolution>Tc2_MC2, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_MC2</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Standard">
+      <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Standard</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_System">
+      <DefaultResolution>Tc2_System, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_System</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_Utilities">
+      <DefaultResolution>Tc2_Utilities, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_Utilities</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Database">
+      <DefaultResolution>Tc3_Database, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Database</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_EventLogger">
+      <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_EventLogger</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc3_Module">
+      <DefaultResolution>Tc3_Module, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc3_Module</Namespace>
+    </PlaceholderReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="External_Conveyor_system.tmc">
+      <SubType>Content</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <SubObject Include="Axis_VFD.Step1_2_RelMove">
+      <ExcludeFromBuild>true</ExcludeFromBuild>
+    </SubObject>
+  </ItemGroup>
+  <ProjectExtensions>
+    <PlcProjectOptions>
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="OptionKey">
+      <v n="Name">"&lt;ProjectRoot&gt;"</v>
+      <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+        <v>{192FAD59-8248-4824-A8DE-9177C94C195A}</v>
+        <o>
+          <v n="Name">"{192FAD59-8248-4824-A8DE-9177C94C195A}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{246001F4-279D-43AC-B241-948EB31120E1}</v>
+        <o>
+          <v n="Name">"{246001F4-279D-43AC-B241-948EB31120E1}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{29BD8D0C-3586-4548-BB48-497B9A01693F}</v>
+        <o>
+          <v n="Name">"{29BD8D0C-3586-4548-BB48-497B9A01693F}"</v>
+          <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
+            <v>NamingConventions</v>
+            <o>
+              <v n="Name">"NamingConventions"</v>
+              <d n="SubKeys" t="Hashtable" />
+              <d n="Values" t="Hashtable" />
+            </o>
+            <v>Rules</v>
+            <o>
+              <v n="Name">"Rules"</v>
+              <d n="SubKeys" t="Hashtable" />
+              <d n="Values" t="Hashtable" />
+            </o>
+          </d>
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{40450F57-0AA3-4216-96F3-5444ECB29763}</v>
+        <o>
+          <v n="Name">"{40450F57-0AA3-4216-96F3-5444ECB29763}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="String">
+            <v>ActiveVisuProfile</v>
+            <v>IR0whWr8bwfwBwAAiD2qpQAAAABVAgAA37x72QAAAAABAAAAAAAAAAEaUwB5AHMAdABlAG0ALgBTAHQAcgBpAG4AZwACTHsAZgA5ADUAYgBiADQAMgA2AC0ANQA1ADIANAAtADQAYgA0ADUALQA5ADQAMAAwAC0AZgBiADAAZgAyAGUANwA3AGUANQAxAGIAfQADCE4AYQBtAGUABDBUAHcAaQBuAEMAQQBUACAAMwAuADEAIABCAHUAaQBsAGQAIAA0ADAAMgA0AC4ANwAFFlAAcgBvAGYAaQBsAGUARABhAHQAYQAGTHsAMQA2AGUANQA1AGIANgAwAC0ANwAwADQAMwAtADQAYQA2ADMALQBiADYANQBiAC0ANgAxADQANwAxADMAOAA3ADgAZAA0ADIAfQAHEkwAaQBiAHIAYQByAGkAZQBzAAhMewAzAGIAZgBkADUANAA1ADkALQBiADAANwBmAC0ANABkADYAZQAtAGEAZQAxAGEALQBhADgAMwAzADUANgBhADUANQAxADQAMgB9AAlMewA5AGMAOQA1ADgAOQA2ADgALQAyAGMAOAA1AC0ANAAxAGIAYgAtADgAOAA3ADEALQA4ADkANQBmAGYAMQBmAGUAZABlADEAYQB9AAoOVgBlAHIAcwBpAG8AbgALBmkAbgB0AAwKVQBzAGEAZwBlAA0KVABpAHQAbABlAA4aVgBpAHMAdQBFAGwAZQBtAE0AZQB0AGUAcgAPDkMAbwBtAHAAYQBuAHkAEAxTAHkAcwB0AGUAbQARElYAaQBzAHUARQBsAGUAbQBzABIwVgBpAHMAdQBFAGwAZQBtAHMAUwBwAGUAYwBpAGEAbABDAG8AbgB0AHIAbwBsAHMAEyhWAGkAcwB1AEUAbABlAG0AcwBXAGkAbgBDAG8AbgB0AHIAbwBsAHMAFCRWAGkAcwB1AEUAbABlAG0AVABlAHgAdABFAGQAaQB0AG8AcgAVIlYAaQBzAHUATgBhAHQAaQB2AGUAQwBvAG4AdAByAG8AbAAWFHYAaQBzAHUAaQBuAHAAdQB0AHMAFwxzAHkAcwB0AGUAbQAYGFYAaQBzAHUARQBsAGUAbQBCAGEAcwBlABkmRABlAHYAUABsAGEAYwBlAGgAbwBsAGQAZQByAHMAVQBzAGUAZAAaCGIAbwBvAGwAGyJQAGwAdQBnAGkAbgBDAG8AbgBzAHQAcgBhAGkAbgB0AHMAHEx7ADQAMwBkADUAMgBiAGMAZQAtADkANAAyAGMALQA0ADQAZAA3AC0AOQBlADkANAAtADEAYgBmAGQAZgAzADEAMABlADYAMwBjAH0AHRxBAHQATABlAGEAcwB0AFYAZQByAHMAaQBvAG4AHhRQAGwAdQBnAGkAbgBHAHUAaQBkAB8WUwB5AHMAdABlAG0ALgBHAHUAaQBkACBIYQBmAGMAZAA1ADQANAA2AC0ANAA5ADEANAAtADQAZgBlADcALQBiAGIANwA4AC0AOQBiAGYAZgBlAGIANwAwAGYAZAAxADcAIRRVAHAAZABhAHQAZQBJAG4AZgBvACJMewBiADAAMwAzADYANgBhADgALQBiADUAYwAwAC0ANABiADkAYQAtAGEAMAAwAGUALQBlAGIAOAA2ADAAMQAxADEAMAA0AGMAMwB9ACMOVQBwAGQAYQB0AGUAcwAkTHsAMQA4ADYAOABmAGYAYwA5AC0AZQA0AGYAYwAtADQANQAzADIALQBhAGMAMAA2AC0AMQBlADMAOQBiAGIANQA1ADcAYgA2ADkAfQAlTHsAYQA1AGIAZAA0ADgAYwAzAC0AMABkADEANwAtADQAMQBiADUALQBiADEANgA0AC0ANQBmAGMANgBhAGQAMgBiADkANgBiADcAfQAmFk8AYgBqAGUAYwB0AHMAVAB5AHAAZQAnVFUAcABkAGEAdABlAEwAYQBuAGcAdQBhAGcAZQBNAG8AZABlAGwARgBvAHIAQwBvAG4AdgBlAHIAdABpAGIAbABlAEwAaQBiAHIAYQByAGkAZQBzACgQTABpAGIAVABpAHQAbABlACkUTABpAGIAQwBvAG0AcABhAG4AeQAqHlUAcABkAGEAdABlAFAAcgBvAHYAaQBkAGUAcgBzACs4UwB5AHMAdABlAG0ALgBDAG8AbABsAGUAYwB0AGkAbwBuAHMALgBIAGEAcwBoAHQAYQBiAGwAZQAsEnYAaQBzAHUAZQBsAGUAbQBzAC1INgBjAGIAMQBjAGQAZQAxAC0AZAA1AGQAYwAtADQAYQAzAGIALQA5ADAANQA0AC0AMgAxAGYAYQA3ADUANgBhADMAZgBhADQALihJAG4AdABlAHIAZgBhAGMAZQBWAGUAcgBzAGkAbwBuAEkAbgBmAG8AL0x7AGMANgAxADEAZQA0ADAAMAAtADcAZgBiADkALQA0AGMAMwA1AC0AYgA5AGEAYwAtADQAZQAzADEANABiADUAOQA5ADYANAAzAH0AMBhNAGEAagBvAHIAVgBlAHIAcwBpAG8AbgAxGE0AaQBuAG8AcgBWAGUAcgBzAGkAbwBuADIMTABlAGcAYQBjAHkAMzBMAGEAbgBnAHUAYQBnAGUATQBvAGQAZQBsAFYAZQByAHMAaQBvAG4ASQBuAGYAbwA0MEwAbwBhAGQATABpAGIAcgBhAHIAaQBlAHMASQBuAHQAbwBQAHIAbwBqAGUAYwB0ADUaQwBvAG0AcABhAHQAaQBiAGkAbABpAHQAeQDQAAIaA9ADAS0E0AUGGgfQBwgaAUUHCQjQAAkaBEUKCwQDAAAABQAAAA0AAAAAAAAA0AwLrQIAAADQDQEtDtAPAS0Q0AAJGgRFCgsEAwAAAAUAAAANAAAAKAAAANAMC60BAAAA0A0BLRHQDwEtENAACRoERQoLBAMAAAAFAAAADQAAAAAAAADQDAutAgAAANANAS0S0A8BLRDQAAkaBEUKCwQDAAAABQAAAA0AAAAUAAAA0AwLrQIAAADQDQEtE9APAS0Q0AAJGgRFCgsEAwAAAAUAAAANAAAAAAAAANAMC60CAAAA0A0BLRTQDwEtENAACRoERQoLBAMAAAAFAAAADQAAAAAAAADQDAutAgAAANANAS0V0A8BLRDQAAkaBEUKCwQDAAAABQAAAA0AAAAAAAAA0AwLrQIAAADQDQEtFtAPAS0X0AAJGgRFCgsEAwAAAAUAAAANAAAAKAAAANAMC60EAAAA0A0BLRjQDwEtENAZGq0BRRscAdAAHBoCRR0LBAMAAAAFAAAADQAAAAAAAADQHh8tINAhIhoCRSMkAtAAJRoFRQoLBAMAAAADAAAAAAAAAAoAAADQJgutAAAAANADAS0n0CgBLRHQKQEtENAAJRoFRQoLBAMAAAADAAAAAAAAAAoAAADQJgutAQAAANADAS0n0CgBLRHQKQEtEJoqKwFFAAEC0AABLSzQAAEtF9AAHy0t0C4vGgPQMAutAQAAANAxC60XAAAA0DIarQDQMy8aA9AwC60CAAAA0DELrQMAAADQMhqtANA0Gq0A0DUarQA=</v>
+          </d>
+        </o>
+        <v>{8A0FB252-96EB-4DCC-A5B4-B4804D05E2D6}</v>
+        <o>
+          <v n="Name">"{8A0FB252-96EB-4DCC-A5B4-B4804D05E2D6}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+            <v>WriteLineIDs</v>
+            <v>True</v>
+          </d>
+        </o>
+        <v>{8F99A816-E488-41E4-9FA3-846536012284}</v>
+        <o>
+          <v n="Name">"{8F99A816-E488-41E4-9FA3-846536012284}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" />
+        </o>
+        <v>{E709B08B-B6E4-4966-8EED-D793A13114C6}</v>
+        <o>
+          <v n="Name">"{E709B08B-B6E4-4966-8EED-D793A13114C6}"</v>
+          <d n="SubKeys" t="Hashtable" />
+          <d n="Values" t="Hashtable" ckt="String" cvt="Boolean">
+            <v>EnableBreakpointLogging</v>
+            <v>True</v>
+          </d>
+        </o>
+      </d>
+      <d n="Values" t="Hashtable" />
+    </o>
+        </Data>
+        <TypeList>
+          <Type n="Boolean">System.Boolean</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+          <Type n="String">System.String</Type>
+        </TypeList>
+      </XmlArchive>
+    </PlcProjectOptions>
+  </ProjectExtensions>
+</Project>

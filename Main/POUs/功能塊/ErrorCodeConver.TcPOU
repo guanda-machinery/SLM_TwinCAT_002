@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="ErrorCodeConver" Id="{3a3c808d-a55b-4a83-b7a5-663bb5992955}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM ErrorCodeConver
+VAR
+	
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[]]></ST>
+    </Implementation>
+    <Method Name="StoberErrorCode" Id="{258ed223-65c1-4c39-92fe-738db736bf7d}">
+      <Declaration><![CDATA[METHOD StoberErrorCode : WSTRING
+VAR_INPUT
+	Name : WSTRING;
+	Event : UDINT;
+	Cause : UDINT;
+END_VAR
+
+VAR
+	strtmp1: WSTRING;
+	strtmp2: WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[
+
+
+
+strtmp2 := WCONCAT(STR1:= Name, STR2:= ":錯誤 Event:");
+
+strtmp1 := UDINT_TO_WSTRING(Event);
+
+strtmp2 := WCONCAT(STR1:= strtmp2, STR2:= strtmp1 );
+
+strtmp2:= WCONCAT(STR1:= strtmp2, STR2:= "Cause:");
+
+strtmp1 := UDINT_TO_WSTRING(Cause);
+
+strtmp2:= WCONCAT(STR1:= strtmp2, STR2:= strtmp1);
+
+// 輸出結果字串
+
+StoberErrorCode := strtmp2;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Str" Id="{0d9dd9bf-14aa-4757-a80b-6e9e62ec0d93}">
+      <Declaration><![CDATA[METHOD Str : WSTRING
+VAR_INPUT
+	str0 : WSTRING;
+	str1 : WSTRING := "";
+	str2 : WSTRING := "";
+	str3 : WSTRING := "";
+	str4 : WSTRING := "";
+	ErrorCode :DWORD;
+END_VAR
+
+VAR
+	strtmp1: STRING;
+	strtmp2: WSTRING;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF ErrorCode > 16#FFFF THEN
+	strtmp1 := DWORD_TO_HEXSTR(in:= ErrorCode, iPrecision:= 8, bLoCase:= FALSE);
+ELSE
+	strtmp1 := DWORD_TO_HEXSTR(in:= ErrorCode, iPrecision:= 4, bLoCase:= FALSE);
+END_IF
+
+strtmp2 := STRING_TO_WSTRING(strtmp1);
+
+strtmp2 := WCONCAT(STR1:= "(", STR2:= strtmp2);
+
+strtmp2 := WCONCAT(STR1:= strtmp2, STR2:= ")" );
+
+strtmp2:= WCONCAT(STR1:= str4, STR2:= strtmp2);
+
+strtmp2:= WCONCAT(STR1:= str3, STR2:= strtmp2);
+
+strtmp2:= WCONCAT(STR1:= str2, STR2:= strtmp2);
+
+strtmp2:= WCONCAT(STR1:= str1, STR2:= strtmp2);
+
+Str:= WCONCAT(STR1:= str0, STR2:= strtmp2);]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

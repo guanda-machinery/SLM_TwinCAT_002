@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="OMH555_Decoder" Id="{0fee4c35-2cdb-4d3d-bd98-7ac8cfe1dcfa}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK OMH555_Decoder IMPLEMENTS I_DisSensor
+VAR_INPUT
+END_VAR
+VAR_OUTPUT
+	// 距離 (單位:mm)
+	fDistance : REAL;
+	// 裝置狀態正常
+	SSC1_1			:BOOL;
+	// 裝置狀態正常
+	bDevice_is_OK			:BOOL;
+	// 需要維護
+	bMaintenance_required	:BOOL;
+	// 超出測量距離
+	bOut_of_specification	:BOOL;
+	// 檢查功能
+	bFunctional_check		:BOOL;
+	// 錯誤
+	bFailure				:BOOL;
+	// 距離比例(單位:公尺)
+	iScale_Distance			:INT;
+END_VAR
+VAR
+	// 原始資料輸入
+	in_RawData AT %I* : ARRAY [0..3] OF USINT;
+	// 原始資料輸出
+	out_rawdata AT %Q* :USINT;	
+	
+	
+
+	DistanceTmp : DINT;
+	tmpStatus : WORD;
+	tmpStatus2 : WORD;
+	tmpStatus3 : DWORD;
+	tmpfDistance : POINTER TO SINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[DistanceTmp := (in_RawData[0] * 16#FF) +  (in_RawData[1] -10 );
+tmpfDistance := ADR(in_RawData[2]);
+
+
+IF (DistanceTmp >= 500) AND (DistanceTmp <= 5000) THEN
+	fDistance := DINT_TO_REAL(DistanceTmp) * 0.1;
+ELSE
+	fDistance := 0;
+END_IF
+
+tmpStatus := ROR(in_RawData[3] AND 16#F0, 4);
+
+SSC1_1 := (in_RawData[3] AND 16#1) = 1;
+
+bDevice_is_OK := tmpStatus = 0;
+bMaintenance_required := tmpStatus = 1;
+bOut_of_specification := tmpStatus = 2;
+bFunctional_check := tmpStatus = 3;
+bFailure := tmpStatus = 4;
+
+tmpStatus2 := 0;
+
+out_rawdata := WORD_TO_USINT(tmpStatus2);]]></ST>
+    </Implementation>
+    <Property Name="Distance" Id="{1985f699-8aae-4382-ad7e-6853b0397ed4}">
+      <Declaration><![CDATA[PROPERTY Distance : LREAL]]></Declaration>
+      <Get Name="Get" Id="{da208d8e-d8a1-4617-bd44-523728085cee}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[Distance := fDistance;]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+  </POU>
+</TcPlcObject>

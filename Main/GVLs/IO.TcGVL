@@ -1,0 +1,351 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <GVL Name="IO" Id="{8b85da45-68b3-4f99-97b9-64e39d2dd2fb}">
+    <Declaration><![CDATA[{attribute 'qualified_only'}
+{attribute 'TcContextName':='PlcTask'}
+VAR_GLOBAL
+{region "============= EL1409_1 ============="}
+	// 緊急停止-PB
+	i101 AT %I*: BOOL;
+	// IPC開機-PB
+	i102 AT %I*: BOOL;
+	// 程式暫停-PB
+	i103 AT %I*: BOOL;
+	// 程式啟動-PB
+	i104 AT %I*: BOOL;
+	// 重置-PB
+	i105 AT %I*: BOOL;
+	// 原點模式A-KS
+	i106 AT %I*: BOOL;
+	// 原點模式B-KS
+	i107 AT %I*: BOOL;
+	// 吋動-KS
+	i108 AT %I*: BOOL;
+	// 半自動-KS
+	i109 AT %I*: BOOL;
+	// 全自動-KS
+	i110 AT %I*: BOOL;
+	// 門解鎖-KS
+	i111 AT %I*: BOOL;
+	// 安全模組重置-PB
+	i112 AT %I*: BOOL;
+	// 模式選擇A-KS
+	i113 AT %I*: BOOL;
+	// 模式選擇B-KS
+	i114 AT %I*: BOOL;
+	// 雷射D鏡頭防護蓋開-PB
+	i115 AT %I*: BOOL;
+	// 雷射D鏡頭防護蓋關-PB
+	i116 AT %I*: BOOL;
+ {endregion}
+{region "============= EL1409_2 ============="}
+	// 吋動 X+
+	i201 AT %I*: BOOL;
+	// 吋動 X-
+	i202 AT %I*: BOOL;
+	// 吋動 Y+
+	i203 AT %I*: BOOL;
+	// 吋動 Y-
+	i204 AT %I*: BOOL;
+	// 吋動 Z+_PB
+	i205 AT %I*: BOOL;
+	// 吋動 Z-_PB
+	i206 AT %I*: BOOL;
+	// 螢幕旋轉
+	i207 AT %I*: BOOL;
+	// 油壓啟動
+	i208 AT %I*: BOOL;
+	// 油壓馬達過負載
+	i209 AT %I*: BOOL;
+	// 油壓散熱循環馬達過負載
+	i210 AT %I*: BOOL;
+	// 安全模組信號
+	i211 AT %I*: BOOL;
+	// 氣壓壓力檢知
+	i212 AT %I*: BOOL;
+	// 雷射A遮蔽信號
+	i213 AT %I*: BOOL;
+	// 雷射B遮蔽信號
+	i214 AT %I*: BOOL;
+	// 雷射C遮蔽信號
+	i215 AT %I*: BOOL;
+	// 雷射D遮蔽信號
+	i216 AT %I*: BOOL;
+{endregion}
+{region "============= EL1409_3 ============="}
+	// 潤滑油A液位檢知
+	i301 AT %I*: BOOL;
+	// 潤滑油A壓力檢知
+	i302 AT %I*: BOOL;
+	// Ax 正極限-LS
+	i303 AT %I*: BOOL;
+	// Ax 負極限-LS
+	i304 AT %I*: BOOL;
+	// Ay 正極限-LS
+	i305 AT %I*: BOOL;
+	// Ay 負極限-LS
+	i306 AT %I*: BOOL;
+	// Az 正極限-LS
+	i307 AT %I*: BOOL;
+	// Az 負極限-LS
+	i308 AT %I*: BOOL;
+	// 潤滑油D液位檢知
+	i309 AT %I*: BOOL;
+	// 潤滑油D壓力檢知
+	i310 AT %I*: BOOL;
+	// Dx 正極限
+	i311 AT %I*: BOOL;
+	// Dx 負極限
+	i312 AT %I*: BOOL;
+	// Dy 正極限
+	i313 AT %I*: BOOL;
+	// Dy 負極限
+	i314 AT %I*: BOOL;
+	// Dz 正極限
+	i315 AT %I*: BOOL;
+	// Dz 負極限
+	i316 AT %I*: BOOL;
+ {endregion}
+{region "============= EL1409_4 ============="}
+	// 潤滑油B液位檢知
+	i401 AT %I*: BOOL;
+	// 潤滑油B壓力檢知
+	i402 AT %I*: BOOL;
+	// Bx 正極限-LS
+	i403 AT %I*: BOOL;
+	// Bx 負極限-LS
+	i404 AT %I*: BOOL;
+	// Bz 正極限-LS
+	i405 AT %I*: BOOL;
+	// Bz 負極限-LS
+	i406 AT %I*: BOOL;
+	// AB區雷射極限開關-LS
+	i407 AT %I*: BOOL;
+	// BC區雷射極限開關-LS
+	i408 AT %I*: BOOL;
+	// 潤滑油C液位檢知
+	i409 AT %I*: BOOL;
+	// 潤滑油C壓力檢知
+	i410 AT %I*: BOOL;
+	// Cx 正極限-LS
+	i411 AT %I*: BOOL;
+	// Cx 負極限-LS
+	i412 AT %I*: BOOL;
+	// Cy 正極限-LS
+	i413 AT %I*: BOOL;
+	// Cy 負極限-LS
+	i414 AT %I*: BOOL;
+	// Cz 正極限
+	i415 AT %I*: BOOL;
+	// 
+	i416 AT %I*: BOOL;
+ {endregion}
+{region "============= EL1409_5 ============="}
+	// 下壓A原點
+	i501 AT %I*: BOOL;
+	// 下壓B原點
+	i502 AT %I*: BOOL;
+	// 下壓C原點
+	i503 AT %I*: BOOL;
+	// 下壓D原點
+	i504 AT %I*: BOOL;
+	// 下壓A壓力到達
+	i505 AT %I*: BOOL;
+	// 下壓B壓力到達
+	i506 AT %I*: BOOL;
+	// 下壓C壓力到達
+	i507 AT %I*: BOOL;
+	// 下壓D壓力到達
+	i508 AT %I*: BOOL;
+	// 側壓原點(AC)
+	i509 AT %I*: BOOL;
+	// 側壓原點(BD)
+	i510 AT %I*: BOOL;
+	// 材料原點偵測
+	i511 AT %I*: BOOL;
+	// 材料脫離點
+	i512 AT %I*: BOOL;
+	// 材料整料點
+	i513 AT %I*: BOOL;
+	// 鏡頭蓋 關
+	i514 AT %I*: BOOL;
+	// 鏡頭蓋 開
+	i515 AT %I*: BOOL;
+	// 
+	i516 AT %I*: BOOL;
+ {endregion}
+{region "============= EL1409_6 ============="}
+	// 手輪軸向X
+	i601 AT %I*: BOOL;
+	// 手輪軸向Y
+	i602 AT %I*: BOOL;
+	// 手輪軸向Z
+	i603 AT %I*: BOOL;
+	// 手輪倍率
+	i604 AT %I*: BOOL;
+	// 手輪倍率
+	i605 AT %I*: BOOL;
+	// 手輪區域選擇A
+	i606 AT %I*: BOOL;
+	// 手輪區域選擇B
+	i607 AT %I*: BOOL;
+	// 手輪區域選擇C
+	i608 AT %I*: BOOL;
+	// 手輪區域選擇D
+	i609 AT %I*: BOOL;
+	// 手輪急停
+	i610 AT %I*: BOOL;
+	// 手輪始能
+	i611 AT %I*: BOOL;
+	// 預留
+	i612 AT %I*: BOOL;
+	// 預留
+	i613 AT %I*: BOOL;
+	// 預留
+	i614 AT %I*: BOOL;
+	// 預留
+	i615 AT %I*: BOOL;
+	// 預留
+	i616 AT %I*: BOOL;
+{endregion}
+{region "============= Murr IMPACT67 ============="}
+	// X0.4
+	i701 AT %I*: BOOL;
+	// X0.2
+	i702 AT %I*: BOOL;
+	// X1.4
+	i703 AT %I*: BOOL;
+	// X1.2
+	i704 AT %I*: BOOL;
+	// X2.4
+	i705 AT %I*: BOOL;
+	// X2.2
+	i706 AT %I*: BOOL;
+	// X3.4
+	i707 AT %I*: BOOL;
+	// X3.2
+	i708 AT %I*: BOOL;
+	// X4.4 工件感應器 出口
+	i709 AT %I*: BOOL;
+	// X4.2 工件原點 (下)
+	i710 AT %I*: BOOL;
+	// X5.4 工件感應器 入口
+	i711 AT %I*: BOOL;
+	// X5.2
+	i712 AT %I*: BOOL;
+	// X6.4 工件原點 (AC夾輪)
+	i713 AT %I*: BOOL;
+	// X6.2
+	i714 AT %I*: BOOL;
+	// X7.4
+	i715 AT %I*: BOOL;
+	// X7.2
+	i716 AT %I*: BOOL;
+{endregion}	
+	
+{region "============= EL2409_7 ============="}
+	// IPC啟動指示燈 
+	q101 AT %Q*: BOOL;
+	// 程式暫停指示燈
+	q102 AT %Q*: BOOL;
+	// 程式啟動指示燈
+	q103 AT %Q*: BOOL;
+	// 重置指示燈
+	q104 AT %Q*: BOOL;
+	// 原點完成指示燈A
+	q105 AT %Q*: BOOL;
+	// 原點完成指示燈B(門開關)
+	q106 AT %Q*: BOOL;
+	// 吋動模式指示燈
+	q107 AT %Q*: BOOL;
+	// 半自動模式指示燈
+	q108 AT %Q*: BOOL;
+	// 全自動模式指示燈
+	q109 AT %Q*: BOOL;
+	// 安全門解鎖
+	q110 AT %Q*: BOOL;
+	// 安全模組腹歸指示燈
+	q111 AT %Q*: BOOL;
+	// 日光燈開/關
+	q112 AT %Q*: BOOL;
+	// 警示燈 綠燈
+	q113 AT %Q*: BOOL;
+	// 警示燈 黃燈
+	q114 AT %Q*: BOOL;
+	// 警示燈 紅燈
+	q115 AT %Q*: BOOL;
+	// 警示燈 Bz
+	q116 AT %Q*: BOOL;
+{endregion}
+{region "============= EL2409_8 ============="}
+	// IPC啟動輸出
+	q201 AT %Q*: BOOL;
+	// 主機油壓馬達啟動
+	q202 AT %Q*: BOOL;
+	// 主機油壓高壓閥啟動
+	q203 AT %Q*: BOOL;
+	// A潤滑油啟動運轉
+	q204 AT %Q*: BOOL;
+	// B潤滑油啟動運轉
+	q205 AT %Q*: BOOL;
+	// C潤滑油啟動運轉
+	q206 AT %Q*: BOOL;
+	// D潤滑油啟動運轉
+	q207 AT %Q*: BOOL;
+	// 下壓A區上升
+	q208 AT %Q*: BOOL;
+	// 下壓A區下降
+	q209 AT %Q*: BOOL;
+	// 下壓B區上升
+	q210 AT %Q*: BOOL;
+	// 下壓B區下降
+	q211 AT %Q*: BOOL;
+	// 下壓C區上升
+	q212 AT %Q*: BOOL;
+	// 下壓C區下降
+	q213 AT %Q*: BOOL;
+	// 下壓D區上升
+	q214 AT %Q*: BOOL;
+	// 下壓D區下降
+	q215 AT %Q*: BOOL;
+	// 主機油壓低壓閥啟動
+	q216 AT %Q*: BOOL;
+{endregion}
+{region "============= EL2409_9 ============="}
+	// 側壓AC前進夾緊
+	q301 AT %Q*: BOOL;
+	// 側壓AC後退放鬆
+	q302 AT %Q*: BOOL;
+	// 側壓BD前進夾緊
+	q303 AT %Q*: BOOL;
+	// 側壓BD後退放鬆
+	q304 AT %Q*: BOOL;
+	// 雷射A吹氣
+	q305 AT %Q*: BOOL;
+	// 雷射B吹氣
+	q306 AT %Q*: BOOL;
+	// 雷射C吹氣
+	q307 AT %Q*: BOOL;
+	// 雷射D吹氣
+	q308 AT %Q*: BOOL;
+	// 雷射D保護蓋開
+	q309 AT %Q*: BOOL;
+	// 雷射D保護蓋關
+	q310 AT %Q*: BOOL;
+	// A側 外部編碼器 進
+	q311 AT %Q*: BOOL;
+	// A側 外部編碼器 退
+	q312 AT %Q*: BOOL;
+	// B側 外部編碼器 進
+	q313 AT %Q*: BOOL;
+	// B側 外部編碼器 退
+	q314 AT %Q*: BOOL;
+	// 預留
+	q315 AT %Q*: BOOL;
+	// 預留
+	q316 AT %Q*: BOOL;
+{endregion}
+	
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

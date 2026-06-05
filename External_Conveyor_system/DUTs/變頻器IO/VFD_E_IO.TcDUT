@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <DUT Name="VFD_E_IO" Id="{7f980418-f62e-40fb-8c2d-300ca1ba96f9}">
+    <Declaration><![CDATA[TYPE VFD_E_IO :
+STRUCT
+	// 正轉 Output
+	o_FWD : POINTER TO BOOL;
+	
+	// 逆轉 Output
+	o_REV : POINTER TO BOOL;
+	
+	// 速度bit1 Output
+	o_Speed1 : POINTER TO BOOL;
+	
+	// 速度bit2 Output
+	o_Speed2 : POINTER TO BOOL;
+	
+	// 速度bit3 Output
+	o_Speed3 : POINTER TO BOOL;
+	
+	// 重置 Output
+	o_Reset : POINTER TO BOOL;
+	
+	// 運行中 Input
+	i_Run : POINTER TO BOOL;
+	
+	// 發生錯誤 Input
+	i_Error : POINTER TO BOOL;
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

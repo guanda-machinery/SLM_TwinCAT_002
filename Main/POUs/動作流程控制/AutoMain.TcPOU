@@ -1,0 +1,5448 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="AutoMain" Id="{640ea801-bc75-4e57-87c7-5cbed9d57d57}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM AutoMain
+VAR
+	
+	step: DINT;
+	
+	// 自動執行中 的 進料動作流程
+	step_Feed: Sub_Step;
+	
+	startStep: DINT;
+
+	PutFloor: UINT;
+	GetFloor: UINT;
+	tmr01: TON;
+	tmr8000: TON;
+	Jog_Ldp: ARRAY[0..15] OF R_TRIG;
+
+	fbWritePersistentData: FB_WritePersistentData;
+
+
+	tmr_ErrorReset: TON;
+	tmr_AutoLock: TON;
+	
+	sFilename: ARRAY [1..9] OF STRING := ['TEST-100-1', 'TEST-100-2', 'TEST-100-3', 'TEST-100-4', 'TEST-100-5', 'TEST-100-6', 'TEST-100-7', 'TEST-100-8', 'TEST-100-9'];
+	fPoint: ARRAY [1..9, 1..2] OF REAL := [2(0.0), 100, 0.0, 100, 0.0, -200, 2(100), 0.0, 100, 0.0, -200, 2(100), 0.0, 100, 0.0];
+	
+	fPoint2: ARRAY [1..4, 1..2] OF REAL := [2(0.0), 80, 0.0, 80, 3(0)];
+	
+	fPointStart: ARRAY [1..2] OF REAL;
+	
+	iCount : INT;
+	posCount: INT;
+	
+	NowWidth : LREAL;
+	i: DINT;
+	
+	// 上次取得位置
+	Last_Pos: LREAL;
+	MaxWidth: LREAL;
+	MinWidth: LREAL;
+	FormatString: FB_FormatString2;
+	
+	_debug_X_NextPos_count :INT;
+	_debug_X_NextPos : ARRAY [0..99] OF LREAL;
+	
+	// 軸組B雷射的距離
+	GroupB_Now_Z: LREAL;
+	// 回原點模式
+	homeMode: BOOL;
+END_VAR
+
+VAR_OUTPUT
+	bBuzy: BOOL;
+	bError: BOOL;
+	bDone: BOOL;
+	iErrorId : DINT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[WebHmi();
+
+GroupA();
+GroupB();
+GroupC();
+GroupD();
+
+IF (EStop OR SystemError) AND bBuzy THEN
+	hmi.Auto_bDone := FALSE;
+	IF bBuzy THEN
+		step := step  + 10000;
+	END_IF
+END_IF
+
+bBuzy := (step >= 100 AND step < 10000);
+bError := (step > 10000);
+
+tmr_ErrorReset(in:= bError, PT:=T#1S);
+IF tmr_ErrorReset.Q THEN
+	iErrorId := step;
+	step := 0;
+END_IF
+
+
+
+
+IF (ProgramReset OR Safety.SystemError) AND bError THEN
+	step := 0;
+END_IF
+
+Step_0_Main();
+step_0100_Homming();
+step_0500_AutoMode_StartCheck();
+step_0600_AutoMode_Feed();
+step_0700_AutoMode_GoPrintPoint();
+step_0800_AutoMode_GoPrintPoint_Cycle_200_UP();
+step_0900_AutoMode_GoPrintPoint_Cycle_200_Down();
+step_1000_AutoPrgEnd();
+
+Start_Feed_In_NC_Start();
+
+step_7800_FindZ();
+step_8000_Jog();
+
+TestActionPou();
+
+
+// IF (bError) THEN
+// 	hmi.Auto_Start := FALSE;
+// 	hmi.Auto_Pause := FALSE;
+// 	iErrorId := step - 10000;
+// END_IF
+
+Timer();
+WritePersistentData();]]></ST>
+    </Implementation>
+    <Folder Name="JOG流程8100_9400" Id="{29c869f8-9e55-4891-96de-3fdfd31f73ae}" />
+    <Folder Name="內部啟動用" Id="{e54b00b0-37e1-43e2-ac19-0768ee77541d}" />
+    <Folder Name="自動流程500_1000" Id="{ed3b663e-b781-4d3b-9e19-bc41e1e6cd65}" />
+    <Folder Name="測試用區域" Id="{91315759-1bb3-4063-b768-24ddab7b0df1}" />
+    <Folder Name="輔助流程_加工動作中自動進料" Id="{60021586-c26a-4340-8fba-12b4e808dba8}" />
+    <Method Name="Homming" Id="{44f06067-4083-4ca2-8078-ae6d4fcf2533}" FolderPath="內部啟動用\">
+      <Declaration><![CDATA[METHOD Homming
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="JogMode" Id="{762caa98-70af-49ec-be7a-f088d4acd762}" FolderPath="內部啟動用\">
+      <Declaration><![CDATA[METHOD JogMode
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 8000;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="JogMode_Exit" Id="{5ff6d66b-3b76-4114-a060-32c154db4adc}" FolderPath="內部啟動用\">
+      <Declaration><![CDATA[METHOD JogMode_Exit
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 9800;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ReStart" Id="{36176bad-7a12-42cc-9d4b-bc1b6cb32850}" FolderPath="內部啟動用\">
+      <Declaration><![CDATA[METHOD ReStart
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[step := 600;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Start_Feed_In_NC_Start" Id="{b2d72d96-9689-4363-85ee-014fef8de968}" FolderPath="輔助流程_加工動作中自動進料\">
+      <Implementation>
+        <ST><![CDATA[
+IF step > 700 AND step < 1000 AND	// 自動流程進入加工階段
+	NOT step_Feed.bBuzy AND 		// 動作中進料沒在執行
+	NOT ExpConver.Feed_bBuzy		// 進料機沒在執行
+	THEN
+		IF Hmi_Web.Auto_Start THEN
+			step_Feed.Step := 1;
+		END_IF
+END_IF
+
+CASE step_Feed.Step OF
+	1:
+		IF 	NOT ReadSQLData.bBuzy THEN
+			step_Feed.Step := step_Feed.Step + 1;
+		END_IF
+
+	2:	// 從資料庫讀取是否有等待中的料
+		IF ReadSQLData.Get_Steel_Num_On_Wait() THEN
+			step_Feed.Step := step_Feed.Step + 1;
+		END_IF
+		
+	3:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step_Feed.Step := step_Feed.Step + 1;
+		END_IF
+			
+	4:
+		IF ReadSQLData.bDone THEN
+			step_Feed.Step := step_Feed.Step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step_Feed.Step := step_Feed.Step + 10000;
+		END_IF
+		
+	5:
+		IF ProjectData.WorkOrder_Num_On_Wait > 0 THEN
+			// 有等待中的料
+			step_Feed.Step := step_Feed.Step + 1;
+		ELSE
+			// 沒有等待中的料，關閉 Hmi_Web.Auto_Start 並 結束流程
+			Hmi_Web.Auto_Start := FALSE;
+			step_Feed.Step := 0;
+		END_IF
+		
+	6:
+		step_Feed.Step := 10;
+		
+	
+	10: // 自動流程還在 加工中 的狀態
+		IF step > 700 AND step < 1000 THEN
+			// 啟動 自動進料機
+			ExpConver.Feed_holding_2_waitLoading();
+			// 關閉 Hmi_Web.Auto_Start 的訊號
+			Hmi_Web.Auto_Start := FALSE;
+			step_Feed.Step := step_Feed.Step + 1;
+		ELSE
+			// 加工已經結束
+			step_Feed.Step := 0;
+		END_IF
+		
+	11:
+		IF ExpConver.Feed_bBuzy OR ExpConver.Feed_bError THEN
+			step_Feed.Step := step_Feed.Step + 1;
+		END_IF
+		
+	12:
+		step_Feed.Step := 0;
+		step_Feed.bDone := TRUE;
+		
+	
+		
+END_CASE
+
+step_Feed.bBuzy := step_Feed.Step > 0 AND step_Feed.Step < 10000;
+step_Feed.bError := step_Feed.Step > 10000;
+IF step_Feed.bBuzy OR step_Feed.bError THEN
+	step_Feed.bDone := FALSE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Step_0_Main" Id="{b79c11b6-0e6f-4d9a-8471-e672afa2103e}">
+      <Implementation>
+        <ST><![CDATA[(*======================================
+		確認起動條件&回原點
+  ======================================*)
+// 處裡緊急停止訊號
+CASE step OF
+	0:
+		IF Hmi_Web.Jog_Mode THEN
+			Hmi.Jog_Mode := FALSE;
+			Hmi_Web.Jog_Mode := FALSE;
+			SystemError := FALSE;
+			IF NOT SystemError THEN
+				step := 8000;
+			END_IF
+		ELSIF Hmi_Web.MPG_Mode THEN
+			Hmi.MPG_Mode := FALSE;
+			SystemError := FALSE;
+			IF NOT SystemError THEN
+				step := 8010;
+			END_IF
+		ELSIF Hmi_Web.Auto_Start OR Hmi_Web.Auto_OneCycle_Start THEN
+// 			Hmi_Web.Auto_Start := FALSE;
+// 			Hmi_Web.Auto_OneCycle_Start  := FALSE;
+			IF NOT SystemError THEN
+				step := 1;
+			ELSE
+				Hmi_Web.Auto_Start := FALSE;
+				Hmi_Web.Auto_OneCycle_Start  := FALSE;
+			END_IF
+		END_IF
+		
+	
+	1:
+		// 檢查是否有設定要啟動的程式
+		IF SystemError THEN
+			Hmi_Web.Auto_Start := FALSE;
+			Hmi_Web.Auto_OneCycle_Start := FALSE;
+		ELSIF Hmi_Web.Auto_Start OR Hmi_Web.Auto_OneCycle_Start THEN
+			step := step + 1;
+		END_IF
+		
+	2:
+		IF NOT GrobelVariable.bHome OR GbZ.fPos < 490 THEN
+			step := 100;
+		ELSE
+			step := 500;
+		END_IF
+		
+		
+
+		
+		
+	10:
+		
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	11:
+		SystemError := FALSE;
+		IF Hmi.Mode_Select = 1 THEN
+			step := 8000;
+		ELSIF Hmi.Mode_Select = 2 THEN
+			step := 8010;
+		ELSE
+			step := 0;
+		END_IF
+		
+
+// ============== 動作結束 ==============
+
+	
+	
+	9900:
+		hmi.Auto_bDone:=TRUE;
+		hmi.Auto_Start := FALSE;
+		hmi.Auto_ProgramSelect := 0;
+		fbWritePersistentData.START := TRUE;
+		step := step  + 1;
+		
+		
+	9901:
+		uRunCounter := uRunCounter + 1;
+		step := step  + 1;
+		
+	9902:
+		IF NOT fbWritePersistentData.BUSY THEN
+			fbWritePersistentData.START := FALSE;
+			step := step  + 1;
+		END_IF
+		
+	9903:
+		step := 0;
+		
+	9905:
+		hmi.Auto_Start := false;
+		hmi.Auto_ProgramSelect := 0;
+		PutFloor := 0;
+		GetFloor := 0;
+		step := step  + 1;
+		
+	9906:
+		
+		step := 0;
+		
+	9910:
+		GaX.PowerOff();
+		GaY.PowerOff();
+		GaZ.PowerOff();
+		GbX.PowerOff();
+		GbY.PowerOff();
+		GbZ.PowerOff();
+		GcX.PowerOff();
+		GcY.PowerOff();
+		GcZ.PowerOff();
+		GdX.PowerOff();
+		GdY.PowerOff();
+		GdZ.PowerOff();
+		step := 0;
+		
+END_CASE
+
+IF step = 0 THEN
+	RETURN;
+END_IF
+
+// step_7900_SensorTest();]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0100_Homming" Id="{a8c1ccf9-ccda-4182-a22a-bf89b00c7b8b}">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	100:
+		Button.HomeButton_Light := 2;
+		step := 110;
+
+	110:
+		GroupA.ToStanby();
+		GroupB.ToStanby();
+		GroupC.ToStanby();
+		GroupD.ToStanby();
+		step := step + 1;
+		
+	111:
+		IF (GroupA.StepA.bBuzy OR GroupA.StepA.bError) AND 
+			(GroupB.StepA.bBuzy OR GroupB.StepA.bError) AND
+			(GroupC.StepA.bBuzy OR GroupC.StepA.bError) AND
+			(GroupD.StepA.bBuzy OR GroupD.StepA.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	112:
+		ExpConver.FeedHomeStart();
+		step := step + 1;
+		
+	113:
+		IF (ExpConver.Feed_bBuzy OR ExpConver.Feed_bError) THEN
+			step := step + 1;
+		END_IF
+
+	114:
+		IF GroupB.StepA.bDone THEN
+			step := step + 1;
+		ELSIF GroupA.StepA.bError OR GroupB.StepA.bError OR GroupC.StepA.bError OR GroupD.StepA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	115:
+		step := 120;
+		
+		
+	120:
+		homeMode := (IO.i501 OR IO.i502 OR IO.i503 OR IO.i504) AND GroupFx.b_AC_HOME AND GroupFx.b_BD_HOME; 
+		GroupFx.A_UnPress();
+		GroupFx.B_UnPress();
+		GroupFx.C_UnPress();
+		GroupFx.D_UnPress();
+		step := step + 1;
+		
+	121:
+		IF (GroupFx.step_A_P.bBuzy OR GroupFx.step_A_P.bError) AND 
+			(GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+			(GroupFx.step_C_P.bBuzy OR GroupFx.step_C_P.bError) AND
+			(GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	122:
+		
+		IF GroupFx.step_A_P.bDone AND GroupFx.step_B_P.bDone AND GroupFx.step_C_P.bDone AND GroupFx.step_D_P.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_A_P.bError OR GroupFx.step_B_P.bError OR GroupFx.step_C_P.bError OR GroupFx.step_D_P.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	123:
+		step := 130;
+		
+		
+	130:
+		IF homeMode THEN
+			GroupFx.AC_UnClamp(10);
+			GroupFx.BD_UnClamp(10);
+		ELSE
+			GroupFx.AC_Home();
+			GroupFx.BD_Home();
+		END_IF
+		step := step + 1;
+		
+	131:
+		IF (GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError) AND 
+			(GroupFx.step_BD_C.bBuzy OR GroupFx.step_BD_C.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	132:
+		
+		IF GroupFx.step_AC_C.bDone AND GroupFx.step_BD_C.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_AC_C.bError OR GroupFx.step_BD_C.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	133:
+		step := 140;
+		
+	140:
+		IF NOT GroupFx.b_AC_HOME THEN
+			GroupFx.AC_Home();
+		END_IF
+		IF NOT GroupFx.b_BD_HOME THEN
+			GroupFx.BD_Home();
+		END_IF
+		step := step + 1;
+		
+	141:
+		IF (GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError OR GroupFx.b_AC_HOME) AND 
+			(GroupFx.step_BD_C.bBuzy OR GroupFx.step_BD_C.bError OR GroupFx.b_BD_HOME) THEN
+				step := step + 1;
+		END_IF
+		
+	142:
+		IF (GroupFx.step_AC_C.bDone OR GroupFx.b_AC_HOME) AND (GroupFx.step_BD_C.bDone OR GroupFx.b_BD_HOME) THEN
+			step := step + 1;
+		ELSIF GroupFx.step_AC_C.bError OR GroupFx.step_BD_C.bError THEN
+			step := step + 10000;
+		END_IF	
+		
+	143:
+		step := 150;
+		
+	150:
+		IF ExpConver.Feed_bDone THEN
+			step := step + 1;
+		ELSIF ExpConver.Feed_bError THEN
+			step := step + 10000;
+			pMsg.Push_Error("自動料架復歸時發生錯誤");
+		END_IF
+		
+	151:
+		IF GroupA.StepA.bDone AND GroupC.StepA.bDone AND GroupC.StepA.bDone THEN
+			step := step + 1;
+		ELSIF GroupA.StepA.bError AND GroupC.StepA.bError AND GroupC.StepA.bError THEN
+			step := step + 10000;
+			pMsg.Push_Error("自動料架復歸時發生錯誤");
+		END_IF
+		
+	152:
+		Button.HomeButton_Light := 1;
+		bDone := TRUE;
+		GrobelVariable.bHome := TRUE;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0500_AutoMode_StartCheck" Id="{4829e2e7-827c-4026-a87b-a346e004fcb7}" FolderPath="自動流程500_1000\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+(*	====================================
+				啟動前檢查
+	====================================*)
+		500:
+			hmi.State := MachineState.auto_mode;
+			IF IO.i212 THEN
+				step := step + 1;
+			ELSE
+				pMsg.Push_Alarm_NoPause("氣壓壓力不足");
+				step := 0;
+			END_IF
+			
+		501:
+			step := 510;
+			
+			
+(*	================================================
+			讀取 資料庫 的 work_order 資料表
+	================================================*)
+		510:
+			ReadSQLData.Get_WorkkOrder();
+			step := step + 1;
+			
+		511:
+			IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+				step := step + 1;
+			END_IF
+			
+		512:
+			IF ReadSQLData.bDone THEN
+				step := step + 1;
+			ELSIF ReadSQLData.bError THEN
+				step := step + 10000;
+			END_IF
+			
+		513:
+			IF Hmi_Web.Auto_Start THEN 
+				
+				// 標準進料模式
+				Hmi_Web.Auto_Start := FALSE;
+				step := 520;
+			ELSIF Hmi_Web.Auto_OneCycle_Start THEN
+				
+				// 插單模式
+				Hmi_Web.Auto_OneCycle_Start := FALSE;
+				step := step + 1;
+			END_IF
+			
+		514: // 插單模式 檢查 插單 或 不靠邊插單 是否有資料
+			IF LEN(STR:=ProjectData.WorkOrder_inserts.steel_id) > 0 OR
+				LEN(STR:=ProjectData.WorkOrder_alignment.steel_id) > 0
+			THEN
+				
+				step := 550;
+			ELSE
+				pMsg.Push_Error(
+					WStrConcat(
+					str0:= "找不到 插單 或 不靠邊插單 的資料 AutoMain:", 
+					str1:= TO_WSTRING(step))
+				);
+			END_IF
+				
+				
+(*	====================================
+				標準進料模式
+	====================================*)
+		520:
+			IF LEN(STR:=ProjectData.WorkOrder_inSide.steel_id) > 0 THEN
+				// 已經有 料的狀態 是 在輸送滾輪上(inSide)
+				ProjectData.WorkOrder_Now := ProjectData.WorkOrder_inSide;
+				step := step + 1;
+			ELSE
+				// 沒有 料的狀態 是 在輸送滾輪上(inSide)
+				step := 530;
+			END_IF
+			
+		521: // 自動進料機執行搬移動作，但不進料到 輸送滾輪上
+			ExpConver.Feed_holding_2_waitLoading();
+			step := step + 1;
+			
+		522:
+			IF ExpConver.Feed_bBuzy OR ExpConver.Feed_bError THEN
+				step := step + 1;
+			END_IF
+			
+		523: // 確認自動進料機執行後，繼續機器進料動作
+			step := 570;
+			
+(*	========================================
+		標準進料模式 - 沒有料在輸送滾輪上
+	========================================*)
+		530: // 自動進料機 執行完整進料
+			ExpConver.FeedAutoStart();
+			step := step + 1;
+			
+		531:
+			IF ExpConver.Feed_bBuzy OR ExpConver.Feed_bError THEN
+				step := step + 1;
+			END_IF
+			
+		532:
+			IF ExpConver.Feed_bDone THEN
+				step := step + 1;
+			ELSIF ExpConver.Feed_bError THEN
+				step := step + 10000;
+			END_IF
+			
+		533:
+			step := 540;
+			
+(*	========================================
+		進料結束後 再次讀取資料庫
+	========================================*)
+		540:
+			ReadSQLData.Get_WorkkOrder();
+			step := step + 1;
+			
+		541:
+			IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+				step := step + 1;
+			END_IF
+			
+		542:
+			IF ReadSQLData.bDone THEN
+				step := step + 1;
+			ELSIF ReadSQLData.bError THEN
+				step := step + 10000;
+			END_IF
+			
+		543:
+			IF LEN(STR:=ProjectData.WorkOrder_inSide.steel_id) > 0 THEN
+				// 已經有 料的狀態 是 在輸送滾輪上(inSide)
+				ProjectData.WorkOrder_Now := ProjectData.WorkOrder_inSide;
+				step := step + 1;
+			ELSE
+				// 沒有 料的狀態 是 在輸送滾輪上(inSide)
+				pMsg.Push_Error(
+					WStrConcat(
+					str0:= "找不到狀態是 輸送滾輪上(inSide) 的資料 AutoMain:", 
+					str1:= TO_WSTRING(step))
+				);
+			END_IF
+			
+		544:
+			step := 570;
+			
+(*	=======================================
+				插單模式 
+			料已放置在 輸送滾輪 上
+	=======================================*)
+		550:
+			ReadSQLData.Get_WorkkOrder();
+			step := step + 1;
+			
+		551:
+			IF (ReadSQLData.bBuzy OR ReadSQLData.bError) THEN
+				step := step + 1;
+			END_IF
+			
+		552:
+			IF ReadSQLData.bDone THEN
+				step := step + 1;
+			ELSIF ReadSQLData.bError THEN
+				step := step + 10000;
+			END_IF
+			
+		553:
+			step := 560;
+			
+			
+		560:
+			IF LEN(STR:=ProjectData.WorkOrder_alignment.steel_id) > 0 THEN
+				// 無靠邊差單
+				ProjectData.WorkOrder_Now := ProjectData.WorkOrder_alignment;
+				step := step + 1;
+			ELSIF LEN(STR:=ProjectData.WorkOrder_inserts.steel_id) > 0 THEN
+				// 差單
+				ProjectData.WorkOrder_Now := ProjectData.WorkOrder_inserts;
+				step := step + 1;
+			ELSE
+				pMsg.Push_Error("AutoMain: 無差單資料");
+				step := 0;
+			END_IF
+			
+			
+		561:
+			step := 570;
+
+(*	=======================================
+			從資料庫 讀取 材料資料
+	=======================================*)
+		570:
+			ReadSQLData.Get_SteelData(ProjectData.WorkOrder_Now.steel_id);
+			step := step + 1;
+			
+		571:
+			IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+				step := step + 1;
+			END_IF
+			
+		572:
+			IF ReadSQLData.bDone THEN
+				step := step + 1;
+			ELSIF ReadSQLData.bError THEN
+				step := step + 10000;
+			END_IF
+			
+		573:
+			IF LEN(STR:=ProjectData.WorkOrder_alignment.steel_id) > 0 THEN
+				// 無靠邊差單
+				step := 590;
+			ELSIF LEN(STR:=ProjectData.WorkOrder_inserts.steel_id) > 0 THEN
+				// 差單
+				step := 580;
+			ELSIF LEN(STR:=ProjectData.WorkOrder_inSide.steel_id) > 0 THEN
+				// 料架進料
+				step := 600;
+			END_IF
+			
+			
+(*	=======================================
+			等待按下 機器啟動
+	=======================================*)		
+		580:
+			hmi.State := MachineState.auto_mode_wait;
+			Button.StartButton_Light := 2;
+			step := step + 1;
+			
+		581:
+			
+			IF Button.StartButton THEN
+				step := step + 1;
+			END_IF
+			
+		582:
+			hmi.State := MachineState.auto_mode;
+			Button.StartButton_Light := 1;
+			step := 590;		
+
+	
+(*	=======================================
+					靠邊
+	=======================================*)	
+		590:
+			ExpConver.Feed_PullOver();
+			step := step + 1;
+			
+		591:
+			IF ExpConver.Feed_bBuzy OR ExpConver.Feed_bError THEN
+				step := step + 1;
+			END_IF
+			
+		592:
+			IF ExpConver.Feed_bDone THEN
+				step := step + 1;
+			ELSIF ExpConver.Feed_bError THEN
+				step := step + 10000;
+			END_IF
+			
+		593:
+			step := 600;
+			
+		
+
+			
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0600_AutoMode_Feed" Id="{d813016f-ba23-4674-893e-521536c59444}" FolderPath="自動流程500_1000\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+(*	==================================================
+			夾輪到指定位置（防止工件墬落）
+	==================================================*) 
+	600: 
+		ExpConver.InRollerStop();
+		NowWidth := ProjectData.Now_Steel.Height;
+		step := step + 1;
+		
+	601:
+		GroupFx.AC_Clamp(NowWidth + 15);
+		GroupFx.BD_Clamp(NowWidth + 15);
+		step := step + 1;
+		
+	602:
+		IF (GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError) AND
+			(GroupFx.step_BD_C.bBuzy OR GroupFx.step_BD_C.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	603:
+		step := 610;
+(*	==================================================
+			材料進入 入口位置 測量寬度
+	==================================================*) 
+	610:// 材料進入 入口位置
+		ExpConver.InRollerStart();
+		
+		step := step + 1;
+		
+	611:
+		IF ExpConver.In_Moter_Running OR ExpConver.In_Moter_Error THEN
+			step := step + 1;
+		END_IF
+		
+	612: // 到達 入口感應器 後停止
+		IF io.i711 OR ExpConver.In_Moter_Error THEN
+			// 停止馬達
+			ExpConver.InRollerStop();
+			
+			IF  io.i711 THEN
+				step := step + 1;
+			ELSIF ExpConver.In_Moter_Error THEN
+				pmsg.Push_Error(
+					WStrConcat("AutoMain:進料馬達發生錯誤", TO_WSTRING(step))
+				);
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	613: // 確認進料馬達停止
+		tmr01.PT := T#2S;
+		tmr01.IN := NOT ExpConver.In_Moter_Running;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	614:// 紀錄寬度數據
+	
+		MaxWidth := ProjectData.Now_Steel.Height + (ProjectData.Now_Steel.Height * 0.2); 
+		MinWidth := ProjectData.Now_Steel.Height - (ProjectData.Now_Steel.Height * 0.2);
+		IF ExpConver.Feed_Workpiace_H > MinWidth AND ExpConver.Feed_Workpiace_H < MaxWidth THEN
+			step := step + 1;
+		ELSE
+			pMsg.Push_Error(WStrConcat(
+				"AutoMain: ",
+				WLEFT(STR:= TO_WSTRING(ProjectData.Now_Steel.uid), SIZE:= 8),
+				" :高度數據與輸入資料錯誤,設定值:",
+				TO_WSTRING(NowWidth),
+				" 實際值:",
+				TO_WSTRING(ExpConver.Feed_Workpiace_H)
+				));
+			step := step + 10000;
+		END_IF
+// 		HightCheck(ExpConver.Feed_Workpiace_H, ExpConver.Feed_Workpiace_W);
+		
+		
+	615:
+		IF GroupFx.step_AC_C.bDone AND GroupFx.step_BD_C.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_AC_C.bError OR GroupFx.step_BD_C.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	616:
+		step := 630;
+(*	==================================================
+			材料前進到 出口位置 (整料)
+	==================================================*) 
+	630:
+		ExpConver.InRollerStart();
+		step := step + 1;
+		
+	631:
+		IF ExpConver.In_Moter_Running OR ExpConver.In_Moter_Error THEN
+			step := step + 1;
+		END_IF
+		
+	632: // 到達 出口感應器 後停止
+		IF io.i709 OR ExpConver.In_Moter_Error THEN
+			// 停止馬達
+			ExpConver.InRollerStop();
+			
+			IF  io.i709 THEN
+				step := step + 1;
+			ELSIF ExpConver.In_Moter_Error THEN
+				pmsg.Push_Error(
+					WStrConcat("AutoMain:進料馬達發生錯誤", TO_WSTRING(step))
+				);
+				step := step + 10000;
+			END_IF
+		END_IF
+		
+	633: // 確認進料馬達停止
+		tmr01.PT := T#2S;
+		tmr01.IN := NOT ExpConver.In_Moter_Running;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	634:
+		step := 640;
+		
+		
+(*	=========================
+			整料開始
+	=========================*) 
+	640: // BD
+		GroupFx.AC_Clamp(0);
+		GroupFx.BD_Clamp(0);
+		step := step + 1;
+	
+	641:
+		IF (GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError) AND
+			(GroupFx.step_BD_C.bBuzy OR GroupFx.step_BD_C.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	642:
+		IF GroupFx.step_AC_C.bDone AND GroupFx.step_BD_C.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_AC_C.bError OR GroupFx.step_BD_C.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	643:
+		step := 650;
+		
+		
+
+	650:
+		GroupFx.B_Press();
+		GroupFx.D_Press();
+		step := step + 1;
+	
+	651:
+		IF (GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+			(GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError)
+			THEN
+			step := step + 1;
+		END_IF
+		
+		
+	652:
+		IF GroupFx.step_B_P.bDone AND GroupFx.step_D_P.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_B_P.bError OR GroupFx.step_D_P.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	653:
+		step := 670;
+
+(*	===============================================
+			整料結束，退開 AC下壓 與 AC夾輪
+	===============================================*) 
+	660:
+		GroupFx.A_UnPress();
+		GroupFx.C_UnPress();
+		step := step + 1;
+	
+	661:
+		IF (GroupFx.step_A_P.bBuzy OR GroupFx.step_A_P.bError) AND
+			(GroupFx.step_C_P.bBuzy OR GroupFx.step_C_P.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	662:
+		IF GroupFx.step_A_P.bDone AND GroupFx.step_C_P.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_A_P.bError OR GroupFx.step_C_P.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	663:
+		step := 670;
+		
+	670: // 退開 AC夾輪
+		GroupFx.AC_UnClamp(10);
+		step := step + 1;
+	
+	671:
+		IF (GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	672:
+		IF GroupFx.step_AC_C.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_AC_C.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	673:
+		step := 680;
+
+
+(*	============================
+			工件原點整定
+	============================*) 
+	680:
+		GroupFx.Fx_Home();
+		step := step + 1;
+		
+	681:
+		IF (GroupFx.bBuzy OR GroupFx.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	682:
+		IF GroupFx.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.bError THEN
+			step := step + 10000;
+		END_IF
+	
+	683:
+		step := 690;
+		
+(*	============================
+		工件進料結束 標示進料結束
+	============================*) 
+	690:
+		Last_Pos := 0;
+		IF  ReadSQLData.Set_Steel_Start(ProjectData.Now_Steel.uid) THEN
+			step := step + 1;
+		END_IF
+		
+	691:
+		step := 700;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0700_AutoMode_GoPrintPoint" Id="{3ddf49fc-b8c3-43b2-aa40-0220e552ab46}" FolderPath="自動流程500_1000\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+(*	===================================
+				搜尋 X工作點
+	===================================*)
+	700:
+		IF ReadSQLData.Get_X_NextPos(0) THEN
+			step := step + 1;
+		END_IF
+		
+	701:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	702:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	703:
+		Last_Pos := ReadSQLData.fNext_XPos;
+		_debug_X_NextPos[_debug_X_NextPos_count] := Last_Pos;
+		_debug_X_NextPos_count := 1;
+		step := step + 1;
+		
+	704:
+		step := 710;
+		
+(*	==========================================
+				取得區間的打標工作
+	==========================================*)
+	710:
+		IF ProjectData.Now_Steel.Height > 200 THEN
+			ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 300);
+		ELSE
+			ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 75);
+		END_IF
+		step := step + 1;
+		
+	711:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	712:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	713:
+		step := 720;
+
+(*	==========================================
+			設定各軸組 並 預移到打標點
+	==========================================*)
+	720: // 設定 各軸組 X參考座標
+		GroupA.Set_X_Ref(Value := Last_Pos);
+		GroupB.Set_X_Ref(Value := Last_Pos);
+		GroupC.Set_X_Ref(Value := Last_Pos);
+		GroupD.Set_X_Ref(Value := Last_Pos);
+		step := step + 1;
+		
+	721: // 設定 各軸組 X參考座標
+		GroupA.Set_Y_Ref(Value := MaCfg.laserA_Y_ReferencePos - ProjectData.Now_Steel.Width);
+		GroupB.Set_Y_Ref(Value := MaCfg.laserB_Y_ReferencePos - ProjectData.Now_Steel.Height);
+		GroupC.Set_Y_Ref(Value := MaCfg.laserC_Y_ReferencePos);
+		GroupD.Set_Y_Ref(Value := MaCfg.laserD_Y_ReferencePos);
+		step := step + 1;
+	
+	722: // 關閉打標 (讓 流程暫停 在 開始打標 前)
+		GroupA.ReadyToPrint := FALSE;
+		GroupB.ReadyToPrint := FALSE;
+		GroupC.ReadyToPrint := FALSE;
+		GroupD.ReadyToPrint := FALSE;
+		
+		GroupA.ReadyToMove := FALSE;
+		GroupB.ReadyToMove := FALSE;
+		GroupC.ReadyToMove := FALSE;
+		GroupD.ReadyToMove := FALSE;
+		step := step + 1;
+		
+
+	
+	723: // 載入區域工作內容 + 預移動開始
+		GroupA.Do_WorkList();
+		GroupB.Do_WorkList();
+		GroupC.Do_WorkList();
+		GroupD.Do_WorkList();
+		step := step + 1;
+		
+	724:
+		IF (GroupA.bBuzy OR GroupA.bError OR ProjectData.Now_Steel_Payload_A_DataNumber = 0) AND
+			(GroupB.bBuzy OR GroupB.bError OR ProjectData.Now_Steel_Payload_B_DataNumber = 0) AND
+			(GroupC.bBuzy OR GroupC.bError OR ProjectData.Now_Steel_Payload_C_DataNumber = 0) AND
+			(GroupD.bBuzy OR GroupD.bError OR ProjectData.Now_Steel_Payload_D_DataNumber = 0) THEN
+				step := step + 1;
+		END_IF
+		
+	725:
+		step := 730;
+		
+(*	================================
+		出料輸送滾輪有工件未吊離
+	================================*)
+	730:
+		IF ExpConver.Out_sensor > 1 AND Last_Pos > 500 THEN
+			hmi.State := MachineState.auto_mode_wait;
+			step := step + 1;
+		ELSE
+			step := 732;
+		END_IF
+		
+	731:
+		IF ExpConver.Out_sensor > 1 THEN
+			Button.StartButton_Light := 0;
+		ELSE
+			Button.StartButton_Light := 2;
+			IF Button.StartButton THEN
+				step := step + 1;
+			END_IF
+		END_IF
+		
+		
+	732:
+		hmi.State := MachineState.auto_mode;
+		Button.StartButton_Light := 1;
+		step := 740;
+
+(*	===================================
+				Fx 前往 X工作點
+	===================================*)
+	740:
+		GroupFx.Fx_Move(Last_Pos);
+		GaZ.AbsMove(posc.GaZ_P_Limite, spdc.HighSpeed);
+		step := step + 1;
+		
+	741:
+		IF (GroupFx.bBuzy OR GroupFx.bError) AND (GaZ.bBuzy OR GaZ.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	742:
+		IF GroupFx.bDone AND GaZ.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.bError OR GaZ.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	743:
+		step := 750;
+		
+	750:
+		
+		GroupB.FindZ();
+		GroupC.FindZ();
+		GroupD.FindZ();
+		step := step + 1;
+		
+	751:
+		IF 	(GroupB.StepA.bBuzy OR GroupB.StepA.bError) AND
+			(GroupC.StepA.bBuzy OR GroupC.StepA.bError) AND
+			(GroupD.StepA.bBuzy OR GroupD.StepA.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	752:
+		IF 	(GroupB.StepA.bDone) AND
+			(GroupC.StepA.bDone) AND 
+			(GroupD.StepA.bDone) THEN
+				GroupB_Now_Z := GroupB.Az.Pos;	// 記錄軸組B的雷射距離，小於200的料使用
+			 	step := step + 1;
+		ELSIF 
+			(GroupB.StepA.bError) OR 
+			(GroupC.StepA.bError) OR 
+			(GroupD.StepA.bError) THEN
+				step := step + 10000;
+		END_IF
+		
+	753:
+		GroupA.FindZ();
+		
+		step := step + 1;
+		
+	754:
+		IF 	(GroupA.StepA.bBuzy OR GroupA.StepA.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	755:
+		IF 	(GroupA.StepA.bDone) THEN
+			step := step + 1;
+		ELSIF 
+			(GroupA.StepA.bError) THEN
+				step := step + 10000;
+		END_IF
+		
+	756:
+		GroupA.ReadyToMove := TRUE;
+		GroupB.ReadyToMove := TRUE;
+		GroupC.ReadyToMove := TRUE;
+		GroupD.ReadyToMove := true;
+		step := 760;
+		
+(*	=============================================
+				開始各組區域打標
+	=============================================*)
+	760: 
+		tmr01.PT := T#2S;
+		tmr01.IN := NOT ExpConver.In_Moter_Running;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	761:
+		GroupA.ReadyToPrint := TRUE;
+		GroupB.ReadyToPrint := TRUE;
+		GroupC.ReadyToPrint := TRUE;
+		GroupD.ReadyToPrint := TRUE;
+		step := step + 1;
+		
+	762:
+		IF GroupA.bDone AND GroupB.bDone AND GroupC.bDone AND GroupD.bDone THEN
+			step := step + 1;
+		ELSIF GroupA.bError OR GroupB.bError OR GroupC.bError OR GroupD.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	763:
+		step := 770;
+		
+(*	================================
+		出料輸送滾輪有工件未吊離
+	================================*)
+	770:
+		IF ExpConver.Out_sensor > 1 AND Last_Pos < 500 THEN
+			hmi.State := MachineState.auto_mode_wait;
+			step := step + 1;
+		ELSE
+			step := 772;
+		END_IF
+		
+	771:
+		IF ExpConver.Out_sensor > 1 THEN
+			Button.StartButton_Light := 0;
+			Button.StopButton_Light := 2;
+		ELSE
+			Button.StartButton_Light := 2;
+			Button.StopButton_Light := 0;
+			IF Button.StartButton THEN
+				step := step + 1;
+			END_IF
+		END_IF
+		
+		
+	772:
+		
+		hmi.State := MachineState.auto_mode;
+		Button.StartButton_Light := 1;
+		IF ProjectData.Now_Steel.Height > 200 THEN
+			step := 800;
+		ELSE
+			step := 900;
+		END_IF
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0800_AutoMode_GoPrintPoint_Cycle_200_UP" Id="{b9ee8044-d68a-43ca-8ce0-75cc1609900c}" FolderPath="自動流程500_1000\">
+      <Implementation>
+        <ST><![CDATA[(*=====================================
+				搜尋 X工作點
+=======================================*)
+
+CASE step OF
+(*	===================================
+				搜尋 X工作點
+	===================================*)
+	800:
+		IF ReadSQLData.Get_X_NextPos(Last_Pos + 200) THEN
+			step := step + 1;
+		END_IF
+		
+	801:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	802:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	803:
+		Last_Pos := ReadSQLData.fNext_XPos;
+		
+		_debug_X_NextPos[_debug_X_NextPos_count] := Last_Pos;
+		_debug_X_NextPos_count := _debug_X_NextPos_count + 1;
+		
+		step := step + 1;
+		
+	804:
+		IF Last_Pos = -1 THEN
+			step := 1000;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	805:
+		step := 810;
+		
+(*	==========================================
+				取得區間的打標工作
+	==========================================*)
+	810:
+		ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 200);
+		step := step + 1;
+		
+	811:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	812:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	813:
+		Last_Pos := Last_Pos - 10;
+		step := 820;
+
+(*	==========================================
+			設定各軸組 並 預移到打標點
+	==========================================*)
+	820: // 設定 各軸組 X參考座標
+		GroupA.Set_X_Ref(Value := Last_Pos);
+		GroupB.Set_X_Ref(Value := Last_Pos);
+		GroupC.Set_X_Ref(Value := Last_Pos);
+		GroupD.Set_X_Ref(Value := Last_Pos);
+		step := step + 1;
+		
+	821:
+		GroupA.ReadyToPrint := FALSE;
+		GroupB.ReadyToPrint := FALSE;
+		GroupC.ReadyToPrint := FALSE;
+		GroupD.ReadyToPrint := FALSE;
+		
+		GroupA.ReadyToMove := FALSE;
+		GroupB.ReadyToMove := FALSE;
+		GroupC.ReadyToMove := FALSE;
+		GroupD.ReadyToMove := FALSE;
+		step := step + 1;
+		
+
+	
+	822: // 載入區域工作內容 + 預移動開始
+		GroupA.Do_WorkList();
+		GroupB.Do_WorkList();
+		GroupC.Do_WorkList();
+		GroupD.Do_WorkList();
+		step := step + 1;
+		
+	823:
+		IF (GroupA.bBuzy OR GroupA.bError OR ProjectData.Now_Steel_Payload_A_DataNumber = 0) AND
+			(GroupB.bBuzy OR GroupB.bError OR ProjectData.Now_Steel_Payload_B_DataNumber = 0) AND
+			(GroupC.bBuzy OR GroupC.bError OR ProjectData.Now_Steel_Payload_C_DataNumber = 0) AND
+			(GroupD.bBuzy OR GroupD.bError OR ProjectData.Now_Steel_Payload_D_DataNumber = 0) THEN
+				step := step + 1;
+		END_IF
+		
+	824:
+		step := 830;
+		
+(*	===================================
+			判斷是否走快到結尾
+			如果是則交換編碼器
+	===================================*)
+	830: // 判斷是否走快到結尾
+		IF (Last_Pos + 1200) > ProjectData.Now_Steel.Length AND NOT GroupFx.b_AC_Clamp THEN
+			IF Fx.fPos < 1200 THEN
+				step := step + 1;
+			ELSE
+				step := 835;
+			END_IF
+		ELSIF (Last_Pos + 100) >= ProjectData.Now_Steel.Length THEN
+			Last_Pos := Last_Pos - 100;
+			GroupA.Set_X_Ref(Value := Last_Pos);
+			GroupB.Set_X_Ref(Value := Last_Pos);
+			GroupC.Set_X_Ref(Value := Last_Pos);
+			GroupD.Set_X_Ref(Value := Last_Pos);
+			step := 850;
+		ELSE
+			step := 850;
+		END_IF
+		
+		
+	831:
+		SensorTest.MovePos[0] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[1] := FxA_Exp_Pos;
+		SensorTest.MovePos[2] := FxB_Exp_Pos;
+		
+		GroupFx.Fx_Move(1200);
+		step := step + 1;
+		
+	832:
+		IF (GroupFx.bBuzy OR GroupFx.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	833:
+		IF GroupFx.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	834:
+		step := 835;
+		
+	835:
+		SensorTest.MovePos[4] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[5] := FxA_Exp_Pos;
+		SensorTest.MovePos[6] := FxB_Exp_Pos;
+		
+		GroupFx.Fx_Set_A_Enc();
+		GroupB.FindZ();
+		step := step + 1;
+		
+	836:
+		IF (GroupFx.bBuzy OR GroupFx.bError) AND (GroupB.StepA.bBuzy OR GroupB.StepA.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	837:
+		IF GroupFx.bDone AND GroupB.StepA.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.bError OR GroupB.StepA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	838:
+		step := 840;
+(*	===================================
+				BD夾 換 AC夾
+	===================================*)
+	840:
+		SensorTest.MovePos[7] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[8] := FxA_Exp_Pos;
+		SensorTest.MovePos[9] := FxB_Exp_Pos;
+	
+		GroupFx.AC_Clamp();
+		GroupFx.B_UnPress();
+		GroupFx.D_UnPress();
+		step := step + 1;
+		
+	841:
+		IF (GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError) AND
+			(GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+			 (GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	842:
+		IF GroupFx.step_AC_C.bDone AND GroupFx.step_B_P.bDone AND GroupFx.step_D_P.bDone  THEN
+			step := step + 1;
+		ELSIF GroupFx.step_AC_C.bError OR GroupFx.step_B_P.bError OR GroupFx.step_D_P.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	843:
+		tmr01.PT := T#1S;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	844:
+		SensorTest.MovePos[10] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[11] := FxA_Exp_Pos;
+		SensorTest.MovePos[12] := FxB_Exp_Pos;
+	
+		GroupFx.BD_UnClamp(20);
+		GroupFx.A_Press();
+		GroupFx.C_Press();
+		step := step + 1;
+		
+	845:
+		IF (GroupFx.step_BD_C.bBuzy OR GroupFx.step_BD_C.bError) AND
+			(GroupFx.step_A_P.bBuzy OR GroupFx.step_A_P.bError) AND
+			 (GroupFx.step_C_P.bBuzy OR GroupFx.step_C_P.bError)  THEN
+			step := step + 1;
+		END_IF
+		
+	846:
+		IF GroupFx.step_BD_C.bDone  THEN
+			GroupFx.B_Press();
+			GroupFx.D_Press();
+			step := step + 1;
+		ELSIF GroupFx.step_BD_C.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	847:
+		IF (GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+			 (GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError)  THEN
+			step := step + 1;
+		END_IF
+		
+	848:
+		IF GroupFx.step_BD_C.bDone AND GroupFx.step_A_P.bDone AND GroupFx.step_B_P.bDone AND GroupFx.step_C_P.bDone AND GroupFx.step_D_P.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_BD_C.bError OR GroupFx.step_A_P.bError OR GroupFx.step_B_P.bError OR GroupFx.step_C_P.bError OR GroupFx.step_D_P.bError THEN
+			step := step + 10000;
+		END_IF
+	
+		
+	849:
+		step := 850;
+(*	===================================
+				Fx 前往 X工作點
+	===================================*)
+	850:
+		SensorTest.MovePos[13] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[14] := FxA_Exp_Pos;
+		SensorTest.MovePos[15] := FxB_Exp_Pos;
+		
+		// BH有接縫工件
+		IF ProjectData.Joint_Pos > 0 THEN
+			IF Last_Pos + 1300 > ProjectData.Joint_Pos AND Fx_Exp_Pos + 1100 < ProjectData.Joint_Pos THEN
+				step := step + 1;
+			ELSE
+				step := 855;
+			END_IF
+		ELSE
+			step := 855;
+		END_IF
+	
+	851:
+		GroupFx.Fx_Move(ProjectData.Joint_Pos - 1400);
+		step := step + 1;
+		
+	852:
+		IF (GroupFx.bBuzy OR GroupFx.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	853:
+		IF GroupFx.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	854:
+		IF GroupFx.Fx_Sync_EncA_2_EncB() THEN
+			step := 855;
+		END_IF
+		
+	855:
+		SensorTest.MovePos[17] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[18] := FxA_Exp_Pos;
+		SensorTest.MovePos[19] := FxB_Exp_Pos;
+		
+		GroupFx.Fx_Move(Last_Pos);
+		step := step + 1;
+		
+	856:
+		IF (GroupFx.bBuzy OR GroupFx.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	857:
+		IF GroupFx.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	858:
+		step := 860;
+		
+	
+		
+(*	===================================
+		Fx 定位後，各組測高開始
+	===================================*)
+	860:
+		IF ProjectData.Now_Steel_Payload_A_DataNumber > 0 THEN
+			GroupA.FindZ();
+		END_IF
+		IF ProjectData.Now_Steel_Payload_B_DataNumber > 0 THEN
+			GroupB.FindZ();
+		END_IF
+		IF ProjectData.Now_Steel_Payload_C_DataNumber > 0 THEN
+			GroupC.FindZ();
+		END_IF
+		IF ProjectData.Now_Steel_Payload_D_DataNumber > 0 THEN
+			GroupD.FindZ();
+		END_IF
+		step := step + 1;
+		
+	861:
+		IF (GroupA.StepA.bBuzy OR GroupA.StepA.bError OR ProjectData.Now_Steel_Payload_A_DataNumber = 0) AND
+			(GroupB.StepA.bBuzy OR GroupB.StepA.bError OR ProjectData.Now_Steel_Payload_B_DataNumber = 0) AND
+			(GroupC.StepA.bBuzy OR GroupC.StepA.bError OR ProjectData.Now_Steel_Payload_C_DataNumber = 0) AND
+			(GroupD.StepA.bBuzy OR GroupD.StepA.bError OR ProjectData.Now_Steel_Payload_D_DataNumber = 0) THEN
+				step := step + 1;
+		END_IF
+		
+	862:
+		GroupA.ReadyToMove := GroupA.StepA.bDone;
+		GroupB.ReadyToMove := GroupB.StepA.bDone;
+		GroupC.ReadyToMove := GroupC.StepA.bDone;
+		GroupD.ReadyToMove := GroupD.StepA.bDone;
+		IF (GroupA.StepA.bDone OR ProjectData.Now_Steel_Payload_A_DataNumber = 0) AND
+			(GroupB.StepA.bDone OR ProjectData.Now_Steel_Payload_B_DataNumber = 0) AND
+			(GroupC.StepA.bDone OR ProjectData.Now_Steel_Payload_C_DataNumber = 0) AND 
+			(GroupD.StepA.bDone OR ProjectData.Now_Steel_Payload_D_DataNumber = 0) THEN
+			 	step := step + 1;
+		ELSIF 
+			(GroupA.StepA.bError AND ProjectData.Now_Steel_Payload_A_DataNumber > 0) OR
+			(GroupB.StepA.bError AND ProjectData.Now_Steel_Payload_B_DataNumber > 0) OR 
+			(GroupC.StepA.bError AND ProjectData.Now_Steel_Payload_C_DataNumber > 0) OR 
+			(GroupD.StepA.bError AND ProjectData.Now_Steel_Payload_D_DataNumber > 0) THEN
+				step := step + 10000;
+		END_IF
+		
+	863:
+		step := 870;
+		
+(*	=============================================
+				開始各組區域打標
+	=============================================*)
+	870: 
+		tmr01.PT := T#1S;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	871:
+		GroupA.ReadyToPrint := TRUE;
+		GroupB.ReadyToPrint := TRUE;
+		GroupC.ReadyToPrint := TRUE;
+		GroupD.ReadyToPrint := TRUE;
+		step := step + 1;
+		
+	872:
+		IF GroupA.bDone AND GroupB.bDone AND GroupC.bDone AND GroupD.bDone THEN
+			step := step + 1;
+		ELSIF GroupA.bError OR GroupB.bError OR GroupC.bError OR GroupD.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	873:
+		step := 880;
+		
+	
+	880:
+		step := 800;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_0900_AutoMode_GoPrintPoint_Cycle_200_Down" Id="{93b20725-0dc6-4893-8408-c5a0e7cf97fe}" FolderPath="自動流程500_1000\">
+      <Implementation>
+        <ST><![CDATA[(*=====================================
+				搜尋 X工作點
+=======================================*)
+
+CASE step OF
+(*	===================================
+				搜尋 X工作點
+	===================================*)
+	900:
+		IF ReadSQLData.Get_X_NextPos(Last_Pos) THEN
+			step := step + 1;
+		END_IF
+		
+	901:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	902:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	903:
+		Last_Pos := ReadSQLData.fNext_XPos;
+		
+		_debug_X_NextPos[_debug_X_NextPos_count] := Last_Pos;
+		_debug_X_NextPos_count := _debug_X_NextPos_count + 1;
+		
+		step := step + 1;
+		
+	904:
+		IF Last_Pos = -1 THEN
+			step := 906;
+		ELSE
+			step := step + 1;
+		END_IF
+		
+	905:
+		step := 910;
+		
+	906:
+		GroupB.ToStanby(Speed:= SpdC.HighSpeed);
+		step := step + 1;
+		
+	907:
+		IF GroupB.StepA.bBuzy OR GroupB.StepA.bError THEN
+			step := step + 1;
+		END_IF
+		
+	908:
+		IF GroupB.StepA.bDone THEN
+			step := step + 1;
+		ELSIF GroupB.StepA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	909:
+		step := 1000;
+		
+(*	==========================================
+				取得區間的打標工作
+	==========================================*)
+	910:
+		ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 1);
+		step := step + 1;
+		
+	911:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	912:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	913:
+		step := 920;
+
+(*	==========================================
+			設定各軸組 並 預移到打標點
+	==========================================*)
+	920: // 設定 各軸組 X參考座標
+		GroupA.Set_X_Ref(Value := Last_Pos);
+		GroupB.Set_X_Ref(Value := Last_Pos);
+		GroupC.Set_X_Ref(Value := Last_Pos);
+		GroupD.Set_X_Ref(Value := Last_Pos);
+		step := step + 1;
+		
+	921:
+		GroupA.ReadyToPrint := FALSE;
+		GroupB.ReadyToPrint := FALSE;
+		GroupC.ReadyToPrint := FALSE;
+		GroupD.ReadyToPrint := FALSE;
+		
+		GroupA.ReadyToMove := FALSE;
+		GroupB.ReadyToMove := FALSE;
+		GroupC.ReadyToMove := FALSE;
+		GroupD.ReadyToMove := FALSE;
+		step := step + 1;
+		
+
+	
+	922: // 載入區域工作內容 + 預移動開始
+		GroupA.Do_WorkList();
+		GroupB.Do_WorkList();
+		GroupC.Do_WorkList();
+		GroupD.Do_WorkList();
+		step := step + 1;
+		
+	923:
+		IF (GroupA.bBuzy OR GroupA.bError OR ProjectData.Now_Steel_Payload_A_DataNumber = 0) AND
+			(GroupB.bBuzy OR GroupB.bError OR ProjectData.Now_Steel_Payload_B_DataNumber = 0) AND
+			(GroupC.bBuzy OR GroupC.bError OR ProjectData.Now_Steel_Payload_C_DataNumber = 0) AND
+			(GroupD.bBuzy OR GroupD.bError OR ProjectData.Now_Steel_Payload_D_DataNumber = 0) THEN
+				step := step + 1;
+		END_IF
+		
+	924:
+		step := 930;
+		
+(*	===================================
+			判斷是否走快到結尾
+			如果是則交換編碼器
+	===================================*)
+	930: // 判斷是否走快到結尾
+		IF (Last_Pos + 1100) > ProjectData.Now_Steel.Length AND NOT GroupFx.b_AC_Clamp THEN
+			IF Fx.fPos < 1000 THEN
+				// 料還沒到 前端
+				step := step + 1;
+			ELSE
+				// 料已超過 前端
+				step := 935;
+			END_IF
+		ELSE
+			step := 950;
+		END_IF
+		
+		
+	931:
+		SensorTest.MovePos[0] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[1] := FxA_Exp_Pos;
+		SensorTest.MovePos[2] := FxB_Exp_Pos;
+		
+		GroupFx.Fx_Move(1000);
+		step := step + 1;
+		
+	932:
+		IF (GroupFx.bBuzy OR GroupFx.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	933:
+		IF GroupFx.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	934:
+		step := 935;
+		
+	935:
+		SensorTest.MovePos[4] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[5] := FxA_Exp_Pos;
+		SensorTest.MovePos[6] := FxB_Exp_Pos;
+		
+		GroupFx.Fx_Set_A_Enc();
+		GroupB.ToStanby(Speed:= SpdC.HighSpeed);
+		step := step + 1;
+		
+	936:
+		IF (GroupFx.bBuzy OR GroupFx.bError) AND 
+			(GroupB.StepA.bBuzy OR GroupB.StepA.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	937:
+		IF GroupFx.bDone AND GroupB.StepA.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.bError OR GroupB.StepA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	938:
+		step := 940;
+(*	===================================
+				BD夾 換 AC夾
+	===================================*)
+	940:
+		SensorTest.MovePos[7] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[8] := FxA_Exp_Pos;
+		SensorTest.MovePos[9] := FxB_Exp_Pos;
+	
+		GroupFx.AC_Clamp();
+		GroupFx.B_UnPress();
+		GroupFx.D_UnPress();
+		step := step + 1;
+		
+	941:
+		IF (GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError) AND
+			(GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+			 (GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	942:
+		IF GroupFx.step_AC_C.bDone AND GroupFx.step_B_P.bDone AND GroupFx.step_D_P.bDone  THEN
+			step := step + 1;
+		ELSIF GroupFx.step_AC_C.bError OR GroupFx.step_B_P.bError OR GroupFx.step_D_P.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	943:
+		tmr01.PT := T#1S;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	944:
+		SensorTest.MovePos[10] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[11] := FxA_Exp_Pos;
+		SensorTest.MovePos[12] := FxB_Exp_Pos;
+	
+		GroupFx.BD_UnClamp(20);
+		GroupFx.A_Press();
+		GroupFx.C_Press();
+		step := step + 1;
+		
+	945:
+		IF (GroupFx.step_BD_C.bBuzy OR GroupFx.step_BD_C.bError) AND
+			(GroupFx.step_A_P.bBuzy OR GroupFx.step_A_P.bError) AND
+			 (GroupFx.step_C_P.bBuzy OR GroupFx.step_C_P.bError)  THEN
+			step := step + 1;
+		END_IF
+		
+	946:
+		IF GroupFx.step_BD_C.bDone THEN
+			GroupFx.B_Press();
+			GroupFx.D_Press();
+			step := step + 1;
+		ELSIF GroupFx.step_BD_C.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	947:
+		IF (GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND (GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError)  THEN
+			step := step + 1;
+		END_IF
+		
+	948:
+		IF GroupFx.step_A_P.bDone AND GroupFx.step_B_P.bDone AND GroupFx.step_C_P.bDone AND GroupFx.step_D_P.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_A_P.bError OR GroupFx.step_B_P.bError OR GroupFx.step_C_P.bError OR GroupFx.step_D_P.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	949:
+		step := 950;
+		
+	950:
+		GbZ.AbsMove(GroupB_Now_Z, spdc.HomeSpeed);
+		step := step + 1;
+		
+	951:
+		IF (GbZ.bBuzy OR GbZ.bError)  THEN
+			step := step + 1;
+		END_IF
+		
+	952:
+		step := 970;
+(*	===================================
+				Fx 前往 X工作點
+	===================================*)
+	970:
+		SensorTest.MovePos[13] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[14] := FxA_Exp_Pos;
+		SensorTest.MovePos[15] := FxB_Exp_Pos;
+		
+		GroupFx.Fx_Move(Last_Pos);
+		step := step + 1;
+		
+	971:
+		IF (GroupFx.bBuzy OR GroupFx.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	972:
+		IF GroupFx.bDone AND GbZ.bDone THEN
+			step := step + 1;
+		ELSIF GroupFx.bError AND GbZ.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	973:
+		SensorTest.MovePos[17] := Sensor.sensor_test_pos;
+		SensorTest.MovePos[18] := FxA_Exp_Pos;
+		SensorTest.MovePos[19] := FxB_Exp_Pos;
+		step := 980;
+		
+(*	===================================
+		原測高動作，小隻的料不做
+	===================================*)
+
+		
+(*	=============================================
+				開始各組區域打標
+	=============================================*)
+	980: 
+		tmr01.PT := T#1S;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	981:
+		GroupA.ReadyToMove := TRUE;
+		GroupB.ReadyToMove := TRUE;
+		GroupC.ReadyToMove := TRUE;
+		GroupD.ReadyToMove := TRUE;
+		GroupA.ReadyToPrint := TRUE;
+		GroupB.ReadyToPrint := TRUE;
+		GroupC.ReadyToPrint := TRUE;
+		GroupD.ReadyToPrint := TRUE;
+		step := step + 1;
+		
+	982:
+		IF GroupA.bDone AND GroupB.bDone AND GroupC.bDone AND GroupD.bDone THEN
+			step := step + 1;
+		ELSIF GroupA.bError OR GroupB.bError OR GroupC.bError OR GroupD.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	983:
+		step := 990;
+		
+	
+	990:
+		step := 900;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_1000_AutoPrgEnd" Id="{d4a54de3-d318-4b44-9a1a-75a485fce4e2}" FolderPath="自動流程500_1000\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	1000:
+		uRunCounter := uRunCounter + 1;
+		GroupA.Oil();
+		GroupB.Oil();
+		GroupC.Oil();
+		GroupD.Oil();
+		ReadSQLData.Set_Steel_Finish(uid := ProjectData.Now_Steel.uid);
+		step := step + 1;
+		
+	1001:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1002:
+		IF ReadSQLData.bDone OR ReadSQLData.bError THEN
+			ProjectData.WorkOrder_Now.steel_id := '';
+			step := step + 1;
+		END_IF
+		
+	1003:
+		step := 1010;
+		
+
+	1010:
+		ReadSQLData.Get_Steel_Num_On_Wait();
+		
+		GroupA.ToStanby(spdc.HighSpeed);
+		GroupB.ToStanby(spdc.HighSpeed);
+		GroupC.ToStanby(spdc.HighSpeed);
+		GroupD.ToStanby(spdc.HighSpeed);
+		
+		IF (fx.fPos < 1800) THEN
+			GroupFx.Fx_Move(1800);
+		ELSE
+			fx.Stop();
+		END_IF
+		
+		step := step + 1;
+		
+	1011:
+		IF (GroupA.StepA.bBuzy OR GroupA.StepA.bError) AND 
+			(GroupB.StepA.bBuzy OR GroupB.StepA.bError) AND
+			(GroupC.StepA.bBuzy OR GroupC.StepA.bError) AND
+			(GroupD.StepA.bBuzy OR GroupD.StepA.bError) AND
+			(GroupFx.bBuzy OR GroupFx.bError OR fx.fPos >= 1800) THEN
+				step := step + 1;
+		END_IF
+		
+	1012:
+		IF GroupB.StepA.bDone AND (GroupFx.bDone OR fx.fPos >= 1800) THEN
+			step := step + 1;
+		ELSIF GroupA.StepA.bError OR GroupB.StepA.bError OR GroupC.StepA.bError OR GroupD.StepA.bError OR GroupFx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1013:
+		
+		step := 1020;
+		
+	1020:
+		GroupFx.A_UnPress();
+		GroupFx.B_UnPress();
+		GroupFx.C_UnPress();
+		GroupFx.D_UnPress();
+		step := step + 1;
+		
+	1021:
+		IF (GroupFx.step_A_P.bBuzy OR GroupFx.step_A_P.bError) AND
+			(GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+			(GroupFx.step_C_P.bBuzy OR GroupFx.step_C_P.bError) AND
+			(GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	1022:
+		tmr01.PT:= T#2S;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+// 		IF GroupFx.step_A_P.bDone AND 
+// 			GroupFx.step_B_P.bDone AND 
+// 			GroupFx.step_C_P.bDone AND 
+// 			GroupFx.step_D_P.bDone THEN
+// 				step := step + 1;
+// 		ELSIF GroupFx.step_A_P.bError AND 
+// 			GroupFx.step_B_P.bError AND 
+// 			GroupFx.step_C_P.bError AND 
+// 			GroupFx.step_D_P.bError THEN
+// 				step := step + 10000;
+// 		END_IF
+		
+	1023:
+		step := 1030;
+		
+		
+	1030:
+		GroupFx.AC_UnClamp(10);
+		GroupFx.BD_UnClamp(10);
+		step := step + 1;
+		
+	1031:
+		IF (GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError) AND
+			(GroupFx.step_BD_C.bBuzy OR GroupFx.step_BD_C.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	1032:
+		tmr01.PT := T#2S;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	1033:
+		IF ReadSQLData.bDone OR ReadSQLData.bError THEN
+			step := 1040;
+		END_IF
+		
+	1040:
+		ExpConver.OutRollerStart();
+		step := step + 1;
+		
+	1041:
+		IF ExpConver.Out_Moter_Running THEN
+			step := step + 1;
+		END_IF
+		
+	1042:
+		IF ProjectData.Now_Steel.Length < 11000 THEN
+			tmr01.PT := T#2S;
+		ELSE
+			tmr01.PT := T#0.5S;
+		END_IF
+		tmr01.IN := NOT io.i709;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	1043:
+		ExpConver.OutRollerStop();
+		step := step + 1;
+		
+	1044:
+		IF NOT ExpConver.Out_Moter_Running THEN
+			step := step + 1;
+		END_IF
+		
+	1045:
+		step := 1050;
+		
+		
+		
+	1050:
+		IF ReadSQLData.bDone OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1051:
+		IF ProjectData.WorkOrder_Num_On_Wait > 0 THEN
+			step := step + 1;
+		ELSE
+			step := 1090;
+		END_IF
+		
+	1052:	
+		IF NOT ExpConver.Feed_bBuzy THEN
+			ExpConver.FeedAutoStart();
+			Hmi_Web.Auto_Start := FALSE;
+			step := step + 1;
+		END_IF
+		
+	1053:
+		IF ExpConver.Feed_bBuzy OR ExpConver.Feed_bError THEN
+			step := step + 1;
+		END_IF
+		
+	1054:
+		IF ExpConver.Feed_bDone THEN
+			step := step + 1;
+		ELSIF ExpConver.Feed_bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1055:
+		step := 1060;
+
+
+(*	========================================
+			讀取資料庫 取得排程資料
+	========================================*)
+	1060:
+		ReadSQLData.Get_WorkkOrder();
+		step := step + 1;
+			
+	1061:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+			
+	1062:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1063:
+		IF LEN(STR:=ProjectData.WorkOrder_inSide.steel_id) > 0 THEN
+			// 已經有 料的狀態 是 在輸送滾輪上(inSide)
+			ProjectData.WorkOrder_Now := ProjectData.WorkOrder_inSide;
+			step := 1070;
+		ELSE
+			// 沒有 料的狀態 是 在輸送滾輪上(inSide)
+			step := 1090;
+		END_IF
+		
+
+(*	========================================
+				有進料完成的料
+	========================================*)
+	1070:
+		ReadSQLData.Get_SteelData(ProjectData.WorkOrder_Now.steel_id);
+		step := step + 1;
+			
+	1071:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1072:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1073:
+		
+		step := 600;
+		
+		
+	1090:
+		GroupFx.AC_UnClamp();
+		GroupFx.BD_UnClamp();
+		step := step + 1;
+		
+	1091:
+		IF (GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError) AND
+			(GroupFx.step_BD_C.bBuzy OR GroupFx.step_BD_C.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	1092:
+		tmr01.PT := T#2S;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	1093:
+		step := 0;
+		
+	step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7000_test_mask_A" Id="{9c11a767-a79b-4d55-b953-b21e0bc4b4a0}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	7000:
+		iCount := 1;
+		fPointStart[1] := GaX.Pos;
+		fPointStart[2] := GaY.Pos;
+		step := 7010;
+		
+	7010:// 載入DXF專案
+		LaserMark.laserA.Load_Project('test');
+		step := step + 1;
+		
+	7011:
+		IF LaserMark.laserA.bBuzy OR LaserMark.laserA.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7012:
+		IF LaserMark.laserA.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7013:
+		step := 7020;
+		
+	7020: // 移X軸
+		GaX.RelMove(80,80);
+// 		GaX.RelMove(fPoint[iCount,1],80);
+// 		GaY.RelMove(fPoint[iCount,2],80);
+// 		LaserMark.laserA.Edit_Object(name := 'dxf', Content := sFilename[iCount]);
+		step := step + 1;
+		
+	7021:
+// 		IF (GaX.bBuzy OR GaX.bError) AND (GaY.bBuzy OR GaY.bError) AND (LaserMark.laserA.bBuzy OR LaserMark.laserA.bError) THEN
+// 			step := step + 1;
+// 		END_IF
+		IF (GaX.bBuzy OR GaX.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7022:
+		IF GaX.bDone THEN
+			step := step + 1;
+		ELSIF GaX.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7023:
+		step := 7030;
+		
+	7030: // 換置 DXF檔案
+// 		step := step + 1;
+		step := 7035;
+		
+// 	7031:
+// 		IF LaserMark.laserA.bDone THEN
+// 			step := step + 1;
+// 		ELSIF LaserMark.laserA.bError THEN
+// 			step := step + 10000;
+// 		END_IF
+// 		
+// 	7032:
+// 		tmr01.IN := TRUE;
+// 		tmr01.PT := T#500MS;
+// 		IF tmr01.Q THEN
+// 			tmr01.IN := FALSE;
+// 			step := step + 1;
+// 		END_IF
+// 		
+// 	7033:
+// 		step := 7035;
+		
+		
+	7035: // 打雷射
+		LaserMark.laserA.Mark();
+		step := step + 1;
+		
+	7036:
+		IF LaserMark.laserA.bBuzy OR LaserMark.laserA.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7037:
+		IF LaserMark.laserA.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7038:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7039:
+		step := 7040;
+		
+	7040:
+		IF iCount < 4 THEN
+			iCount := iCount + 1;
+			step := 7020;
+		ELSE
+			iCount := 1;
+			step := step + 1;
+		END_IF
+		
+	7041:
+		GaX.AbsMove(fPointStart[1],80);
+		GaY.AbsMove(fPointStart[2],80);
+		step := step + 1;
+		
+	7042:
+		IF (GaX.bBuzy OR GaX.bError) AND (GaY.bBuzy OR GaY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7043:
+		IF GaX.bDone AND GaY.bDone THEN
+			step := step + 1;
+		ELSIF GaX.bError OR GaY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7044:
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7100_test_mask_A_1" Id="{5fd6c699-8423-4243-9463-d08b5464c75f}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[
+CASE step OF
+	7100:
+		iCount := 1;
+		fPointStart[1] := GaX.Pos;
+		fPointStart[2] := GaY.Pos;
+		step := step + 1;
+		
+	7101:
+		GroupA.FindZ_Fast();
+		step := step + 1;
+		
+	7102:
+		IF (GroupA.StepA.bBuzy OR GroupA.StepA.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7103:
+		IF GroupA.StepA.bDone THEN
+			step := step + 1;
+		ELSIF GroupA.StepA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7104:
+		step := 7120;
+		
+	7120: // 移X軸
+		GaX.RelMove(fPoint2[iCount,1],80);
+		GaY.RelMove(fPoint2[iCount,2],80);
+		step := step + 1;
+		
+	7121:
+		IF (GaX.bBuzy OR GaX.bError) AND (GaY.bBuzy OR GaY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7122:
+		IF GaX.bDone AND GaY.bDone THEN
+			step := step + 1;
+		ELSIF GaX.bError OR GaY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7123:
+		step := 7130;
+		
+		
+	7130: // 打雷射
+		LaserMark.laserA.Mark();
+		step := step + 1;
+		
+	7131:
+		IF LaserMark.laserA.bBuzy OR LaserMark.laserA.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7132:
+		IF LaserMark.laserA.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7133:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7134:
+		step := 7140;
+		
+	7140:
+		IF iCount < 4 THEN
+			iCount := iCount + 1;
+			step := 7120;
+		ELSE
+			iCount := iCount + 1;
+			step := step + 1;
+		END_IF
+		
+	7141:
+		GaX.AbsMove(fPointStart[1] + 5,80);
+		GaY.AbsMove(fPointStart[2] + 5,80);
+		step := step + 1;
+		
+	7142:
+		IF (GaX.bBuzy OR GaX.bError) AND (GaY.bBuzy OR GaY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7143:
+		IF GaX.bDone AND GaY.bDone THEN
+			step := step + 1;
+		ELSIF GaX.bError OR GaY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7144:
+		iCount := 0;
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7200_test_mask_B" Id="{4c61de62-fb3a-448e-87a0-699fa1e97c12}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	7000:
+		iCount := 1;
+		fPointStart[1] := GaX.Pos;
+		fPointStart[2] := GaY.Pos;
+		step := 7010;
+		
+	7010:// 載入DXF專案
+		LaserMark.laserA.Load_Project('dxf');
+		step := step + 1;
+		
+	7011:
+		IF LaserMark.laserA.bBuzy OR LaserMark.laserA.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7012:
+		IF LaserMark.laserA.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7013:
+		step := 7020;
+		
+	7020: // 移X軸
+		GaX.RelMove(fPoint[iCount,1],80);
+		GaY.RelMove(fPoint[iCount,2],80);
+		LaserMark.laserA.Edit_Object(Name := 'dxf', Content := sFilename[iCount]);
+		step := step + 1;
+		
+	7021:
+		IF (GaX.bBuzy OR GaX.bError) AND (GaY.bBuzy OR GaY.bError) AND (LaserMark.laserA.bBuzy OR LaserMark.laserA.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7022:
+		IF GaX.bDone AND GaY.bDone THEN
+			step := step + 1;
+		ELSIF GaX.bError OR GaY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7023:
+		step := 7030;
+		
+	7030: // 換置 DXF檔案
+		step := step + 1;
+		
+	7031:
+		IF LaserMark.laserA.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7032:
+		tmr01.IN := TRUE;
+		tmr01.PT := T#500MS;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := 7035;
+		END_IF
+		
+		
+	7035: // 打雷射
+		LaserMark.laserA.Mark();
+		step := step + 1;
+		
+	7036:
+		IF LaserMark.laserA.bBuzy OR LaserMark.laserA.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7037:
+		IF LaserMark.laserA.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7038:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7039:
+		step := 7040;
+		
+	7040:
+		IF iCount < 9 THEN
+			iCount := iCount + 1;
+			step := 7020;
+		ELSE
+			iCount := 1;
+			step := step + 1;
+		END_IF
+		
+	7041:
+		GaX.AbsMove(fPointStart[1],80);
+		GaY.AbsMove(fPointStart[2],80);
+		step := step + 1;
+		
+	7042:
+		IF (GaX.bBuzy OR GaX.bError) AND (GaY.bBuzy OR GaY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7043:
+		IF GaX.bDone AND GaY.bDone THEN
+			step := step + 1;
+		ELSIF GaX.bError OR GaY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7044:
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7300_test_mask_B_1" Id="{8d03264d-5885-47fe-a0e0-a32c6f133f5b}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[
+CASE step OF
+	7200:
+		iCount := 1;
+		fPointStart[1] := GaX.Pos;
+		fPointStart[2] := GaY.Pos;
+		step := 7220;
+		
+	7220: // 移X軸
+		GaX.RelMove(fPoint2[iCount,1],80);
+		GaY.RelMove(fPoint2[iCount,2],80);
+		step := step + 1;
+		
+	7221:
+		IF (GaX.bBuzy OR GaX.bError) AND (GaY.bBuzy OR GaY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7222:
+		IF GaX.bDone AND GaY.bDone THEN
+			step := step + 1;
+		ELSIF GaX.bError OR GaY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7223:
+		step := 7230;
+		
+		
+	7230: // 打雷射
+		LaserMark.laserA.Mark();
+		step := step + 1;
+		
+	7231:
+		IF LaserMark.laserA.bBuzy OR LaserMark.laserA.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7232:
+		IF LaserMark.laserA.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserA.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7233:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7234:
+		step := 7240;
+		
+	7240:
+		IF iCount < 4 THEN
+			iCount := iCount + 1;
+			step := 7220;
+		ELSE
+			
+			iCount := iCount + 1;
+			step := step + 1;
+		END_IF
+		
+	7241:
+		GaX.AbsMove(fPointStart[1],80);
+		GaY.AbsMove(fPointStart[2],80);
+		step := step + 1;
+		
+	7242:
+		IF (GaX.bBuzy OR GaX.bError) AND (GaY.bBuzy OR GaY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7243:
+		IF GaX.bDone AND GaY.bDone THEN
+			step := step + 1;
+		ELSIF GaX.bError OR GaY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7244:
+		iCount := 0;
+		step := 0;
+
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7400_test_mask_C" Id="{fc0c6fda-73e2-41af-9fc9-5032d411c6d4}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	7400:
+		iCount := 1;
+		fPointStart[1] := GcX.Pos;
+		fPointStart[2] := GcY.Pos;
+		step := 7410;
+		
+	7410:// 載入DXF專案
+		LaserMark.laserC.Load_Project('dxf');
+		step := step + 1;
+		
+	7411:
+		IF LaserMark.laserC.bBuzy OR LaserMark.laserC.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7412:
+		IF LaserMark.laserC.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserC.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7413:
+		step := 7420;
+		
+	7420: // 移X軸
+		GcX.RelMove(fPoint[iCount,1],80);
+		GcY.RelMove(fPoint[iCount,2],80);
+		LaserMark.laserC.Edit_Object(Name := 'dxf', Content := sFilename[iCount]);
+		step := step + 1;
+		
+	7421:
+		IF (GcX.bBuzy OR GcX.bError) AND (GcY.bBuzy OR GcY.bError) AND (LaserMark.laserC.bBuzy OR LaserMark.laserC.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7422:
+		IF GcX.bDone AND GcY.bDone THEN
+			step := step + 1;
+		ELSIF GcX.bError OR GcY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7423:
+		step := 7430;
+		
+	7430: // 換置 DXF檔案
+		step := step + 1;
+		
+	7431:
+		IF LaserMark.laserC.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserC.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7432:
+		tmr01.IN := TRUE;
+		tmr01.PT := T#500MS;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := 7435;
+		END_IF
+		
+		
+	7435: // 打雷射
+		LaserMark.laserC.Mark();
+		step := step + 1;
+		
+	7436:
+		IF LaserMark.laserC.bBuzy OR LaserMark.laserC.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7437:
+		IF LaserMark.laserC.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserC.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7438:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7439:
+		step := 7440;
+		
+	7440:
+		IF iCount < 9 THEN
+			iCount := iCount + 1;
+			step := 7420;
+		ELSE
+			iCount := 1;
+			step := step + 1;
+		END_IF
+		
+	7441:
+		GcX.AbsMove(fPointStart[1],80);
+		GcY.AbsMove(fPointStart[2],80);
+		step := step + 1;
+		
+	7442:
+		IF (GcX.bBuzy OR GcX.bError) AND (GcY.bBuzy OR GcY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7443:
+		IF GcX.bDone AND GcY.bDone THEN
+			step := step + 1;
+		ELSIF GcX.bError OR GcY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7444:
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7500_test_mask_C_1" Id="{157bc15f-5e02-418c-931b-18c000d4256a}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[
+CASE step OF
+	7500:
+		iCount := 1;
+		fPointStart[1] := GcX.Pos;
+		fPointStart[2] := GcY.Pos;
+		step := 7520;
+		
+	7520: // 移X軸
+		GcX.RelMove(fPoint2[iCount,1],80);
+		GcY.RelMove(fPoint2[iCount,2],80);
+		step := step + 1;
+		
+	7521:
+		IF (GcX.bBuzy OR GcX.bError) AND (GcY.bBuzy OR GcY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7522:
+		IF GcX.bDone AND GcY.bDone THEN
+			step := step + 1;
+		ELSIF GcX.bError OR GcY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7523:
+		step := 7530;
+		
+		
+	7530: // 打雷射
+		LaserMark.laserC.Mark();
+		step := step + 1;
+		
+	7531:
+		IF LaserMark.laserC.bBuzy OR LaserMark.laserC.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7532:
+		IF LaserMark.laserC.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserC.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7533:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7534:
+		step := 7540;
+		
+	7540:
+		IF iCount < 4 THEN
+			iCount := iCount + 1;
+			step := 7520;
+		ELSE
+			
+			iCount := iCount + 1;
+			step := step + 1;
+		END_IF
+		
+	7541:
+		GcX.AbsMove(fPointStart[1],80);
+		GcY.AbsMove(fPointStart[2],80);
+		step := step + 1;
+		
+	7542:
+		IF (GcX.bBuzy OR GcX.bError) AND (GcY.bBuzy OR GcY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7543:
+		IF GcX.bDone AND GcY.bDone THEN
+			step := step + 1;
+		ELSIF GcX.bError OR GcY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7544:
+		iCount := 0;
+		step := 8010;
+
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7600_test_mask_D" Id="{0b9c3ef3-9254-45dc-bc49-5cb485e2f771}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	7600:
+		iCount := 1;
+		fPointStart[1] := GdX.Pos;
+		fPointStart[2] := GdY.Pos;
+		step := 7610;
+		
+	7610:// 載入DXF專案
+		LaserMark.laserD.Load_Project('dxf');
+		step := step + 1;
+		
+	7611:
+		IF LaserMark.laserD.bBuzy OR LaserMark.laserD.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7612:
+		IF LaserMark.laserD.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserD.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7613:
+		step := 7620;
+		
+	7620: // 移X軸
+		GdX.RelMove(fPoint[iCount,1],80);
+		GdY.RelMove(fPoint[iCount,2],80);
+		LaserMark.laserD.Edit_Object(Name := 'dxf', Content := sFilename[iCount]);
+		step := step + 1;
+		
+	7621:
+		IF (GdX.bBuzy OR GdX.bError) AND (GdY.bBuzy OR GdY.bError) AND (LaserMark.laserD.bBuzy OR LaserMark.laserD.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7622:
+		IF GdX.bDone AND GdY.bDone THEN
+			step := step + 1;
+		ELSIF GdX.bError OR GdY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7623:
+		step := 7630;
+		
+	7630: // 換置 DXF檔案
+		step := step + 1;
+		
+	7631:
+		IF LaserMark.laserD.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserD.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7632:
+		tmr01.IN := TRUE;
+		tmr01.PT := T#500MS;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := 7635;
+		END_IF
+		
+		
+	7635: // 打雷射
+		LaserMark.laserD.Mark();
+		step := step + 1;
+		
+	7636:
+		IF LaserMark.laserD.bBuzy OR LaserMark.laserD.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7637:
+		IF LaserMark.laserD.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserD.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7638:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7639:
+		step := 7640;
+		
+	7640:
+		IF iCount < 9 THEN
+			iCount := iCount + 1;
+			step := 7620;
+		ELSE
+			iCount := 1;
+			step := step + 1;
+		END_IF
+		
+	7641:
+		GdX.AbsMove(fPointStart[1],80);
+		GdY.AbsMove(fPointStart[2],80);
+		step := step + 1;
+		
+	7642:
+		IF (GdX.bBuzy OR GdX.bError) AND (GdY.bBuzy OR GdY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7643:
+		IF GdX.bDone AND GdY.bDone THEN
+			step := step + 1;
+		ELSIF GdX.bError OR GdY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7644:
+		step := 0;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7700_test_mask_D_1" Id="{ed775e26-4708-4de8-8dbb-4ec7681b81d3}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	7700:
+		iCount := 1;
+		fPointStart[1] := GdX.Pos;
+		fPointStart[2] := GdY.Pos;
+		step := 7720;
+		
+	7720: // 移X軸
+		GdX.RelMove(fPoint2[iCount,1],80);
+		GdY.RelMove(fPoint2[iCount,2],80);
+		step := step + 1;
+		
+	7721:
+		IF (GdX.bBuzy OR GdX.bError) AND (GdY.bBuzy OR GdY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7722:
+		IF GdX.bDone AND GdY.bDone THEN
+			step := step + 1;
+		ELSIF GdX.bError OR GdY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7723:
+		step := 7730;
+		
+		
+	7730: // 打雷射
+		LaserMark.laserD.Mark();
+		step := step + 1;
+		
+	7731:
+		IF LaserMark.laserD.bBuzy OR LaserMark.laserD.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7732:
+		IF LaserMark.laserD.bDone THEN
+			step := step + 1;
+		ELSIF LaserMark.laserD.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7733:
+		tmr01.PT := T#500MS;
+		tmr01.IN := TRUE;
+		IF tmr01.Q THEN
+			tmr01.IN := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7734:
+		step := 7740;
+		
+	7740:
+		IF iCount < 4 THEN
+			iCount := iCount + 1;
+			step := 7720;
+		ELSE
+			
+			iCount := iCount + 1;
+			step := step + 1;
+		END_IF
+		
+	7741:
+		GdX.AbsMove(fPointStart[1] - 5, 80);
+		GdY.AbsMove(fPointStart[2] + 5, 80);
+		step := step + 1;
+		
+	7742:
+		IF (GdX.bBuzy OR GdX.bError) AND (GdY.bBuzy OR GdY.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	7743:
+		IF GdX.bDone AND GdY.bDone THEN
+			step := step + 1;
+		ELSIF GdX.bError OR GdY.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7744:
+		iCount := 0;
+		step := 8010;
+
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7800_FindZ" Id="{78554766-b253-4c2b-86e4-fe4f195d427b}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[CASE step OF
+	7800: // 設定 工件大小
+		ProjectData.Now_Steel.Height	:= 400;
+		ProjectData.Now_Steel.Width		:= 200;
+		
+	7801: // 設定 各軸組 X參考座標
+		GroupA.Set_X_Ref(Value := Last_Pos);
+		GroupB.Set_X_Ref(Value := Last_Pos);
+		GroupC.Set_X_Ref(Value := Last_Pos);
+		GroupD.Set_X_Ref(Value := Last_Pos);
+		step := step + 1;
+		
+	7802: // 設定 各軸組 X參考座標
+		GroupA.Set_Y_Ref(Value := MaCfg.laserA_Y_ReferencePos - ProjectData.Now_Steel.Width);
+		GroupB.Set_Y_Ref(Value := MaCfg.laserB_Y_ReferencePos - ProjectData.Now_Steel.Height);
+		GroupC.Set_Y_Ref(Value := MaCfg.laserC_Y_ReferencePos);
+		GroupD.Set_Y_Ref(Value := MaCfg.laserD_Y_ReferencePos);
+		step := step + 1;
+		
+	7810:
+		GroupB.FindZ();
+		GroupC.FindZ();
+		GroupD.FindZ();
+		step := step + 1;
+		
+	7811:
+		IF 	(GroupB.StepA.bBuzy OR GroupB.StepA.bError) AND
+			(GroupC.StepA.bBuzy OR GroupC.StepA.bError) AND
+			(GroupD.StepA.bBuzy OR GroupD.StepA.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	7812:
+		IF 	(GroupB.StepA.bDone) AND
+			(GroupC.StepA.bDone) AND 
+			(GroupD.StepA.bDone) THEN
+				GroupB_Now_Z := GroupB.Az.Pos;	// 記錄軸組B的雷射距離，小於200的料使用
+			 	step := step + 1;
+		ELSIF 
+			(GroupB.StepA.bError) OR 
+			(GroupC.StepA.bError) OR 
+			(GroupD.StepA.bError) THEN
+				step := step + 10000;
+		END_IF
+		
+	7813:
+		GroupA.FindZ();
+		
+		step := step + 1;
+		
+	7814:
+		IF 	(GroupA.StepA.bBuzy OR GroupA.StepA.bError) THEN
+				step := step + 1;
+		END_IF
+		
+	7815:
+		IF 	(GroupA.StepA.bDone) THEN
+			step := step + 1;
+		ELSIF 
+			(GroupA.StepA.bError) THEN
+				step := step + 10000;
+		END_IF
+		
+	7820:
+		GroupA.XY_Move_Ref(0, (ProjectData.Now_Steel.Width / 2), 50);
+		GroupB.XY_Move_Ref(0, (ProjectData.Now_Steel.Height / 2), 50);
+		GroupC.XY_Move_Ref(0, (ProjectData.Now_Steel.Width / 2), 50);
+		GroupD.XY_Move_Ref(0, (ProjectData.Now_Steel.Height / 2), 50);
+		step := step + 1;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_7900_SensorTest" Id="{2a2185c3-79fd-40b1-a47d-319d15089cdf}" FolderPath="測試用區域\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group A X軸 Jog模式
+  ====================================*) 
+hmi.Jog_move_to_bBuzy := step > 7900 AND step < 7920;
+
+IF hmi.Jog_move_to_bBuzy THEN
+	hmi.Jog_move_to_bDone := FALSE;
+END_IF
+  
+CASE step OF
+
+	7900:
+		IF hmi.Jog_move_to_start THEN
+			hmi.Jog_move_to_start := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7901:
+		FOR SensorTest.posCount := 0 TO 49 DO
+			SensorTest.MovePos[SensorTest.posCount] := (SensorTest.posCount + 1) * 220;
+		END_FOR
+		SensorTest.MovePos[50] := 0;
+		step := step + 1;
+			
+	7902:
+		SensorTest.posCount := 0;
+		step := step + 1;
+		
+	7903:
+		IF hmi.Jog_move_to_start THEN
+			hmi.Jog_move_to_start := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7904:
+		step := 7909;
+		
+	7909:
+		IF SensorTest.posCount <= SensorTest.posCountMax THEN
+			hmi.Jog_move_to := SensorTest.MovePos[SensorTest.posCount];
+			step := 7910;
+		ELSE
+			step := 7900;
+		END_IF
+		
+		
+	7910:
+		Fx.AbsMove(hmi.Jog_move_to, 100);
+		step := step + 1;
+		
+	7911:
+		IF Fx.bBuzy OR Fx.bError THEN
+			step := step + 1;
+		END_IF
+		
+	7912:
+		IF Fx.bDone THEN
+			step := step + 1;
+		ELSIF Fx.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	7913:
+		tmr01.PT := T#5S;
+		tmr01.in := TRUE;
+		IF tmr01.Q THEN
+			tmr01.in := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7914:
+		step := 7920;
+		
+	7920:
+		hmi.Jog_move_to_bDone := TRUE;
+		step := step + 1;
+		
+	7921:
+		tmr01.PT := T#0.5S;
+		tmr01.in := TRUE;
+		IF tmr01.Q THEN
+			tmr01.in := FALSE;
+			step := step + 1;
+		END_IF
+	
+	7922:
+		IF NOT hmi.Jog_move_to_bDone THEN
+			SensorTest.posCount := SensorTest.posCount + 1;
+			step := 7909;
+		END_IF
+		
+		
+	7930:
+		axis.Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Set_counter_value := 10000;
+		axis.Encoder_FxB_PosEnc.MDP5001_511_Output.MDP5001_511_Set_counter_value := 10000;
+		step := step + 1;
+		
+	7931:
+		axis.Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := TRUE;
+		axis.Encoder_FxB_PosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := TRUE;
+		step := step + 1;
+		
+	7932:
+		IF axis.Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done AND
+			axis.Encoder_FxB_PosEnc.MDP5001_511_Input.MDP5001_511_Status.Set_counter_done THEN
+			step := step + 1;
+		END_IF
+		
+	7933:
+		axis.Encoder_FxB_ExPosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		axis.Encoder_FxB_PosEnc.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+		step := step + 1;
+		
+	7934:
+		Sensor.Set_SensoeZero := TRUE;
+		step := step + 1;
+		
+	7935:
+		IF ABS(Sensor.sensor_test_pos) < 2 THEN
+ 			Sensor.Set_SensoeZero := FALSE;
+			step := step + 1;
+		END_IF
+		
+	7936:
+		
+		step := 7900;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8000_Jog" Id="{c27e7acc-5ac3-4b59-9fa3-c17028cc9d68}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+				Jog模式
+  ====================================*) 
+IF (Hmi_Web.Auto_Start OR Hmi_Web.Auto_OneCycle_Start) AND step >= 8000 AND step < 9800 THEN
+	step := 9800;
+END_IF
+
+IF SystemError THEN
+	Hmi.Jog_X_P := FALSE;
+	Hmi.Jog_X_N := FALSE;
+	Hmi.Jog_Y_P := FALSE;
+	Hmi.Jog_Y_N := FALSE;
+	Hmi.Jog_Z_P := FALSE;
+	Hmi.Jog_Z_N := FALSE;
+END_IF
+
+IF step = 0 THEN
+	RETURN;
+END_IF
+
+step_8100_Jog_GroupA_X();
+step_8200_Jog_GroupA_Y();
+step_8300_Jog_GroupA_Z();
+
+step_8400_Jog_GroupB_X();
+step_8500_Jog_GroupB_Y();
+step_8600_Jog_GroupB_Z();
+
+step_8700_Jog_GroupC_X();
+step_8800_Jog_GroupC_Y();
+step_8900_Jog_GroupC_Z();
+
+step_9000_Jog_GroupD_X();
+step_9100_Jog_GroupD_Y();
+step_9200_Jog_GroupD_Z();
+step_9300_Jog_GroupFx_A();
+step_9400_Jog_GroupFx_B();
+
+step_9700_Jog_SetLimit();
+
+
+
+IF step < 9700 OR step >= 9800 THEN
+	IF Hmi.Jog_Set_GroupA THEN
+		Hmi.Jog_Set_GroupA := FALSE;
+		IF Hmi.Jog_GroupSelect <> 1 THEN
+			Hmi.Jog_GroupSelect := 1;
+		ELSE
+			Hmi.Jog_GroupSelect := 0;
+		END_IF
+		
+	ELSIF Hmi.Jog_Set_GroupB THEN
+		Hmi.Jog_Set_GroupB := FALSE;
+		IF Hmi.Jog_GroupSelect <> 2 THEN
+			Hmi.Jog_GroupSelect := 2;
+		ELSE
+			Hmi.Jog_GroupSelect := 0;
+		END_IF
+		
+	ELSIF Hmi.Jog_Set_GroupC THEN
+		Hmi.Jog_Set_GroupC := FALSE;
+		IF Hmi.Jog_GroupSelect <> 3 THEN
+			Hmi.Jog_GroupSelect := 3;
+		ELSE
+			Hmi.Jog_GroupSelect := 0;
+		END_IF	
+		
+	ELSIF Hmi.Jog_Set_GroupD THEN
+		Hmi.Jog_Set_GroupD := FALSE;
+		IF Hmi.Jog_GroupSelect <> 4 THEN
+			Hmi.Jog_GroupSelect := 4;
+		ELSE
+			Hmi.Jog_GroupSelect := 0;
+		END_IF	
+	END_IF
+END_IF
+
+
+
+
+
+CASE step OF
+	8000: // jog按鍵
+		fbWritePersistentData.START := FALSE;
+	
+		Hmi.Jog_Mode := FALSE;
+		Hmi.Mode_Select := 1;
+		
+		ExpConver.FeedJogStart();
+		
+		GaX.PowerOn();
+		GaY.PowerOn();
+		GaZ.PowerOn();
+		GbX.PowerOn();
+		GbY.PowerOn();
+		GbZ.PowerOn();
+		GcX.PowerOn();
+		GcY.PowerOn();
+		GcZ.PowerOn();
+		GdX.PowerOn();
+		GdY.PowerOn();
+		GdZ.PowerOn();
+		Fx.PowerOn();
+		step := step + 1;
+		
+	8001:
+		HMI.Mode_Select := 1;
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				// 按鍵JOG 
+				HMI.Jog_GroupSelect := 1;
+				IF Hmi.Jog_X_P THEN
+					step := 8100;
+				ELSIF Hmi.Jog_X_N THEN
+					step := 8150;
+				ELSIF Hmi.Jog_Y_P THEN
+					step := 8200;
+				ELSIF Hmi.Jog_Y_N THEN
+					step := 8250;
+				ELSIF Hmi.Jog_Z_P THEN
+					step := 8300;
+				ELSIF Hmi.Jog_Z_N THEN
+					step := 8350;
+				END_IF
+				
+			2:
+				// 按鍵JOG 
+				HMI.Jog_GroupSelect := 2;
+				IF Hmi.Jog_X_P THEN
+					step := 8400;
+				ELSIF Hmi.Jog_X_N THEN
+					step := 8450;
+				ELSIF Hmi.Jog_Y_P THEN
+					step := 8500;
+				ELSIF Hmi.Jog_Y_N THEN
+					step := 8550;
+				ELSIF Hmi.Jog_Z_P THEN
+					step := 8600;
+				ELSIF Hmi.Jog_Z_N THEN
+					step := 8650;
+				END_IF
+				
+			3:
+				// 按鍵JOG 
+				HMI.Jog_GroupSelect := 3;
+				IF Hmi.Jog_X_P THEN
+					step := 8700;
+				ELSIF Hmi.Jog_X_N THEN
+					step := 8750;
+				ELSIF Hmi.Jog_Y_P THEN
+					step := 8800;
+				ELSIF Hmi.Jog_Y_N THEN
+					step := 8850;
+				ELSIF Hmi.Jog_Z_P THEN
+					step := 8900;
+				ELSIF Hmi.Jog_Z_N THEN
+					step := 8950;
+				END_IF
+				
+			4:
+				// 按鍵JOG 
+				HMI.Jog_GroupSelect := 4;
+				IF Hmi.Jog_X_P THEN
+					step := 9000;
+				ELSIF Hmi.Jog_X_N THEN
+					step := 9050;
+				ELSIF Hmi.Jog_Y_P THEN
+					step := 9100;
+				ELSIF Hmi.Jog_Y_N THEN
+					step := 9150;
+				ELSIF Hmi.Jog_Z_P THEN
+					step := 9200;
+				ELSIF Hmi.Jog_Z_N THEN
+					step := 9250;
+				END_IF
+				
+			5:
+				// 按鍵JOG 
+				IF Hmi_Web.Jog_FxA.H_Close THEN
+					step := 9000;
+				ELSIF Hmi.Jog_X_N THEN
+					step := 9050;
+				ELSIF Hmi.Jog_Y_P THEN
+					step := 9100;
+				ELSIF Hmi.Jog_Y_N THEN
+					step := 9150;
+				ELSIF Hmi.Jog_Z_P THEN
+					step := 9200;
+				ELSIF Hmi.Jog_Z_N THEN
+					step := 9250;
+				END_IF
+				
+		END_CASE
+		
+		IF Hmi_Web.Jog_Ga.X_P THEN
+			step := 8100;
+		ELSIF Hmi_Web.Jog_Ga.X_N THEN
+			step := 8120;
+		ELSIF Hmi_Web.Jog_Ga.Y_P THEN
+			step := 8200;
+		ELSIF Hmi_Web.Jog_Ga.Y_N THEN
+			step := 8220;
+		ELSIF Hmi_Web.Jog_Ga.Z_P THEN
+			step := 8300;
+		ELSIF Hmi_Web.Jog_Ga.Z_N THEN
+			step := 8320;
+		ELSIF Hmi_Web.Jog_Gb.X_P THEN
+			step := 8400;
+		ELSIF Hmi_Web.Jog_Gb.X_N THEN
+			step := 8420;
+		ELSIF Hmi_Web.Jog_Gb.Y_P THEN
+			step := 8500;
+		ELSIF Hmi_Web.Jog_Gb.Y_N THEN
+			step := 8520;
+		ELSIF Hmi_Web.Jog_Gb.Z_P THEN
+			step := 8600;
+		ELSIF Hmi_Web.Jog_Gb.Z_N THEN
+			step := 8620;
+		ELSIF Hmi_Web.Jog_Gc.X_P THEN
+			step := 8700;
+		ELSIF Hmi_Web.Jog_Gc.X_N THEN
+			step := 8720;
+		ELSIF Hmi_Web.Jog_Gc.Y_P THEN
+			step := 8800;
+		ELSIF Hmi_Web.Jog_Gc.Y_N THEN
+			step := 8820;
+		ELSIF Hmi_Web.Jog_Gc.Z_P THEN
+			step := 8900;
+		ELSIF Hmi_Web.Jog_Gc.Z_N THEN
+			step := 8920;
+		ELSIF Hmi_Web.Jog_Gd.X_P THEN
+			step := 9000;
+		ELSIF Hmi_Web.Jog_Gd.X_N THEN
+			step := 9020;
+		ELSIF Hmi_Web.Jog_Gd.Y_P THEN
+			step := 9100;
+		ELSIF Hmi_Web.Jog_Gd.Y_N THEN
+			step := 9120;
+		ELSIF Hmi_Web.Jog_Gd.Z_P THEN
+			step := 9200;
+		ELSIF Hmi_Web.Jog_Gd.Z_N THEN
+			step := 9220;
+		ELSIF Hmi_Web.Jog_FxA.H_Close THEN
+			step := 9300;
+		ELSIF Hmi_Web.Jog_FxA.H_Hold THEN
+			step := 9310;
+		ELSIF Hmi_Web.Jog_FxA.H_Open THEN
+			step := 9320;
+		ELSIF Hmi_Web.Jog_FxA.V_Close THEN
+			step := 9330;
+		ELSIF Hmi_Web.Jog_FxA.V_Open THEN
+			step := 9340;
+		ELSIF Hmi_Web.Jog_FxA.P THEN
+			step := 9360;
+		ELSIF Hmi_Web.Jog_FxA.N THEN
+			step := 9370;
+		ELSIF Hmi_Web.Jog_FxA.ExEncTouch THEN
+			IO.q311 := TRUE;
+			IO.q311 := FALSE;
+		ELSIF Hmi_Web.Jog_FxA.ExEncExit THEN
+			IO.q311 := FALSE;
+			IO.q311 := TRUE;
+		ELSIF Hmi_Web.Jog_FxB.H_Close THEN
+			step := 9400;
+		ELSIF Hmi_Web.Jog_FxB.H_Hold THEN
+			step := 9410;
+		ELSIF Hmi_Web.Jog_FxB.H_Open THEN
+			step := 9420;
+		ELSIF Hmi_Web.Jog_FxB.V_Close THEN
+			step := 9430;
+		ELSIF Hmi_Web.Jog_FxB.V_Open THEN
+			step := 9440;
+		ELSIF Hmi_Web.Jog_FxB.ExEncTouch THEN
+			IO.q313 := TRUE;
+			IO.q314 := FALSE;
+		ELSIF Hmi_Web.Jog_FxB.ExEncExit THEN
+			IO.q313 := FALSE;
+			IO.q314 := TRUE;
+		ELSE
+			IO.q311 := FALSE;
+			IO.q311 := FALSE;
+			IO.q313 := FALSE;
+			IO.q314 := FALSE;
+		END_IF
+		
+		IF Hmi.Jog_Mode OR Hmi.MPG_Mode OR Hmi.Auto_Mode OR
+			Hmi.Set_X_P_Limite OR Hmi.Set_X_Home OR
+			Hmi.Set_Y_P_Limite OR Hmi.Set_Y_Home OR
+			Hmi.Set_Z_P_Limite OR Hmi.Set_Z_Home OR
+			Hmi_Web.Auto_Mode OR Hmi_Web.Auto_OneCycle_Start OR
+			Hmi_Web.Jog_Mode
+ 		THEN
+			step := step + 1;
+		END_IF
+		
+	8002:
+		IF Hmi.Jog_Mode OR Hmi_Web.Jog_Mode THEN
+			Hmi.Jog_Mode := FALSE;
+			Hmi_Web.Jog_Mode := FALSE;
+			step := 9910;
+			ExpConver.Feed_Reset();
+			Hmi.Mode_Select := 0;
+		ELSIF Hmi.MPG_Mode OR Hmi.Auto_Mode OR
+			Hmi_Web.Auto_Mode OR Hmi_Web.Auto_OneCycle_Start OR Hmi_Web.Auto_Start
+		 THEN
+			step := 0;
+		ELSIF 
+		Hmi.Set_X_P_Limite OR Hmi.Set_X_Home OR
+		Hmi.Set_Y_P_Limite OR Hmi.Set_Y_Home OR
+		Hmi.Set_Z_P_Limite OR Hmi.Set_Z_Home
+		THEN
+			step := 9800;
+		END_IF
+		
+	8003:
+		Hmi.Jog_Mode := FALSE;
+		ExpConver.Feed_Reset();
+		step := 9910;
+		Hmi.Mode_Select := 0;
+		
+		
+	8010:
+		Jog_MPG.Start();
+		HMI.Jog_GroupSelect := Jog_MPG.in_iAxisGroup;
+		Hmi.MPG_Mode := FALSE;
+		Hmi.Mode_Select := 2;
+		step := step + 1;
+		
+	8011:
+		HMI.Mode_Select := 2;
+		IF Hmi.Jog_Mode OR Hmi.MPG_Mode OR Hmi.Auto_Mode OR
+			Hmi.Set_X_P_Limite OR Hmi.Set_X_Home OR
+			Hmi.Set_Y_P_Limite OR Hmi.Set_Y_Home OR
+			Hmi.Set_Z_P_Limite OR Hmi.Set_Z_Home
+ 		THEN
+			step := step + 1;
+		END_IF
+		
+		IF NOT Jog_MPG.Active THEN
+			step := 8010;
+		END_IF
+		
+	8012:
+		Jog_MPG.Stop();
+		step := step + 1;
+		
+	8013:
+		
+		IF NOT Jog_MPG.Active THEN
+			step := step + 1;
+		END_IF
+		
+	8014:
+		step := step + 1;
+		
+	8015:
+		GaX.Stop();
+		GaY.Stop();
+		GaZ.Stop();
+		GbX.Stop();
+		GbY.Stop();
+		GbZ.Stop();
+		GcX.Stop();
+		GcY.Stop();
+		GcZ.Stop();
+		GdX.Stop();
+		GdY.Stop();
+		GdZ.Stop();
+		IF NOT GaX.Axis1.Status.Moving AND 
+			NOT GaY.Axis1.Status.Moving AND 
+			NOT GaZ.Axis1.Status.Moving AND 
+			NOT GbX.Axis1.Status.Moving AND 
+			NOT GbY.Axis1.Status.Moving AND 
+			NOT GbZ.Axis1.Status.Moving AND 
+			NOT GcX.Axis1.Status.Moving AND 
+			NOT GcY.Axis1.Status.Moving AND 
+			NOT GcZ.Axis1.Status.Moving AND 
+			NOT GdX.Axis1.Status.Moving AND 
+			NOT GdY.Axis1.Status.Moving AND 
+			NOT GdZ.Axis1.Status.Moving
+		THEN
+			step := step + 1;
+		END_IF
+		
+	8016:
+		IF Hmi.MPG_Mode THEN
+			Hmi.MPG_Mode := FALSE;
+			step := 0;
+			Hmi.Mode_Select := 0;
+		ELSIF Hmi.Jog_Mode OR Hmi.Auto_Mode THEN
+			step := 0;
+		ELSIF 
+		Hmi.Set_X_P_Limite OR Hmi.Set_X_Home OR
+		Hmi.Set_Y_P_Limite OR Hmi.Set_Y_Home OR
+		Hmi.Set_Z_P_Limite OR Hmi.Set_Z_Home
+		THEN
+			step := 9800;
+		END_IF
+		
+	(* 寫入停電記憶 *)
+	8020:
+		fbWritePersistentData.START := TRUE;
+		step := step  + 1;
+		
+	8021:
+		IF NOT fbWritePersistentData.BUSY THEN
+			fbWritePersistentData.START := FALSE;
+			step := step  + 1;
+		END_IF
+		
+	8022:
+		step := 8000;
+		
+	
+	9800:
+		Hmi.Jog_X_P := FALSE;
+		Hmi.Jog_X_N := FALSE;
+		Hmi.Jog_Y_P := FALSE;
+		Hmi.Jog_Y_N := FALSE;
+		Hmi.Jog_Z_P := FALSE;
+		Hmi.Jog_Z_N := FALSE;
+		
+		GaX.bJogMode := FALSE;
+		GaY.bJogMode := FALSE;
+		GaZ.bJogMode := FALSE;
+		
+		GbX.bJogMode := FALSE;
+		GbY.bJogMode := FALSE;
+		GbZ.bJogMode := FALSE;
+		
+		GcX.bJogMode := FALSE;
+		GcY.bJogMode := FALSE;
+		GcZ.bJogMode := FALSE;
+
+		GdX.bJogMode := FALSE;
+		GdY.bJogMode := FALSE;
+		GdZ.bJogMode := FALSE;
+
+		Hmi.MPG_Mode:=FALSE;
+		
+		ExpConver.FeedJogExit();
+		
+		step := step + 1;
+		
+	
+		
+	9801:
+		pmsg.Push_Info("退出手動模式");
+		step:=9900;
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8100_Jog_GroupA_X" Id="{e799dead-5ecb-44cb-96a8-211ac7ea9e16}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group A X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	8100:
+		IF PosC.GcX_P_Limite > 0 THEN
+			GcX.AbsMove(PosC.GcX_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GcX.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8101:
+		IF	GcX.bDone OR		// 位置(軟體極限)到達
+			NOT GcX.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Ga.X_P) THEN 		// 人機按鍵放開
+				step := 8109;
+		END_IF
+		
+	8109:
+		GcX.Stop();
+		IF (NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Ga.X_P) THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8120:
+		IF PosC.GcX_N_Limite <> 0 THEN
+			GcX.AbsMove(PosC.GcX_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GcX.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8121:
+		IF GcX.bDone OR		// 位置(軟體極限)到達
+			NOT GcX.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Ga.X_N) THEN  			// 人機按鍵放開
+			step:=8129;
+		END_IF
+		
+	8129:
+		GcX.Stop();
+		IF (NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Ga.X_N) THEN
+			step:=8001;
+		END_IF
+		
+
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8200_Jog_GroupA_Y" Id="{37ce9b29-c425-42de-8468-6415230b3534}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group A Y軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	8200:
+		IF PosC.GcY_P_Limite > 0 OR NOT Hmi.Jog_UnLimite THEN
+			GcY.AbsMove(PosC.GcY_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GcY.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8201:
+		IF	GcY.bDone OR		// 位置(軟體極限)到達
+			NOT GcY.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Ga.Y_P) THEN 		// 人機按鍵放開
+				step := 8209;
+		END_IF
+		
+	8209:
+		GcY.Stop();
+		IF (NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Ga.Y_P) THEN
+			step := 8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8220:
+		IF PosC.GcY_N_Limite <> 0 OR NOT Hmi.Jog_UnLimite THEN
+			GcY.AbsMove(PosC.GcY_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GcY.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8221:
+		IF GcY.bDone OR		// 位置(軟體極限)到達
+			NOT GcY.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Ga.Y_N) THEN 		// 人機按鍵放開
+				step := 8229;
+		END_IF
+		
+	8229:
+		GcY.Stop();
+		IF (NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Ga.Y_N) THEN
+			step := 8001;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8300_Jog_GroupA_Z" Id="{5a63ed6b-fb7d-4cb7-81bb-e4a40e19dcb5}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group A X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	8300:
+		IF PosC.GcZ_P_Limite > 0 THEN
+			GcZ.AbsMove(PosC.GcZ_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GcZ.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8301:
+		IF	GcZ.bDone OR		// 位置(軟體極限)到達
+			NOT GcZ.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Ga.Z_P) THEN 		// 人機按鍵放開
+				step := 8309;
+		END_IF
+		
+	8309:
+		GcZ.Stop();
+		IF (NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Ga.Z_P) THEN
+			step := 8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8320:
+		IF PosC.GcZ_N_Limite <> 0 THEN
+			GcZ.AbsMove(PosC.GcZ_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GcZ.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8321:
+		IF GcZ.bDone OR		// 位置(軟體極限)到達
+			NOT GcZ.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Ga.Z_N) THEN  			// 人機按鍵放開
+				step := 8329;
+		END_IF
+		
+	8329:
+		GcZ.Stop();
+		IF (NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Ga.Z_N) THEN
+			step := 8001;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8400_Jog_GroupB_X" Id="{f02d0236-6e7f-4e25-a06a-ca2355ca4b9a}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group B X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	8400:
+		IF PosC.GbX_P_Limite <> 0 THEN
+			GbX.AbsMove(PosC.GbX_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GbX.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8401:
+		IF	GbX.bDone OR		// 位置(軟體極限)到達
+			NOT GbX.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Gb.X_P) THEN 		// 人機按鍵放開
+				step := 8409;
+		END_IF
+		
+	8409:
+		GbX.Stop();
+		IF (NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Gb.X_P) THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8420:
+		IF PosC.GbX_N_Limite <> 0 THEN
+			GbX.AbsMove(PosC.GbX_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GbX.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8421:
+		IF GbX.bDone OR		// 位置(軟體極限)到達
+			NOT GbX.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Gb.X_N) THEN  			// 人機按鍵放開
+			step:=8429;
+		END_IF
+		
+	8429:
+		GbX.Stop();
+		IF (NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Gb.X_N) THEN
+			step:=8001;
+		END_IF
+		
+
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8500_Jog_GroupB_Y" Id="{d9913704-7786-46a8-84b1-7db0eaf1f3b6}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group B Y軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	8500:
+		IF PosC.GbY_P_Limite > 0 THEN
+			GbY.AbsMove(PosC.GbY_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GbY.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8501:
+		IF	GbY.bDone OR		// 位置(軟體極限)到達
+			NOT GbY.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Gb.Y_P) THEN		// 人機按鍵放開
+				step := 8509;
+		END_IF
+		
+	8509:
+		GbY.Stop();
+		IF (NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Gb.Y_P) THEN
+			step := 8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8520:
+		IF PosC.GbY_N_Limite <> 0 THEN
+			GbY.AbsMove(PosC.GbY_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GbY.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8521:
+		IF GbY.bDone OR		// 位置(軟體極限)到達
+			NOT GbY.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Gb.Y_N) THEN  			// 人機按鍵放開
+			step := 8529;
+		END_IF
+		
+	8529:
+		GbY.Stop();
+		IF (NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Gb.Y_N) THEN
+			step := 8001;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8600_Jog_GroupB_Z" Id="{3c8cdb25-5cb1-4b0f-b934-e73736a2fa67}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group B Z軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	8600:
+		IF PosC.GbZ_P_Limite > 0 THEN
+			GbZ.AbsMove(PosC.GbZ_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GbZ.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8601:
+		IF	GbZ.bDone OR		// 位置(軟體極限)到達
+			NOT GbZ.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Gb.Z_P) THEN
+				step := 8609;
+		END_IF
+		
+	8609:
+		GbZ.Stop();
+		IF (NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Gb.Z_P) THEN
+			step := 8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8620:
+		IF PosC.GbZ_N_Limite <> 0 THEN
+			GbZ.AbsMove(PosC.GbZ_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GbZ.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8621:
+		IF GbZ.bDone OR		// 位置(軟體極限)到達
+			NOT GbZ.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Gb.Z_N) THEN
+			step := 8629;
+		END_IF
+		
+	8629:
+		GbZ.Stop();
+		IF (NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Gb.Z_N) THEN
+			step := 8001;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8700_Jog_GroupC_X" Id="{7ad358ea-2217-42cd-9261-5e2d16620efe}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group C X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	8700:
+		IF PosC.GaX_P_Limite <> 0 THEN
+			GaX.AbsMove(PosC.GaX_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GaX.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8701:
+		IF	GaX.bDone OR		// 位置(軟體極限)到達
+			NOT GaX.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Gc.X_P) THEN 		// 人機按鍵放開
+				step := 8709;
+		END_IF
+		
+	8709:
+		GaX.Stop();
+		IF (NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Gc.X_P) THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8720:
+		IF PosC.GaX_N_Limite <> 0 THEN
+			GaX.AbsMove(PosC.GaX_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GaX.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8721:
+		IF GaX.bDone OR		// 位置(軟體極限)到達
+			NOT GaX.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Gc.X_N) THEN  			// 人機按鍵放開
+			step:=8729;
+		END_IF
+		
+	8729:
+		GaX.Stop();
+		IF (NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Gc.X_N) THEN
+			step:=8001;
+		END_IF
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8800_Jog_GroupC_Y" Id="{6d571eda-dd32-4acd-9da1-545affc0a066}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group C Y軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	8800:
+		IF PosC.GaY_P_Limite > 0 AND NOT Hmi.Jog_UnLimite THEN
+			GaY.AbsMove(PosC.GaY_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GaY.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8801:
+		IF	GaY.bDone OR		// 位置(軟體極限)到達
+			NOT GaY.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Gc.Y_P) THEN 		// 人機按鍵放開
+				step := 8809;
+		END_IF
+		
+	8809:
+		GaY.Stop();
+		IF (NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Gc.Y_P) THEN
+			step := 8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8820:
+		IF PosC.GaY_N_Limite <> 0 AND NOT Hmi.Jog_UnLimite THEN
+			GaY.AbsMove(PosC.GaY_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GaY.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8821:
+		IF GaY.bDone OR		// 位置(軟體極限)到達
+			NOT GaY.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Gc.Y_N) THEN 		// 人機按鍵放開
+				step := 8829;
+		END_IF
+		
+	8829:
+		GaY.Stop();
+		IF (NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Gc.Y_N) THEN
+			step := 8001;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_8900_Jog_GroupC_Z" Id="{53227d1d-026f-48c0-ad4b-19eb9bfd66e5}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group C Z軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	8900:
+		IF PosC.GaZ_P_Limite > 0 THEN
+			GaZ.AbsMove(PosC.GaZ_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GaZ.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8901:
+		IF	GaZ.bDone OR		// 位置(軟體極限)到達
+			NOT GaZ.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Gc.Z_P) THEN 		// 人機按鍵放開
+				step := 8909;
+		END_IF
+		
+	8909:
+		GaZ.Stop();
+		IF (NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Gc.Z_P) THEN
+			step := 8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	8920:
+		IF PosC.GaZ_N_Limite <> 0 THEN
+			GaZ.AbsMove(PosC.GaZ_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GaZ.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	8921:
+		IF GaZ.bDone OR		// 位置(軟體極限)到達
+			NOT GaZ.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Gc.Z_N) THEN  			// 人機按鍵放開
+				 step := 8929;
+		END_IF
+		
+	8929:
+		GaZ.Stop();
+		IF (NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Gc.Z_N) THEN
+			step := 8001;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_9000_Jog_GroupD_X" Id="{5db77154-6d99-4cea-89d3-6cfd264fd84d}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group D X軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	9000:
+		IF PosC.GdX_P_Limite <> 0 THEN
+			GdX.AbsMove(PosC.GdX_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GdX.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	9001:
+		IF	GdX.bDone OR		// 位置(軟體極限)到達
+			NOT GdX.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Gd.X_P) THEN 		// 人機按鍵放開
+				step := 9009;
+		END_IF
+		
+	9009:
+		GdX.Stop();
+		IF (NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Gd.X_P) THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	9020:
+		IF PosC.GdX_N_Limite <> 0 THEN
+			GdX.AbsMove(PosC.GdX_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GdX.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	9021:
+		IF	GdX.bDone OR		// 位置(軟體極限)到達
+			NOT GdX.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Gd.X_N) THEN 		// 人機按鍵放開
+				step := 9029;
+		END_IF
+		
+	9029:
+		GdX.Stop();
+		IF (NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Gd.X_N) THEN
+			step:=8001;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_9100_Jog_GroupD_Y" Id="{91ffc927-82c0-469b-8f33-9a13afeabebf}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group D Y軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	9100:
+		IF PosC.GdY_P_Limite > 0 THEN
+			GdY.AbsMove(PosC.GdY_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GdY.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	9101:
+		IF	GdY.bDone OR		// 位置(軟體極限)到達
+			NOT GdY.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Gd.Y_P) THEN 		// 人機按鍵放開
+				step := 9109;
+		END_IF
+		
+	9109:
+		GdY.Stop();
+		IF (NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Gd.Y_P) THEN
+			step := 8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	9120:
+		IF PosC.GdY_N_Limite <> 0 THEN
+			GdY.AbsMove(PosC.GdY_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GdY.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	9121:
+		IF GdY.bDone OR		// 位置(軟體極限)到達
+			NOT GdY.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Gd.Y_N) THEN 		// 人機按鍵放開
+				step := 9129;
+		END_IF
+		
+	9129:
+		GdY.Stop();
+		IF (NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Gd.Y_N) THEN
+			step := 8001;
+		END_IF
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_9200_Jog_GroupD_Z" Id="{2c5f3bd0-6f4a-4e8d-9ccd-8e124117a518}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group D Z軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				正方向
+  ====================================*) 
+
+	9200:
+		IF PosC.GdZ_P_Limite > 0 THEN
+			GdZ.AbsMove(PosC.GdZ_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GdZ.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	9201:
+		IF	GdZ.bDone OR		// 位置(軟體極限)到達
+			NOT GdZ.OutLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Gd.Z_P) THEN 		// 人機按鍵放開
+				step := 9209;
+		END_IF
+		
+	9209:
+		GdZ.Stop();
+		IF (NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Gd.Z_P) THEN
+			step := 8001;
+		END_IF
+		
+(*====================================
+				負方向
+  ====================================*) 
+		
+	9220:
+		IF PosC.GdZ_N_Limite <> 0 THEN
+			GdZ.AbsMove(PosC.GdZ_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		ELSE
+			GdZ.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+		END_IF
+		step := step + 1;
+		
+		
+	9221:
+		IF GdZ.bDone OR		// 位置(軟體極限)到達
+			NOT GdZ.inLimiter OR		// 	硬體極限到達
+			(NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Gd.Z_N) THEN  			// 人機按鍵放開
+			 	step := 9229;
+		END_IF
+		
+	9229:
+		GdZ.Stop();
+		IF (NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Gd.Z_N) THEN
+			step := 8001;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_9300_Jog_GroupFx_A" Id="{4ea608c7-d2b7-4028-abc8-0bf6443d9578}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group FX A軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*====================================
+				夾
+  ====================================*) 
+
+	9300: // 夾
+		IF NOT io.i501 AND NOT io.i503 THEN
+			GroupFx.AC_Clamp();
+			step := step + 1;
+		ELSE
+			IF io.i501 THEN
+				pMsg.Push_alarm("JOG FxB: B下壓不再原點上");
+			END_IF
+			IF io.i503 THEN
+				pMsg.Push_alarm("JOG FxB: D下壓不再原點上");
+			END_IF
+			step := 9309;
+		END_IF
+		
+	9301:
+		IF GroupFx.step_AC_C.bBuzy OR NOT Hmi_Web.Jog_FxA.H_Close THEN
+			step := step + 1;
+		END_IF
+		
+	9302:
+		IF GroupFx.step_AC_C.bDone OR NOT Hmi_Web.Jog_FxA.H_Close THEN
+			step:=9309;
+		END_IF
+		
+	9309:
+		GroupFx.AC_Stop();
+		IF NOT Hmi_Web.Jog_FxA.H_Close THEN
+			step:=8001;
+		END_IF
+
+(*====================================
+				保持
+  ====================================*) 
+	9310:
+		IF GroupFx.b_AC_Clamp THEN
+			GroupFx.AC_Clamp();
+			step := step + 1;
+		ELSE
+			step := 9319;
+			pMsg.Push_alarm("JOG FxA: 尚未執行FxA夾輪靠緊");
+		END_IF
+		
+	9311:
+		IF GroupFx.step_AC_C.bBuzy OR GroupFx.step_AC_C.bError THEN
+			step := step + 1;
+		END_IF
+		
+	9312:
+		IF GroupFx.step_AC_C.bdone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_AC_C.bError THEN
+			pMsg.Push_alarm("JOG FxA: 執行FxA夾輪保持時發生錯誤");
+		END_IF
+		
+	9313:
+		step:=9319;
+		
+	9319:
+		IF NOT Hmi_Web.Jog_FxA.H_Hold THEN
+			step:=8001;
+		END_IF
+
+(*====================================
+				放
+  ====================================*) 
+	9320: // 放
+		IF NOT io.i501 AND NOT io.i503 THEN
+			GroupFx.AC_UnClamp(99999);
+			step := step + 1;
+		ELSE
+			IF io.i501 THEN
+				pMsg.Push_alarm("JOG FxB: B下壓不再原點上");
+			END_IF
+			IF io.i503 THEN
+				pMsg.Push_alarm("JOG FxB: D下壓不再原點上");
+			END_IF
+			step := 9329;
+		END_IF
+		
+	9321:
+		IF GroupFx.step_AC_C.bBuzy OR NOT Hmi_Web.Jog_FxA.H_Open THEN
+			step := step + 1;
+		END_IF
+		
+	9322:
+		IF GroupFx.step_AC_C.bDone OR NOT Hmi_Web.Jog_FxA.H_Open THEN
+			step:=9329;
+		END_IF
+		
+	9329:
+		GroupFx.AC_Stop();
+		IF NOT Hmi_Web.Jog_FxA.H_Open THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				下壓夾
+  ====================================*) 
+		
+	9330:
+		GroupFx.A_Press();
+		GroupFx.C_Press();
+		step := step + 1;
+		
+	9331:
+		IF (GroupFx.step_A_P.bBuzy OR GroupFx.step_A_P.bError) AND
+			(GroupFx.step_C_P.bBuzy OR GroupFx.step_C_P.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	9332:
+		IF (GroupFx.step_A_P.bDone AND GroupFx.step_A_P.bDone) OR
+			GroupFx.step_C_P.bError OR GroupFx.step_C_P.bError OR
+			NOT Hmi_Web.Jog_FxA.V_Close THEN
+			step := 9339;
+		END_IF
+		
+	9339:
+		IF NOT Hmi_Web.Jog_FxA.V_Close THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				下壓放
+  ====================================*) 
+		
+	9340:
+		GroupFx.A_UnPress();
+		GroupFx.C_UnPress();
+		step := step + 1;
+		
+	9341:
+		IF (GroupFx.step_A_P.bBuzy OR GroupFx.step_A_P.bError) AND
+			(GroupFx.step_C_P.bBuzy OR GroupFx.step_C_P.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	9342:
+		IF (GroupFx.step_A_P.bDone AND GroupFx.step_A_P.bDone) OR
+			GroupFx.step_C_P.bError OR GroupFx.step_C_P.bError OR
+			NOT Hmi_Web.Jog_FxA.V_Open THEN
+			step := 9349;
+		END_IF
+		
+	9349:
+		IF NOT Hmi_Web.Jog_FxA.V_Open THEN
+			step:=8001;
+		END_IF
+		
+(*====================================
+				滾輪正轉
+  ====================================*) 
+		
+	9360:
+		Fx.RelMove(100000, 200 * Hmi.Jog_Speed * 0.01);
+		step := step + 1;
+		
+	9361:
+		IF Fx.bDone OR Fx.bError OR NOT Hmi_Web.Jog_FxA.P THEN
+			step := 9369;
+		END_IF
+		
+	9369:
+		Fx.Stop();
+		IF NOT Hmi_Web.Jog_FxA.P THEN
+			step:=8001;
+		END_IF
+(*====================================
+				滾輪反轉
+  ====================================*) 
+		
+	9370:
+		Fx.RelMove(-100000, 200 * Hmi.Jog_Speed * 0.01);
+		step := step + 1;
+		
+	9371:
+		IF Fx.bDone OR Fx.bError OR NOT Hmi_Web.Jog_FxA.N THEN
+			step := 9389;
+		END_IF
+		
+	9379:
+		Fx.Stop();
+		IF NOT Hmi_Web.Jog_FxA.N THEN
+			step:=8001;
+		END_IF
+		
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_9400_Jog_GroupFx_B" Id="{b3bfee0c-2d0d-4c88-a8a1-984085440ece}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+		Group FX B軸 Jog模式
+  ====================================*) 
+
+CASE step OF
+(*	====================================
+					夾
+  ====================================*) 
+
+	9400: // 夾
+		IF NOT io.i502 AND NOT io.i504 THEN
+			GroupFx.BD_Clamp();
+			step := step + 1;
+		ELSE
+			IF NOT io.i502 THEN
+				pMsg.Push_alarm("JOG FxB: B下壓不再原點上");
+			END_IF
+			IF NOT io.i504 THEN
+				pMsg.Push_alarm("JOG FxB: D下壓不再原點上");
+			END_IF
+			step := 9409;
+		END_IF
+		
+		
+	9401:
+		IF GroupFx.step_BD_C.bBuzy OR NOT Hmi_Web.Jog_FxB.H_Close THEN
+			step := step + 1;
+		END_IF
+		
+	9402:
+		IF GroupFx.step_BD_C.bDone OR NOT Hmi_Web.Jog_FxB.H_Close THEN
+			step:=9409;
+		END_IF
+		
+	9409:
+		GroupFx.BD_Stop();
+		IF NOT Hmi_Web.Jog_FxB.H_Close THEN
+			step:=8001;
+		END_IF
+
+(*	====================================
+					保持
+	====================================	*) 
+	9410:
+		IF GroupFx.b_BD_Clamp THEN
+			GroupFx.BD_Clamp();
+			step := step + 1;
+		ELSE
+			step := 9419;
+			pMsg.Push_alarm("JOG FxB: 尚未執行FxB夾輪靠緊");
+		END_IF
+		
+	9411:
+		IF GroupFx.step_BD_C.bBuzy OR GroupFx.step_BD_C.bError THEN
+			step := step + 1;
+		END_IF
+		
+	9412:
+		IF GroupFx.step_BD_C.bdone THEN
+			step := step + 1;
+		ELSIF GroupFx.step_BD_C.bError THEN
+			pMsg.Push_alarm("JOG FxB: 執行FxB夾輪保持時發生錯誤");
+		END_IF
+		
+	9413:
+		step:=9419;
+		
+	9419:
+		IF NOT Hmi_Web.Jog_FxB.H_Hold THEN
+			step:=8001;
+		END_IF
+
+(*	====================================
+					放
+  	====================================*) 
+	9420: // 放
+		IF NOT io.i502 AND NOT io.i504 THEN
+			GroupFx.BD_UnClamp(99999);
+			step := step + 1;
+		ELSE
+			IF io.i502 THEN
+				pMsg.Push_alarm("JOG FxB: B下壓不再原點上");
+			END_IF
+			IF io.i504 THEN
+				pMsg.Push_alarm("JOG FxB: D下壓不再原點上");
+			END_IF
+			step := 9429;
+		END_IF
+		
+	9421:
+		IF GroupFx.step_BD_C.bBuzy OR NOT Hmi_Web.Jog_FxB.H_Open THEN
+			step := step + 1;
+		END_IF
+		
+	9422:
+		IF GroupFx.step_BD_C.bDone OR NOT Hmi_Web.Jog_FxB.H_Open THEN
+				step:=9429;
+		END_IF
+		
+	9429:
+		GroupFx.BD_Stop();
+		IF NOT Hmi_Web.Jog_FxB.H_Open THEN
+			step:=8001;
+		END_IF
+		
+(*	====================================
+					下壓夾
+  	====================================*) 
+		
+	9430:
+		GroupFx.B_Press();
+		GroupFx.D_Press();
+		step := step + 1;
+		
+	9431:
+		IF (GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+			(GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	9432:
+		IF (GroupFx.step_B_P.bDone AND GroupFx.step_B_P.bDone) OR
+			GroupFx.step_D_P.bError OR GroupFx.step_D_P.bError OR
+			NOT Hmi_Web.Jog_FxB.V_Close THEN
+			step := 9439;
+		END_IF
+		
+	9439:
+		IF NOT Hmi_Web.Jog_FxB.V_Close THEN
+			step:=8001;
+		END_IF
+		
+(*	====================================
+					下壓放
+  	====================================*) 
+		
+	9440:
+		GroupFx.B_UnPress();
+		GroupFx.D_UnPress();
+		step := step + 1;
+		
+	9441:
+		IF (GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+			(GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError) THEN
+			step := step + 1;
+		END_IF
+		
+	9442:
+		IF (GroupFx.step_B_P.bDone AND GroupFx.step_B_P.bDone) OR
+			GroupFx.step_D_P.bError OR GroupFx.step_D_P.bError OR
+			NOT Hmi_Web.Jog_FxB.V_Open THEN
+			step := 9449;
+		END_IF
+		
+	9449:
+		IF NOT Hmi_Web.Jog_FxB.V_Open THEN
+			step:=8001;
+		END_IF
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="step_9700_Jog_SetLimit" Id="{b2fe7821-cf3c-4702-8677-8a39e991af14}" FolderPath="JOG流程8100_9400\">
+      <Implementation>
+        <ST><![CDATA[(*====================================
+				設定極限
+  ====================================*) 
+
+CASE step OF
+	9700:
+		IF Hmi.Jog_GroupSelect > 0 THEN
+			IF Hmi.Set_X_P_Limite THEN
+				step := 9710;
+			ELSIF Hmi.Set_X_Home THEN
+				step := 9720;
+			ELSIF Hmi.Set_Y_P_Limite THEN
+				step := 9730;
+			ELSIF Hmi.Set_Y_Home THEN
+				step := 9740;
+			ELSIF Hmi.Set_Z_P_Limite THEN
+				step := 9750;
+			ELSIF Hmi.Set_Z_Home THEN
+				step := 9760;
+			ELSE
+				step := step + 1;
+			END_IF
+		ELSE
+			Hmi.Set_X_P_Limite := FALSE;
+			Hmi.Set_X_Home := FALSE;
+			Hmi.Set_Y_P_Limite := FALSE;
+			Hmi.Set_Y_Home := FALSE;
+			Hmi.Set_Z_P_Limite := FALSE;
+			Hmi.Set_Z_Home := FALSE;
+			step := step + 1;
+		END_IF
+		
+	9701:
+		IF Hmi.Mode_Select = 1 THEN
+			step := 8000;
+		ELSIF Hmi.Mode_Select = 2 THEN
+			step := 8010;
+		ELSE
+			step := 0;
+		END_IF
+		
+
+
+(*====================================
+				X+
+  ====================================*)
+	9710:
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				posc.GaX_P_Limite := GaX.Pos + 2;
+				GaX.SetLimit();
+				step := step + 1;
+				
+			2:
+				posc.GbX_P_Limite := GbX.Pos + 2;
+				GbX.SetLimit();
+				step := step + 1;
+				
+			3:
+				posc.GcX_P_Limite := GcX.Pos + 2;
+				GcX.SetLimit();
+				step := step + 1;
+				
+			4:
+				posc.GdX_P_Limite := GdX.Pos + 2;
+				GdX.SetLimit();
+				step := step + 1;
+				
+			ELSE
+				step := 9700;
+		END_CASE
+		
+		
+	9711:
+		Hmi.Set_X_P_Limite := FALSE;
+		step := 9790;
+		
+(*====================================
+				X-
+  ====================================*) 
+  	9720:
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				posc.GaX_N_Limite := -2;
+				GaX.Homing();
+				step := step + 1;
+				
+			2:
+				posc.GbX_N_Limite := -2;
+				GbX.Homing();
+				step := step + 1;
+				
+			3:
+				posc.GcX_N_Limite := -2;
+				GcX.Homing();
+				step := step + 1;
+				
+			4:
+				posc.GdX_N_Limite := -2;
+				GdX.Homing();
+				step := step + 1;
+				
+			ELSE
+				step := 9700;
+		END_CASE
+		
+		
+	9721:
+		IF (Hmi.Jog_GroupSelect = 1 AND (GaX.bBuzy OR GaX.bError)) OR 
+			(Hmi.Jog_GroupSelect = 2 AND (GbX.bBuzy OR GbX.bError)) OR
+			(Hmi.Jog_GroupSelect = 3 AND (GcX.bBuzy OR GcX.bError)) OR
+			(Hmi.Jog_GroupSelect = 4 AND (GdX.bBuzy OR GdX.bError)) 
+		THEN
+			step := step + 1;
+		END_IF
+		
+	9722:
+		IF (Hmi.Jog_GroupSelect = 1 AND GaX.bDone) OR
+			(Hmi.Jog_GroupSelect = 1 AND GbX.bDone) OR
+			(Hmi.Jog_GroupSelect = 3 AND GcX.bDone) OR
+			(Hmi.Jog_GroupSelect = 4 AND GdX.bDone)
+		THEN
+			step := step + 1;
+		ELSIF (Hmi.Jog_GroupSelect = 1 AND GaX.bError) OR
+			(Hmi.Jog_GroupSelect = 1 AND GbX.bError) OR
+			(Hmi.Jog_GroupSelect = 3 AND GcX.bError) OR
+			(Hmi.Jog_GroupSelect = 4 AND GdX.bError)
+		THEN
+			step := 9700;
+		END_IF
+		
+	9723:
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				GaX.SetLimit();
+				step := step + 1;
+				
+			2:
+				GbX.SetLimit();
+				step := step + 1;
+				
+			3:
+				GcX.SetLimit();
+				step := step + 1;
+				
+			4:
+				GdX.SetLimit();
+				step := step + 1;
+				
+			ELSE
+				step := step + 1;
+		END_CASE
+		
+	9724:	
+		Hmi.Set_X_Home := FALSE;
+		step := 9790;
+		
+(*====================================
+				Y+
+  ====================================*)
+	9730:
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				posc.GaY_P_Limite := GaY.Pos + 2;
+				GaY.SetLimit();
+				step := step + 1;
+				
+			2:
+				posc.GbY_P_Limite := GbY.Pos + 2;
+				GbY.SetLimit();
+				step := step + 1;
+				
+			3:
+				posc.GcY_P_Limite := GcY.Pos + 2;
+				GcY.SetLimit();
+				step := step + 1;
+				
+			4:
+				posc.GdY_P_Limite := GdY.Pos + 2;
+				GdY.SetLimit();
+				step := step + 1;
+				
+			ELSE
+				step := step + 1;
+		END_CASE
+		
+		
+	9731:
+		Hmi.Set_Y_P_Limite := FALSE;
+		step := 9790;
+		
+(*====================================
+				Y-
+  ====================================*) 
+  	9740:
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				posc.GaY_N_Limite := -2;
+				GaY.Homing();
+				step := step + 1;
+				
+			2:
+				posc.GbY_N_Limite := -2;
+				GbY.Homing();
+				step := step + 1;
+				
+			3:
+				posc.GcY_N_Limite := -2;
+				GcY.Homing();
+				step := step + 1;
+				
+			4:
+				posc.GdY_N_Limite := -2;
+				GdY.Homing();
+				step := step + 1;
+				
+			ELSE
+				step := 9700;
+		END_CASE
+		
+		
+	9741:
+		IF (Hmi.Jog_GroupSelect = 1 AND (GaY.bBuzy OR GaY.bError)) OR 
+			(Hmi.Jog_GroupSelect = 2 AND (GbY.bBuzy OR GbY.bError)) OR
+			(Hmi.Jog_GroupSelect = 3 AND (GcY.bBuzy OR GcY.bError)) OR
+			(Hmi.Jog_GroupSelect = 4 AND (GdY.bBuzy OR GdY.bError)) 
+		THEN
+			step := step + 1;
+		END_IF
+		
+	9742:
+		IF (Hmi.Jog_GroupSelect = 1 AND GaY.bDone) OR
+			(Hmi.Jog_GroupSelect = 2 AND GbY.bDone) OR
+			(Hmi.Jog_GroupSelect = 3 AND GcY.bDone) OR
+			(Hmi.Jog_GroupSelect = 4 AND GdY.bDone)
+		THEN
+			step := step + 1;
+		ELSIF (Hmi.Jog_GroupSelect = 1 AND GaY.bError) OR
+			(Hmi.Jog_GroupSelect = 2 AND GbY.bError) OR
+			(Hmi.Jog_GroupSelect = 3 AND GcY.bError) OR
+			(Hmi.Jog_GroupSelect = 4 AND GdY.bError)
+		THEN
+			step := 9700;
+		END_IF
+		
+	9743:
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				GaY.SetLimit();
+				step := step + 1;
+				
+			2:
+				GbY.SetLimit();
+				step := step + 1;
+				
+			3:
+				GcY.SetLimit();
+				step := step + 1;
+				
+			4:
+				GdY.SetLimit();
+				step := step + 1;
+				
+			ELSE
+				step := step + 1;
+		END_CASE
+		
+	9744:
+		Hmi.Set_Y_Home := FALSE;
+		step := 9790;
+		
+(*====================================
+				Z+
+  ====================================*)
+	9750:
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				posc.GaZ_P_Limite := GaZ.Pos + 2;
+				GaZ.SetLimit();
+				step := step + 1;
+				
+			2:
+				posc.GbZ_P_Limite := GbZ.Pos + 2;
+				GbZ.SetLimit();
+				step := step + 1;
+				
+			3:
+				posc.GcZ_P_Limite := GcZ.Pos + 2;
+				GcZ.SetLimit();
+				step := step + 1;
+				
+			4:
+				posc.GdZ_P_Limite := GdZ.Pos + 2;
+				GdZ.SetLimit();
+				step := step + 1;
+				
+			ELSE
+				step := step + 1;
+		END_CASE
+		
+		
+	9751:
+		Hmi.Set_Z_P_Limite := FALSE;
+		step := 9790;
+		
+(*====================================
+				Z-
+  ====================================*) 
+	9760:
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				posc.GaZ_N_Limite := -2;
+				GaZ.Homing();
+				step := step + 1;
+				
+			2:
+				posc.GbZ_N_Limite := -2;
+				GbZ.Homing();
+				step := step + 1;
+				
+			3:
+				posc.GcZ_N_Limite := -2;
+				GcZ.Homing();
+				step := step + 1;
+				
+			4:
+				posc.GdZ_N_Limite := -2;
+				GdZ.Homing();
+				step := step + 1;
+				
+			ELSE
+				step := 9700;
+		END_CASE
+		
+		
+	9761:
+		IF (Hmi.Jog_GroupSelect = 1 AND (GaZ.bBuzy OR GaZ.bError)) OR 
+			(Hmi.Jog_GroupSelect = 2 AND (GbZ.bBuzy OR GbZ.bError)) OR
+			(Hmi.Jog_GroupSelect = 3 AND (GcZ.bBuzy OR GcZ.bError)) OR
+			(Hmi.Jog_GroupSelect = 4 AND (GdZ.bBuzy OR GdZ.bError)) 
+		THEN
+			step := step + 1;
+		END_IF
+		
+	9762:
+		IF (Hmi.Jog_GroupSelect = 1 AND GaZ.bDone) OR
+			(Hmi.Jog_GroupSelect = 1 AND GbZ.bDone) OR
+			(Hmi.Jog_GroupSelect = 3 AND GcZ.bDone) OR
+			(Hmi.Jog_GroupSelect = 4 AND GdZ.bDone)
+		THEN
+			step := step + 1;
+		ELSIF (Hmi.Jog_GroupSelect = 1 AND GaZ.bError) OR
+			(Hmi.Jog_GroupSelect = 1 AND GbZ.bError) OR
+			(Hmi.Jog_GroupSelect = 3 AND GcZ.bError) OR
+			(Hmi.Jog_GroupSelect = 4 AND GdZ.bError)
+		THEN
+			step := 9700;
+		END_IF
+		
+	9763:
+		CASE Hmi.Jog_GroupSelect OF
+			1:
+				GaZ.SetLimit();
+				step := step + 1;
+				
+			2:
+				GbZ.SetLimit();
+				step := step + 1;
+				
+			3:
+				GcZ.SetLimit();
+				step := step + 1;
+				
+			4:
+				GdZ.SetLimit();
+				step := step + 1;
+				
+			ELSE
+				step := step + 1;
+		END_CASE
+		step := step + 1;
+		
+	9764:
+		Hmi.Set_Z_Home := FALSE;
+		step := 9790;
+		
+		
+		
+	9790:
+		fbWritePersistentData.START := TRUE;
+		step := step  + 1;
+		
+	9791:
+		IF NOT fbWritePersistentData.BUSY THEN
+			fbWritePersistentData.START := FALSE;
+			step := step  + 1;
+		END_IF
+		
+	9792:
+		step := 9700;
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Timer" Id="{c4f557db-fcde-4848-b204-06307f28f9ff}">
+      <Implementation>
+        <ST><![CDATA[tmr01();]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="WritePersistentData" Id="{19164537-7422-43c1-bcc7-02dc2b29a4be}">
+      <Implementation>
+        <ST><![CDATA[fbWritePersistentData(
+	PORT:= 851,
+	TMOUT:= T#5S, 
+	MODE:= SPDM_2PASS, 
+	);
+]]></ST>
+      </Implementation>
+    </Action>
+  </POU>
+</TcPlcObject>

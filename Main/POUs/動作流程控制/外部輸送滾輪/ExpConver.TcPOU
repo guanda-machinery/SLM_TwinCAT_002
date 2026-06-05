@@ -1,0 +1,250 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="ExpConver" Id="{96189648-90f7-4ef9-9172-9cfd8c2ae429}" SpecialFunc="None">
+    <Declaration><![CDATA[{attribute 'TcContextName':='PlcTask'}
+PROGRAM ExpConver
+VAR
+(*	======================================================
+					外部輸送機 訊號輸出
+	======================================================*)
+	// 進料機 動作中
+	Feed_bBuzy						AT %I*	: BOOL;
+	// 進料機 動作完成
+	Feed_bDone 						AT %I*	: BOOL;
+	// 進料機 發生錯誤
+	Feed_bError 					AT %I*	: BOOL;
+	
+	// 進料材料寬度
+	Feed_Workpiace_W 				AT %I*	: LREAL;
+	
+	// 進料材料高度
+	Feed_Workpiace_H 				AT %I*	: LREAL;
+	
+	// 執行中的動作
+	ActionMode_Now 					AT %I*	: UINT;
+	
+	
+	
+	// 靠邊 動作中
+	PullOver_bBuzy					AT %I*	: BOOL;
+	// 靠邊  動作完成
+	PullOver_bDone 					AT %I*	: BOOL;
+	// 靠邊  發生錯誤
+	PullOver_bError 				AT %I*	: BOOL;
+	
+	
+	// 入料測感應器
+	In_sensor 						AT %I*	: WORD;
+	
+	// 出料測感應器
+	Out_sensor 						AT %I*	: WORD;
+	
+	// 進料滾輪啟動
+	In_Moter_Running 				AT %I*	: BOOL;
+	// 進料滾輪錯誤
+	In_Moter_Error 					AT %I*	: BOOL;
+	
+	// 出料滾輪啟動
+	Out_Moter_Running 				AT %I*	: BOOL;
+	// 出料滾輪錯誤
+	Out_Moter_Error 				AT %I*	: BOOL;
+	
+	
+(*	======================================================
+					外部輸送機 訊號輸入
+	======================================================*)
+	// 進料機 執行
+	ExpConver_Start					AT %Q*	: BOOL;
+	
+	// 進料機 模式
+	ExpConver_Enable				AT %Q*	: BOOL;
+	
+	// 進料機 模式
+	ExpConver_Mode					AT %Q*	: INT;
+	
+	// 進料機 進料的專案UUID
+	ExpConver_WorkOrder_UUID		AT %Q*	: STRING(36);
+	
+	// 進料機 錯誤重置
+	ExpConver_Reset					AT %Q*	: BOOL;
+	
+	// 靠邊 模式執行
+	PullOver_Start					AT %Q*	: BOOL;
+	
+	// 進料滾輪啟動
+	In_Moter_Start 					AT %Q*	: BOOL;
+	
+	// 出料滾輪啟動
+	Out_Moter_Start 				AT %Q*	: BOOL;
+	trig1: R_TRIG;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF (EStop OR SystemError) THEN
+	In_Moter_Start := FALSE;
+	Out_Moter_Start := FALSE;
+	ExpConver_Reset := TRUE;
+	ExpConver_Mode := 0;
+END_IF
+
+IF Feed_bBuzy AND ActionMode_Now <> 8001 THEN
+	ExpConver_Start := FALSE;
+ELSIF ExpConver_Mode = 8001 AND ActionMode_Now = 0 THEN
+	ExpConver_Start := FALSE;
+END_IF
+
+ExpConver_WorkOrder_UUID := Hmi_Web.Auto_ProjectWorkOrder_uuid; 
+
+trig1(CLK := Feed_bError OR Feed_bDone);
+IF trig1.Q THEN
+	ExpConver_Mode := 0;
+END_IF
+
+IF ExpConver_Reset AND ActionMode_Now = 0 AND 
+		NOT (EStop OR SystemError) THEN
+	ExpConver_Reset := FALSE;
+END_IF
+
+IF PullOver_bBuzy THEN
+	PullOver_Start := FALSE;
+END_IF
+
+ExpConver_Enable := NOT IO.i711 AND (AutoMain.step < 600 OR AutoMain.step > 1000);
+
+
+// IF AutoMain.step >= 0 AND AutoMain.step < 8000 AND Mode_Select = 1 THEN
+// 	ExpConver.ExpConver_Mode := 8000;
+// 	ExpConver_Start := true;
+// ELSIF AutoMain.step >= 8000 AND AutoMain.step < 9800 AND Mode_Select = 0 THEN
+// 	ExpConver_AutoMode := FALSE;
+// 	ExpConver_JogMode := TRUE;
+// ELSE
+// 	ExpConver_AutoMode := FALSE;
+// 	ExpConver_JogMode := FALSE;
+// END_IF]]></ST>
+    </Implementation>
+    <Method Name="Feed_holding_2_waitLoading" Id="{e384fc41-9010-444a-a276-09fa267ee1c7}">
+      <Declaration><![CDATA[METHOD Feed_holding_2_waitLoading
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ExpConver_Mode := 400;
+
+ExpConver_Start := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Feed_PullOver" Id="{3a2e7048-046f-41b7-9c5f-b0a28991a1b7}">
+      <Declaration><![CDATA[METHOD Feed_PullOver
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ExpConver_Mode := 2000;
+
+ExpConver_Start := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Feed_Reset" Id="{6b31dff7-d0a9-4b44-a23a-a808d21027fe}">
+      <Declaration><![CDATA[METHOD Feed_Reset
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ExpConver_Reset := true;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FeedAutoStart" Id="{f0183cdc-e0bd-4cd8-b6ba-e1c8a89574cc}">
+      <Declaration><![CDATA[METHOD FeedAutoStart
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ExpConver_Mode := 0;
+
+ExpConver_Start := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FeedHomeStart" Id="{a12d4fe0-e461-48ac-a69f-7f1bcaffeb4b}">
+      <Declaration><![CDATA[METHOD FeedHomeStart
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ExpConver_Mode := 100;
+
+ExpConver_Start := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FeedJogExit" Id="{19041cf0-2a8a-4cb8-8bde-2c5bc18d43ad}">
+      <Declaration><![CDATA[METHOD FeedJogExit
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ExpConver_Mode := 8001;
+
+ExpConver_Start := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="FeedJogStart" Id="{58a8ba95-93ad-4b42-a809-8d091ff96d44}">
+      <Declaration><![CDATA[METHOD FeedJogStart
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[ExpConver_Mode := 8000;
+
+ExpConver_Start := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="InRollerStart" Id="{ea62ddcd-f5eb-48fb-82c6-0e00d1d9da3e}">
+      <Declaration><![CDATA[METHOD InRollerStart
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[In_Moter_Start := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="InRollerStop" Id="{a85c9876-b971-4ca0-91f5-ad8d5757646b}">
+      <Declaration><![CDATA[METHOD InRollerStop
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[In_Moter_Start := false;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="OutRollerStart" Id="{46f09f1f-93cf-42b0-b5cb-1119a07aef1a}">
+      <Declaration><![CDATA[METHOD OutRollerStart
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Out_Moter_Start := TRUE;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="OutRollerStop" Id="{7c22d1c4-4905-49c8-8bb8-c397b35265d0}">
+      <Declaration><![CDATA[METHOD OutRollerStop
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[Out_Moter_Start := false;]]></ST>
+      </Implementation>
+    </Method>
+    <ObjectProperties>
+      <XmlArchive>
+        <Data>
+          <o xml:space="preserve" t="LicenseProperty">
+            <l2 n="Licenses" />
+          </o>
+        </Data>
+        <TypeList>
+          <Type n="LicenseProperty">{ec6b18ef-cd41-4646-b1b3-985c60f930b9}</Type>
+        </TypeList>
+      </XmlArchive>
+    </ObjectProperties>
+  </POU>
+</TcPlcObject>

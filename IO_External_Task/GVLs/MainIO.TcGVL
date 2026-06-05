@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <GVL Name="MainIO" Id="{9379aacf-aa57-47dc-bbc2-51d977e10bfd}">
+    <Declaration><![CDATA[{attribute 'qualified_onlY0'}
+VAR_GLOBAL
+	//
+	IO101: In_16_To_PLC;
+	//
+	IO102: In_16_To_PLC;
+	//
+	IO103: In_16_To_PLC;
+	//
+	IO104: In_16_To_PLC;
+	
+	
+	//
+	IO105: Out_16_To_PLC;
+	//
+	IO106: Out_16_To_PLC;
+	//
+	IO107: Out_16_To_PLC;
+	
+	
+	
+
+	IO101_s : WORD;
+	IO102_s : WORD;
+	IO103_s : WORD;
+	IO104_s : WORD;
+	IO105_s : WORD;
+	IO106_s : WORD;
+	IO107_s : WORD;
+	
+	IO101_f : WORD;
+	IO102_f : WORD;
+	IO103_f : WORD;
+	IO104_f : WORD;
+	IO105_f : WORD;
+	IO106_f : WORD;
+	IO107_f : WORD;
+END_VAR]]></Declaration>
+  </GVL>
+</TcPlcObject>

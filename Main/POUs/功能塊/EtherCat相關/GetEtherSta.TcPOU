@@ -1,0 +1,463 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+  <POU Name="GetEtherSta" Id="{f8e6b35f-46d7-4679-ad0f-82ada64b5169}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM GetEtherSta
+VAR
+	fbGetAllSlaveStates : FB_EcGetAllSlaveStates;
+    sNetId      AT %I*  : AMSNETID ;
+	sNetId2      AT %I*  : AMSNETID ;
+    bExecute            : BOOL;
+    devStates           : ARRAY[0..255] OF ST_EcSlaveState;
+	devStates2           : ARRAY[0..255] OF ST_EcSlaveState;
+    nSlaves             : UINT := 0;
+	nSlaves2             : UINT := 0;
+    nErrId              : UDINT;
+	
+	fbEcReqSlaveState : FB_EcReqSlaveState;
+	
+	fb_EcGetSlaveTopologyInfo	: FB_EcGetSlaveTopologyInfo;
+	TopologyInfo 				: ARRAY[0..255] OF ST_TopologyDataEx;
+	
+	step: INT;
+	tmr1: TON;
+	i: UINT;
+	
+	fb_EcSetSlaveState : FB_EcSetSlaveState;
+	resetSlaveNumber : INT;
+	tmr100: TON;
+	str_TmpString: WSTRING;
+	
+	
+	
+	step100: INT;
+END_VAR
+
+VAR_OUTPUT
+	bErrorGetEC: BOOL;
+
+	bBuzy: BOOL;
+	bError: BOOL;
+	bDone: BOOL;
+	iErrorId : INT;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[fbGetAllSlaveStates();
+bErrorGetEC := fbGetAllSlaveStates.bError;
+nErrId := fbGetAllSlaveStates.nErrId;
+
+CASE step OF
+	0:
+		fb_EcGetSlaveTopologyInfo.sNetId	:= F_CreateAmsNetId(sNetId);
+		fb_EcGetSlaveTopologyInfo.pAddrBuf	:= ADR(TopologyInfo);
+		fb_EcGetSlaveTopologyInfo.cbBufLen	:= SIZEOF(TopologyInfo);
+		fb_EcGetSlaveTopologyInfo.bExecute	:= TRUE;
+		step := step + 1;
+		
+	1:
+		IF fb_EcGetSlaveTopologyInfo.bBusy OR fb_EcGetSlaveTopologyInfo.bError THEN
+			step := step + 1;
+		END_IF
+		
+	2:
+		IF NOT fb_EcGetSlaveTopologyInfo.bBusy THEN
+			fb_EcGetSlaveTopologyInfo.bExecute := FALSE;
+			step := step + 1;
+		END_IF
+		
+	3:
+		step := 10;
+		
+		
+	10:
+		fbGetAllSlaveStates.sNetId:= F_CreateAmsNetId(sNetId);
+		fbGetAllSlaveStates.pStateBuf	:= ADR(devStates);
+		fbGetAllSlaveStates.cbBufLen	:= SIZEOF(devStates);
+		fbGetAllSlaveStates.bExecute := TRUE;
+		step := step + 1;
+		
+	11:
+		IF fbGetAllSlaveStates.bBusy OR fbGetAllSlaveStates.bError THEN
+			step := step + 1;
+		END_IF
+		
+	12:
+		IF NOT fbGetAllSlaveStates.bBusy THEN
+			fbGetAllSlaveStates.bExecute := FALSE;
+			nSlaves := fbGetAllSlaveStates.nSlaves;
+			step := step + 1;
+		END_IF
+		
+	13:
+		fbGetAllSlaveStates.sNetId		:= F_CreateAmsNetId(sNetId2);
+		fbGetAllSlaveStates.pStateBuf	:= ADR(devStates2);
+		fbGetAllSlaveStates.cbBufLen	:= SIZEOF(devStates2);
+		fbGetAllSlaveStates.bExecute := TRUE;
+		step := step + 1;
+		
+	14:
+		IF fbGetAllSlaveStates.bBusy OR fbGetAllSlaveStates.bError THEN
+			step := step + 1;
+		END_IF
+		
+	15:
+		IF NOT fbGetAllSlaveStates.bBusy THEN
+			fbGetAllSlaveStates.bExecute := FALSE;
+			nSlaves2 := fbGetAllSlaveStates.nSlaves;
+			step := step + 1;
+		END_IF
+		
+	16:
+		FOR i := 0 TO nSlaves2 DO
+			devStates[nSlaves + i] := devStates2[i];
+		END_FOR
+		step := 20;
+		
+		
+	20:
+		tmr1.in := TRUE;
+		tmr1.pt := T#5S;
+		IF tmr1.Q THEN
+			tmr1.in := FALSE;
+			step := step + 1;
+		END_IF
+		
+	21:
+		step := 10;
+			
+		
+END_CASE
+
+fb_EcGetSlaveTopologyInfo();
+
+fbEcReqSlaveState();
+
+Step100_resetECAT();
+
+tmr1();]]></ST>
+    </Implementation>
+    <Method Name="ResetECat1" Id="{81d36d6c-b2a9-41dd-8e5f-fd78af86e815}">
+      <Declaration><![CDATA[METHOD ResetECat1 : BOOL
+VAR_INPUT
+	SlaveAddr : INT;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[resetSlaveNumber := SlaveAddr;
+fb_EcSetSlaveState.sNetId := F_CreateAmsNetId(sNetId);
+bDone := FALSE;
+step100 := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="ResetECat2" Id="{062c26d6-8d9e-48c6-90cd-a3fd0f8e0594}">
+      <Declaration><![CDATA[METHOD ResetECat2 : BOOL
+VAR_INPUT
+	SlaveAddr : INT;
+	
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[resetSlaveNumber := SlaveAddr;
+fb_EcSetSlaveState.sNetId := F_CreateAmsNetId(sNetId2);
+bDone := FALSE;
+step100 := 100;]]></ST>
+      </Implementation>
+    </Method>
+    <Action Name="Step100_resetECAT" Id="{d8087f4f-ce2c-45c3-8d80-1bee3aaed400}">
+      <Implementation>
+        <ST><![CDATA[bBuzy := step100 > 0 AND step100 < 10000;
+bError := step100 > 10000;
+
+IF (EStop OR SystemError) THEN
+	bDone := FALSE;
+	IF bBuzy THEN
+		step100 := step100  + 10000;
+	END_IF
+END_IF
+
+IF ProgramReset THEN
+	iErrorId := step;
+	step := 0;
+END_IF
+
+CASE step100 OF
+	100:
+		fb_EcSetSlaveState.bExecute := FALSE;
+		fb_EcSetSlaveState.tTimeout := T#5S;
+		step100 := step100 + 1;
+		
+	101:// 將裝置設定狀態設為init
+		fb_EcSetSlaveState.nSlaveAddr := INT_TO_UINT(resetSlaveNumber);
+		fb_EcSetSlaveState.reqState := 1;
+		fb_EcSetSlaveState.bExecute := TRUE;
+		step100 := step100 + 1;
+		
+		
+	102:
+		IF fb_EcSetSlaveState.bBusy OR fb_EcSetSlaveState.bError THEN
+			step100 := step100 + 1;
+		END_IF
+		
+	103:
+		IF fb_EcSetSlaveState.currState.deviceState = 1 THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			step100 := step100 + 1;
+		ELSIF fb_EcSetSlaveState.bError THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			str_TmpString := WCONCAT(STR1:= "設定EtherCat站號", STR2:= INT_TO_WSTRING(resetSlaveNumber));
+			str_TmpString := WCONCAT(STR1:= str_TmpString, STR2:= " 的狀態為INIT時發生錯誤");
+			pMsg.Push_Alarm(str_TmpString);
+			step100 := step100 + 10000;
+		END_IF
+	
+	104:
+		tmr100.IN:=TRUE;
+		tmr100.PT := T#500MS;
+		IF tmr100.Q THEN
+			tmr100.IN:=FALSE;
+			step100 := step100 + 1;
+		END_IF
+		
+	105:
+		step100 := 110;
+		
+		
+		
+	110:// 將裝置設定狀態設為PREOP 
+		fb_EcSetSlaveState.nSlaveAddr := INT_TO_UINT(resetSlaveNumber);
+		fb_EcSetSlaveState.reqState := 2;
+		fb_EcSetSlaveState.bExecute := TRUE;
+		step100 := step100 + 1;
+		
+	111:
+		IF fb_EcSetSlaveState.bBusy OR fb_EcSetSlaveState.bError THEN
+			step100 := step100 + 1;
+		END_IF
+		
+	112:
+		IF fb_EcSetSlaveState.currState.deviceState = 2 THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			step100 := step100 + 1;
+		ELSIF fb_EcSetSlaveState.bError THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			str_TmpString := WCONCAT(STR1:= "設定EtherCat站號", STR2:= INT_TO_WSTRING(resetSlaveNumber));
+			str_TmpString := WCONCAT(STR1:= str_TmpString, STR2:= " 的狀態為PREOP時發生錯誤");
+			pMsg.Push_Alarm(str_TmpString);
+			step100 := step100 + 10000;
+		END_IF
+		
+	113:
+		tmr100.IN:=TRUE;
+		tmr100.PT := T#500MS;
+		IF tmr100.Q THEN
+			tmr100.IN:=FALSE;
+			step100 := step100 + 1;
+		END_IF
+		
+	114:
+		step100 := 120;
+		
+		
+		
+	120:// 將裝置設定狀態設為SAFEOP
+		fb_EcSetSlaveState.nSlaveAddr := INT_TO_UINT(resetSlaveNumber);
+		fb_EcSetSlaveState.reqState := 4;
+		fb_EcSetSlaveState.bExecute := TRUE;
+		step100 := step100 + 1;
+		
+		
+	121:
+		IF fb_EcSetSlaveState.bBusy OR fb_EcSetSlaveState.bError THEN
+			step100 := step100 + 1;
+		END_IF
+		
+	122:
+		IF fb_EcSetSlaveState.currState.deviceState = 4 THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			step100 := step100 + 1;
+		ELSIF fb_EcSetSlaveState.bError THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			str_TmpString := WCONCAT(STR1:= "設定EtherCat站號", STR2:= INT_TO_WSTRING(resetSlaveNumber));
+			str_TmpString := WCONCAT(STR1:= str_TmpString, STR2:= " 的狀態為SAFEOP時發生錯誤");
+			pMsg.Push_Alarm(str_TmpString);
+			step100 := step100 + 10000;
+		END_IF
+		
+	123:
+		tmr100.IN:=TRUE;
+		tmr100.PT := T#500MS;
+		IF tmr100.Q THEN
+			tmr100.IN:=FALSE;
+			step100 := step100 + 1;
+		END_IF
+		
+	124:
+		step100 := 130;
+		
+	130:// 將裝置設定狀態設為OP
+		fb_EcSetSlaveState.nSlaveAddr := INT_TO_UINT(resetSlaveNumber);
+		fb_EcSetSlaveState.reqState := 8;
+		fb_EcSetSlaveState.bExecute := TRUE;
+		step100 := step100 + 1;
+		
+		
+	131:
+		IF fb_EcSetSlaveState.bBusy OR fb_EcSetSlaveState.bError THEN
+			step100 := step100 + 1;
+		END_IF
+		
+	132:
+		IF fb_EcSetSlaveState.currState.deviceState = 8 THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			step100 := step100 + 1;
+		ELSIF fb_EcSetSlaveState.bError THEN
+			fb_EcSetSlaveState.bExecute := FALSE;
+			str_TmpString := WCONCAT(STR1:= "設定EtherCat站號", STR2:= INT_TO_WSTRING(resetSlaveNumber));
+			str_TmpString := WCONCAT(STR1:= str_TmpString, STR2:= " 的狀態為SAFEOP時發生錯誤");
+			pMsg.Push_Alarm(str_TmpString);
+			step100 := step100 + 10000;
+		END_IF
+		
+	133:
+		tmr100.IN:=TRUE;
+		tmr100.PT := T#500MS;
+		IF tmr100.Q THEN
+			tmr100.IN:=FALSE;
+			step100 := step100 + 1;
+		END_IF
+		
+	134:
+		bDone := TRUE;
+		step100 := 0;
+		
+END_CASE
+
+tmr100();
+fb_EcSetSlaveState();]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="GetEtherSta">
+      <LineId Id="13" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="167" Count="1" />
+      <LineId Id="172" Count="1" />
+      <LineId Id="169" Count="0" />
+      <LineId Id="174" Count="2" />
+      <LineId Id="178" Count="1" />
+      <LineId Id="177" Count="0" />
+      <LineId Id="180" Count="1" />
+      <LineId Id="183" Count="1" />
+      <LineId Id="186" Count="0" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="187" Count="2" />
+      <LineId Id="170" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="85" Count="2" />
+      <LineId Id="34" Count="4" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="41" Count="2" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="91" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="49" Count="1" />
+      <LineId Id="93" Count="15" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="109" Count="2" />
+      <LineId Id="113" Count="1" />
+      <LineId Id="51" Count="4" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="63" Count="5" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="190" Count="1" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="156" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="61" Count="0" />
+    </LineIds>
+    <LineIds Name="GetEtherSta.ResetECat1">
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="GetEtherSta.ResetECat2">
+      <LineId Id="5" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="11" Count="0" />
+    </LineIds>
+    <LineIds Name="GetEtherSta.Step100_resetECAT">
+      <LineId Id="186" Count="0" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="192" Count="0" />
+      <LineId Id="194" Count="9" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="191" Count="0" />
+      <LineId Id="1" Count="1" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="19" Count="1" />
+      <LineId Id="26" Count="4" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="36" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="39" Count="1" />
+      <LineId Id="99" Count="2" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="103" Count="3" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="46" Count="19" />
+      <LineId Id="182" Count="0" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="107" Count="2" />
+      <LineId Id="113" Count="0" />
+      <LineId Id="110" Count="2" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="68" Count="1" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="116" Count="3" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="120" Count="15" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="136" Count="10" />
+      <LineId Id="70" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="149" Count="3" />
+      <LineId Id="185" Count="0" />
+      <LineId Id="153" Count="15" />
+      <LineId Id="180" Count="0" />
+      <LineId Id="169" Count="10" />
+      <LineId Id="188" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
