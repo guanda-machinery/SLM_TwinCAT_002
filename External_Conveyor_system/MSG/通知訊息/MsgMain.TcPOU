@@ -36,7 +36,7 @@ END_VAR
 	_SqlCommand := 
 //	'INSERT INTO msg (msgtime, msg_level, msgnum, str1, str2) VALUES ({msgtime}, {msg_level}, {msgnum}, {str1})';
 
-	'INSERT INTO msg (msgtime, msg_level, msgnum, str1, str2, raw_msg_str) VALUES ({msgtime}, {msg_level}, {msgnum}, {str1}, {str2}, {raw_msg_str})';
+	'INSERT INTO msg (su, msgtime, msg_level, msgnum, str1, str2, raw_msg_str) VALUES (uuidV7, {msgtime}::timestamptz, {msg_level}, {msgnum}, {str1}, {str2}, {raw_msg_str})';
 
 	msgtmp.msgTIME := msg.msgTIME;
 	msgtmp.Level := msg.Level;

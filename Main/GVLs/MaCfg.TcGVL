@@ -82,6 +82,10 @@ VAR_GLOBAL PERSISTENT
 	FxA_Clamp_Zero_Pos: LREAL := 1297.4;
 	// BD夾輪的零點位置 ( 空夾位置 + 空夾兩夾輪間距(70))
 	FxB_Clamp_Zero_Pos: LREAL := 1296.49;
+	
+	// 雷射動作超時
+	LaserPrinter_Timeout : INT;
+	
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>
