@@ -1403,11 +1403,11 @@ CASE step OF
 		_SqlCommand := 
 		'SELECT EXISTS(
 			SELECT 
-				steel_id
+				part_nest_id
 			from 
 				public.work_order_data
 			where 
-				steel_id = {uuid}::uuid
+				part_nest_id = {uuid}::uuid
 		);';
 				
 		
@@ -1465,7 +1465,7 @@ CASE step OF
 		SET 
 			steel_status = $'machining$', steel_location = $'machine$'
 		WHERE
-			steel_id = {id}::UUID
+			part_nest_id = {id}::UUID
 		';
 		
 	
