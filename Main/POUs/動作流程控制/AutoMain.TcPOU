@@ -3728,11 +3728,9 @@ CASE step OF
 		ELSIF Hmi_Web.Jog_FxA.N THEN
 			step := 9370;
 		ELSIF Hmi_Web.Jog_FxA.ExEncTouch THEN
-			IO.q311 := TRUE;
-			IO.q311 := FALSE;
+			GroupFx.Fx_Enc_jog(EncA_touch := TRUE);
 		ELSIF Hmi_Web.Jog_FxA.ExEncExit THEN
-			IO.q311 := FALSE;
-			IO.q311 := TRUE;
+			GroupFx.Fx_Enc_jog(EncA_exit := TRUE);
 		ELSIF Hmi_Web.Jog_FxB.H_Close THEN
 			step := 9400;
 		ELSIF Hmi_Web.Jog_FxB.H_Hold THEN
@@ -3744,16 +3742,11 @@ CASE step OF
 		ELSIF Hmi_Web.Jog_FxB.V_Open THEN
 			step := 9440;
 		ELSIF Hmi_Web.Jog_FxB.ExEncTouch THEN
-			IO.q313 := TRUE;
-			IO.q314 := FALSE;
+			GroupFx.Fx_Enc_jog(EncB_touch := TRUE);
 		ELSIF Hmi_Web.Jog_FxB.ExEncExit THEN
-			IO.q313 := FALSE;
-			IO.q314 := TRUE;
+			GroupFx.Fx_Enc_jog(EncB_exit := TRUE);
 		ELSE
-			IO.q311 := FALSE;
-			IO.q311 := FALSE;
-			IO.q313 := FALSE;
-			IO.q314 := FALSE;
+			GroupFx.Fx_Enc_jog();
 		END_IF
 		
 		IF Hmi.Jog_Mode OR Hmi.MPG_Mode OR Hmi.Auto_Mode OR

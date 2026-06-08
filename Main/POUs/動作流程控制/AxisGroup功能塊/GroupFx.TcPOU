@@ -532,6 +532,23 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
+    <Method Name="Fx_Enc_jog" Id="{37aa8f8d-de3a-46e0-a0e3-947775af0dcf}">
+      <Declaration><![CDATA[METHOD Fx_Enc_jog : BOOL
+VAR_INPUT
+	EncA_touch	: BOOL := FALSE;
+	EncA_exit	: BOOL := FALSE;
+	EncB_touch	: BOOL := FALSE;
+	EncB_exit	: BOOL := FALSE;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[o_AC_Encoder_enable := EncA_touch;
+o_AC_Encoder_disable := EncA_exit;
+
+o_BD_Encoder_enable := EncB_touch;
+o_BD_Encoder_disable := EncB_exit;]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="Fx_Home" Id="{9c2c74f4-e82e-4baa-b643-a79afb0dc84a}">
       <Declaration><![CDATA[METHOD Fx_Home : BOOL
 VAR_INPUT
@@ -557,6 +574,7 @@ step := 1000;]]></ST>
     <Method Name="Fx_Set_A_Enc" Id="{3f3ddac9-bcb0-4070-8d12-9345305d8ec0}">
       <Declaration><![CDATA[METHOD Fx_Set_A_Enc : BOOL
 VAR_INPUT
+	
 END_VAR
 ]]></Declaration>
       <Implementation>
