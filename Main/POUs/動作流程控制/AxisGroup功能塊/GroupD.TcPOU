@@ -33,7 +33,7 @@ VAR
 	
 	moveZdis	: REAL;
 	tmr01A		: TON;
-	tmr01		: TOF;
+	tmr01		: TON;
 	
 	// 坐標系的參考原點
 	pointRef : XYZ_Point;
@@ -473,6 +473,7 @@ END_CASE
 			tmr01.IN := FALSE;
 			step := step + 1;
 		ELSIF tmr01.Q THEN
+			tmr01.IN := FALSE;
 			pMsg.Push_Error("GroupD:雷射動作超時");
 			step := step + 10000;
 		END_IF

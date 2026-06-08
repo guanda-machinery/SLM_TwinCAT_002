@@ -88,6 +88,7 @@
     <Folder Include="POUs" />
     <Folder Include="POUs\功能塊" />
     <Folder Include="POUs\功能塊\EtherCat相關" />
+    <Folder Include="POUs\功能塊\程式紀錄" />
     <Folder Include="POUs\功能塊\字串處理功能塊" />
     <Folder Include="POUs\功能塊\字串處理功能塊\浮點轉字串控制去小數點" />
     <Folder Include="POUs\功能塊\字串處理功能塊\字串記憶" />
@@ -274,6 +275,13 @@
     </Compile>
     <Compile Include="POUs\功能塊\字串處理功能塊\字串連接\WStrConcat.TcPOU">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\程式紀錄\StepLog_Struct.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\程式紀錄\Step_Log.TcPOU">
+      <SubType>Code</SubType>
+      <ExcludeFromBuild>true</ExcludeFromBuild>
     </Compile>
     <Compile Include="POUs\功能塊\資料庫 Postgre相關\ReadSQLData.TcPOU">
       <SubType>Code</SubType>
