@@ -5,7 +5,7 @@
 STRUCT
 	fx_a_pos	: LREAL;
 	ex_enc_pos	: LREAL;
-	data_time	: DT;
+	data_time	: LINT;
 	sheetid		: STRING(36);
 END_STRUCT
 END_TYPE

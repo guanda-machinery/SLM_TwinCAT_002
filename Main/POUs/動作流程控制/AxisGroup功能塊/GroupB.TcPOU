@@ -81,6 +81,8 @@ VAR
 	Y_Move: LREAL;
 	Z_Move: LREAL;
 	tmr_oil: TON;
+	
+	_log : Step_Log; 
 END_VAR
 
 VAR_OUTPUT
@@ -162,7 +164,9 @@ RefPos.Z := Az.Pos - pointRef.Z;
 
 ProjectData.Now_Steel_Payload_B_DataNumberDone := WorkNum;
 
-io.q306 := q_Lens_Blow;]]></ST>
+io.q306 := q_Lens_Blow;
+
+_log(name:= 'GroupB', step:= step);]]></ST>
     </Implementation>
     <Folder Name="入口" Id="{cc192c0b-fa87-453a-b171-3195c2311762}" />
     <Folder Name="內部功能" Id="{c17919d2-487e-4d56-a75b-118a779e5547}" />

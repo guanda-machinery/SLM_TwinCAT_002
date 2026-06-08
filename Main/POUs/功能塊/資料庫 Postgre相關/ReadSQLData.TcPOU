@@ -1614,7 +1614,7 @@ END_CASE]]></ST>
     <Action Name="Stap_3100_Set_Steel_Finish" Id="{ab4764c2-e21b-46f3-aa9a-4310f48c9722}">
       <Implementation>
         <ST><![CDATA[(*	=================================================================
-						從資料庫讀取 A頭 雷射檔
+						設定工件完成
 	================================================================= *)
 CASE step OF
 	3100:
@@ -1687,14 +1687,6 @@ CASE step OF
 			job_finish_time = {timestamp}, is_job_finish = true
 		WHERE
 			id = {id}::UUID;
-			
-		UPDATE 
-			public.steeldata 
-		SET 
-			sequence_number = sequence_number - 1
-		WHERE
-			sequence_number > 0;
-			
 		';
 			
 		// 設定對應參數
@@ -1733,11 +1725,11 @@ CASE step OF
 		_SqlCommand := 
 		'SELECT EXISTS(
 			SELECT 
-				steel_id
+				part_nest_id
 			from 
 				public.work_order_data
 			where 
-				steel_id = {uuid}::uuid
+				part_nest_id = {uuid}
 		);';
 				
 		
@@ -1790,18 +1782,27 @@ CASE step OF
 		// SQL命令
 		_SqlCommand := 
 		'
-		
 		UPDATE 
 			public.work_order_data 
 		SET 
-			steel_status = $'finish$', steel_location = $'exitRack$', sequence_number = 0, steel_process_is_job_finish = true
+			steel_status = $'finish$', 
+			steel_location = $'exitRack$',
+			steel_process_is_job_finish = true,
+			job_finish_time = {timestamp}
 		WHERE
-			steel_id = {id}::UUID
+			part_nest_id = {id};
+			
+		UPDATE 
+			public.work_order_data 
+		SET 
+			sequence_number = sequence_number - 1
+		WHERE
+			sequence_number > 0;
 		';
 			
 		// 設定對應參數
-		_stPara[0].sParaName := 'id'; 			_stPara[0].eParaType := E_ExpParameterType.STRING_; 		_stPara[0].nParaSize := 37;
-		
+		_stPara[0].sParaName := 'timestamp'; 			_stPara[0].eParaType := E_ExpParameterType.DateTime; 		_stPara[0].nParaSize := SIZEOF(Write_Time_para.Start_TIME);
+		_stPara[1].sParaName := 'id'; 					_stPara[1].eParaType := E_ExpParameterType.STRING_; 		_stPara[1].nParaSize := 37;
 		step := step + 1;
 		
 	3131:
@@ -1810,10 +1811,10 @@ CASE step OF
 				hDBID := database_server_id,
 				pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
 				cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
-				pData:= ADR(_uuid),							// 帶入的參數值
-				cbData:= SIZEOF(_uuid),						// 帶入的參數值大小
+				pData:= ADR(Write_Time_para),							// 帶入的參數值
+				cbData:= SIZEOF(Write_Time_para),						// 帶入的參數值大小
 				pParameter:= ADR(_stPara), 					// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
-				cbParameter:= SIZEOF(_stPara[0])			// 帶入的參數類型設定的大小
+				cbParameter:= SIZEOF(_stPara[0])*2			// 帶入的參數類型設定的大小
 			) 
 		THEN
 			IF MsgMain._fb_PLCDBCmdEvt.bError THEN

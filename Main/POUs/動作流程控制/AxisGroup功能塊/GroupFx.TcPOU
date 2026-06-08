@@ -169,6 +169,8 @@ VAR
 	
 	AC_Encoder_Active: BOOL;
 	BD_Encoder_Active: BOOL;
+	
+	_log : Step_Log; 
 END_VAR
 
 ]]></Declaration>
@@ -273,7 +275,9 @@ timer();
 
 output();
 
-]]></ST>
+
+
+_log(name:= 'GroupFX', step:= step);]]></ST>
     </Implementation>
     <Folder Name="內部功能" Id="{460ccaff-f0de-4f4a-ae51-469198ad2c0c}" />
     <Method Name="A_Press" Id="{f82ae2d7-18fc-4e60-8ad5-24798a574025}">

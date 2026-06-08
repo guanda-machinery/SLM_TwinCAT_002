@@ -4730,12 +4730,11 @@ CASE step OF
 		END_IF
 		
 	9313:
+		Hmi_Web.Jog_FxA.H_Hold := FALSE;
 		step:=9319;
 		
 	9319:
-		IF NOT Hmi_Web.Jog_FxA.H_Hold THEN
-			step:=8001;
-		END_IF
+		step:=8001;
 
 (*====================================
 				放
@@ -4931,12 +4930,11 @@ CASE step OF
 		END_IF
 		
 	9413:
+		Hmi_Web.Jog_FxB.H_Hold := FALSE;
 		step:=9419;
 		
 	9419:
-		IF NOT Hmi_Web.Jog_FxB.H_Hold THEN
-			step:=8001;
-		END_IF
+		step:=8001;
 
 (*	====================================
 					放

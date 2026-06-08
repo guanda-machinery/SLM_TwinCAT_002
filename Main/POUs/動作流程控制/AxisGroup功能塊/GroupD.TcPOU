@@ -94,6 +94,8 @@ VAR
 	Y_Move: LREAL;
 	Z_Move: LREAL;
 	tmr_oil: TON;
+	
+	_log : Step_Log; 
 END_VAR
 
 
@@ -192,7 +194,9 @@ END_IF
 io.q309 := q_Lens_Cap_Open;
 io.q310 := q_Lens_Cap_Close;
 
-io.q308 := q_Lens_Blow;]]></ST>
+io.q308 := q_Lens_Blow;
+
+_log(name:= 'GroupD', step:= step);]]></ST>
     </Implementation>
     <Folder Name="入口" Id="{8f04e6ff-138d-4a6d-9a92-13d3e7675a5b}" />
     <Folder Name="內部功能" Id="{6667eb1b-bf27-40b1-9501-af6b166c47d1}" />

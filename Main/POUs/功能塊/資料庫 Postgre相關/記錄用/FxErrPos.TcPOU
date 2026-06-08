@@ -37,12 +37,12 @@ END_VAR
 
 // SQL命令
 	_SqlCommand := 
-	'INSERT INTO "public"."fx_pos_err" ("fx_a_pos", "ex_enc_pos", "data_time", "sheetid") VALUES ( {fx_a_pos}, {ex_enc_pos}, {data_time}, {sheetid}::UUID);';
+	'INSERT INTO "public"."fx_pos_err" ("fx_a_pos", "ex_enc_pos", "data_time", "sheetid") VALUES ( {fx_a_pos}, {ex_enc_pos}, to_timestamp(({data_time} - 116444736000000000) / 10000000.0), {sheetid}::UUID);';
 	
 	// 設定對應參數
 	_stPara[0].sParaName := 'fx_a_pos'; 		_stPara[0].eParaType := E_ExpParameterType.Double64; 	_stPara[0].nParaSize := SIZEOF(_FxErrPos.fx_a_pos);
 	_stPara[1].sParaName := 'ex_enc_pos'; 		_stPara[1].eParaType := E_ExpParameterType.Double64; 	_stPara[1].nParaSize := SIZEOF(_FxErrPos.ex_enc_pos);
-	_stPara[2].sParaName := 'data_time';		_stPara[2].eParaType := E_ExpParameterType.DateTime;	_stPara[2].nParaSize := SIZEOF(_FxErrPos.data_time);
+	_stPara[2].sParaName := 'data_time';		_stPara[2].eParaType := E_ExpParameterType.Int64;		_stPara[2].nParaSize := SIZEOF(_FxErrPos.data_time);
 	_stPara[3].sParaName := 'sheetid';			_stPara[3].eParaType := E_ExpParameterType.STRING_;		_stPara[3].nParaSize := SIZEOF(_FxErrPos.sheetid);
 
 IF _write THEN
@@ -51,7 +51,7 @@ IF _write THEN
 	bDone	:= FALSE;
 	
 	IF _fb_PLCDBCmdEvt.Execute(
-			hDBID := 1,
+			hDBID := 3,
 			pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
 			cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
 			pData:= ADR(_FxErrPos),						// 帶入的參數值
@@ -81,7 +81,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[_FxErrPos.data_time 	:= msgbuff.currentTime;
+        <ST><![CDATA[_FxErrPos.data_time 	:= TO_LINT(F_GetSystemTime());
 
 _FxErrPos.sheetid		:= ProjectData.Now_Steel.uid;
 
