@@ -281,7 +281,7 @@
     </Compile>
     <Compile Include="POUs\功能塊\程式紀錄\Step_Log.TcPOU">
       <SubType>Code</SubType>
-      <ExcludeFromBuild>true</ExcludeFromBuild>
+      <ExcludeFromBuild>false</ExcludeFromBuild>
     </Compile>
     <Compile Include="POUs\功能塊\資料庫 Postgre相關\ReadSQLData.TcPOU">
       <SubType>Code</SubType>

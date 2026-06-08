@@ -1627,7 +1627,8 @@ CASE step OF
 				public.steeldata
 			where 
 				id = {uuid}::uuid
-		);';
+		);
+		';
 				
 		
 	
@@ -1685,7 +1686,15 @@ CASE step OF
 		SET 
 			job_finish_time = {timestamp}, is_job_finish = true
 		WHERE
-			id = {id}::UUID
+			id = {id}::UUID;
+			
+		UPDATE 
+			public.steeldata 
+		SET 
+			sequence_number = sequence_number - 1
+		WHERE
+			sequence_number > 0;
+			
 		';
 			
 		// 設定對應參數

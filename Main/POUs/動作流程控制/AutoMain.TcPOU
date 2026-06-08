@@ -49,6 +49,8 @@ VAR
 	GroupB_Now_Z: LREAL;
 	// 回原點模式
 	homeMode: BOOL;
+	
+	_log : Step_Log; 
 END_VAR
 
 VAR_OUTPUT
@@ -112,7 +114,9 @@ TestActionPou();
 // END_IF
 
 Timer();
-WritePersistentData();]]></ST>
+WritePersistentData();
+
+_log(name := 'AutoMain', step := step);]]></ST>
     </Implementation>
     <Folder Name="JOG流程8100_9400" Id="{29c869f8-9e55-4891-96de-3fdfd31f73ae}" />
     <Folder Name="內部啟動用" Id="{e54b00b0-37e1-43e2-ac19-0768ee77541d}" />
