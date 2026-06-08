@@ -78,6 +78,7 @@ VAR
 	move_Start_Pos : LREAL;
 	move_RTrig : R_TRIG;
 	move_FTrig : F_TRIG;
+	_retry_count: INT;
 END_VAR
 
 VAR_OUTPUT
@@ -431,7 +432,7 @@ CASE step OF
 		tmrWdt.IN := FALSE;
 //		SetDyn(bJogMode);
 		Axis1Reset.Execute :=FALSE;
-		
+		_retry_count := 0;
 		IF NOT bDone THEN
 			step := 10;
 		END_IF
@@ -477,11 +478,17 @@ CASE step OF
 			tmrWdt.IN := FALSE;
 			
 		ELSIF tmrWdt.Q OR Axis1Power.Error THEN
-			pMsg.Push_Error(
-					ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 啟動失敗", ErrorCode:= Axis1Power.ErrorID)
-			);
 			tmrWdt.IN := FALSE;
-			step:=step + 10000;
+			IF _retry_count > 3 THEN
+				pMsg.Push_Error(
+						ErrorCodeConver.Str(str0:= scAxisName, str1:= ": 啟動失敗", ErrorCode:= Axis1Power.ErrorID)
+				);
+				step:=step + 10000;
+			ELSE
+				Axis1Power.Enable := FALSE;
+				step := 10;
+				_retry_count := _retry_count + 1;
+			END_IF
 		END_IF
 		
 	23:// 馬達啟動後延遲
