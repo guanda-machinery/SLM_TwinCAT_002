@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Step_Log" Id="{270360c1-f0bd-4d2c-a674-2515648ccf16}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION_BLOCK Step_Log
+VAR_INPUT
+	name : STRING;
+END_VAR
+VAR_OUTPUT
+END_VAR
+VAR
+	LogData : StepLog_Struct;
+
+	old_step : DINT;
+
+	db_fb_PLCDBCmdEvt : FB_PLCDBCmdEvt(sNetID:= '', tTimeout:= T#5S );
+	
+	_SqlCommand : STRING(255);
+	
+END_VAR
+VAR_IN_OUT
+	step : DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF step <> old_step THEN
+	old_step := step;
+	
+	LogData.name := name;
+	
+	LogData.step := step;
+	
+	
+	// SQL命令
+	_SqlCommand := 
+
+	'INSERT INTO msg (su, msgtime, msg_level, msgnum, str1, str2, raw_msg_str) VALUES (uuidv7(), {msgtime}::timestamptz, {msg_level}, {msgnum}, {str1}, {str2}, {raw_msg_str})';
+
+	
+
+
+// 設定對應參數
+	_stPara[0].sParaName := 'msgtime'; 		_stPara[0].eParaType := E_ExpParameterType.DateTime; 	_stPara[0].nParaSize := SIZEOF(msgtmp.msgTIME);
+	_stPara[1].sParaName := 'msg_level'; 	_stPara[1].eParaType := E_ExpParameterType.Int16; 		_stPara[1].nParaSize := SIZEOF(msgtmp.Level);
+	_stPara[2].sParaName := 'msgnum';		_stPara[2].eParaType := E_ExpParameterType.Int16;		_stPara[2].nParaSize := SIZEOF(msgtmp.Number);
+	_stPara[3].sParaName := 'str1';			_stPara[3].eParaType := E_ExpParameterType.WSTRING_;	_stPara[3].nParaSize := 160;
+	_stPara[4].sParaName := 'str2';			_stPara[4].eParaType := E_ExpParameterType.WSTRING_;	_stPara[4].nParaSize := 160;
+	_stPara[5].sParaName := 'raw_msg_str';	_stPara[5].eParaType := E_ExpParameterType.WSTRING_;	_stPara[5].nParaSize := 500;
+
+
+	IF 
+		MsgMain._fb_PLCDBCmdEvt.Execute(
+			hDBID := 1,
+			pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+			cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+			pData:= ADR(msgtmp),		// 帶入的參數值
+			cbData:= SIZEOF(msgtmp),//itmp, 	// 帶入的參數值大小
+			pParameter:= ADR(_stPara), 				// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+			cbParameter:= SIZEOF(_stPara),			// 帶入的參數類型設定的大小
+		) 
+	THEN
+		IF MsgMain._fb_PLCDBCmdEvt.bError THEN
+			tcMessage := MsgMain._fb_PLCDBCmdEvt.ipTcResult;
+		END_IF
+		msgbuff.DoneNumber := msgbuff.DoneNumber + 1;
+	END_IF
+ELSIF msgbuff.DoneNumber > msgbuff.evenNumber THEN
+	msgbuff.DoneNumber := msgbuff.evenNumber;
+END_IF
+
+msgbuff.systime(
+	bEnable:= TRUE, 
+	dwCycle:= 1,
+	systemTime=> );
+msgbuff.currentTime := SYSTEMTIME_TO_DT(msgbuff.systime.systemTime);]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
