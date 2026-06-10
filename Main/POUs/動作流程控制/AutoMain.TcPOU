@@ -78,6 +78,7 @@ bBuzy := (step >= 100 AND step < 10000);
 bError := (step > 10000);
 
 tmr_ErrorReset(in:= bError, PT:=T#1S);
+
 IF tmr_ErrorReset.Q THEN
 	iErrorId := step;
 	step := 0;

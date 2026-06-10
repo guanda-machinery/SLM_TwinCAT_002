@@ -121,19 +121,25 @@
     <Compile Include="POUs\功能塊\字串處理功能塊\字串連接\WStrConcat.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\功能塊\資料庫 Postgre相關\ReadSQLData.TcPOU">
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\動作資料\ReadSQLData.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\sc_db_Set_Work_Order_WaitLoading_Pos.TcDUT">
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\動作資料\相關結構\e_db_steel_local.TcTLEO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\sc_db_Steel_Status.TcDUT">
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\動作資料\相關結構\e_db_steel_status.TcTLEO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\e_db_steel_status.TcTLEO">
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\動作資料\相關結構\sc_db_Set_Work_Order_WaitLoading_Pos.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\e_db_steel_local.TcTLEO">
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\動作資料\相關結構\sc_db_Steel_Status.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\程式紀錄\StepLog_Struct.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\程式紀錄\Step_Log.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\動作流程控制\Alignment_pos.TcDUT">
@@ -209,6 +215,10 @@
     <Folder Include="MSG\訊息列表" />
     <Folder Include="MSG\訊息格式" />
     <Folder Include="MSG\通知訊息" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\動作資料" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\動作資料\相關結構" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\記錄用" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\記錄用\程式紀錄" />
     <Folder Include="POUs\資料轉換" />
     <Folder Include="POUs\功能塊" />
     <Folder Include="POUs\功能塊\EtherCat相關" />
@@ -217,7 +227,6 @@
     <Folder Include="POUs\功能塊\字串處理功能塊\字串記憶" />
     <Folder Include="POUs\功能塊\字串處理功能塊\字串連接" />
     <Folder Include="POUs\功能塊\資料庫 Postgre相關" />
-    <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構" />
     <Folder Include="POUs\動作流程控制" />
     <Folder Include="POUs\動作流程控制\滾輪整料" />
     <Folder Include="POUs\安全控制" />
@@ -285,8 +294,8 @@
   <ProjectExtensions>
     <PlcProjectOptions>
       <XmlArchive>
-  <Data>
-    <o xml:space="preserve" t="OptionKey">
+        <Data>
+          <o xml:space="preserve" t="OptionKey">
       <v n="Name">"&lt;ProjectRoot&gt;"</v>
       <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
         <v>{192FAD59-8248-4824-A8DE-9177C94C195A}</v>
@@ -356,14 +365,14 @@
       </d>
       <d n="Values" t="Hashtable" />
     </o>
-  </Data>
-  <TypeList>
-    <Type n="Boolean">System.Boolean</Type>
-    <Type n="Hashtable">System.Collections.Hashtable</Type>
-    <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
-    <Type n="String">System.String</Type>
-  </TypeList>
-</XmlArchive>
+        </Data>
+        <TypeList>
+          <Type n="Boolean">System.Boolean</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+          <Type n="String">System.String</Type>
+        </TypeList>
+      </XmlArchive>
     </PlcProjectOptions>
   </ProjectExtensions>
 </Project>

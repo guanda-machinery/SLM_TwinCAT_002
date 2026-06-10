@@ -80,7 +80,8 @@ VAR
 	move_FTrig : F_TRIG;
 	_retry_count: INT;
 
-	_log : Step_Log; 
+	_log : Step_Log;
+// 	_log_data : string(256);
 END_VAR
 
 VAR_OUTPUT

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <DUT Name="StepLog_Struct" Id="{37ba0d87-00ed-4f8b-9415-06cd3893e8ed}">
+    <Declaration><![CDATA[TYPE StepLog_Struct :
+STRUCT
+	step_number : DINT;
+	created_at : LINT;
+	program_name : STRING(80);
+END_STRUCT
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

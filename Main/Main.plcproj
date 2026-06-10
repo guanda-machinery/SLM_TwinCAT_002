@@ -88,7 +88,6 @@
     <Folder Include="POUs" />
     <Folder Include="POUs\功能塊" />
     <Folder Include="POUs\功能塊\EtherCat相關" />
-    <Folder Include="POUs\功能塊\程式紀錄" />
     <Folder Include="POUs\功能塊\字串處理功能塊" />
     <Folder Include="POUs\功能塊\字串處理功能塊\浮點轉字串控制去小數點" />
     <Folder Include="POUs\功能塊\字串處理功能塊\字串記憶" />
@@ -103,6 +102,8 @@
     <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\寫入起始時間" />
     <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得範圍內的加工資料" />
     <Folder Include="POUs\功能塊\資料庫 Postgre相關\相關結構\取得X點" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\記錄用\滾輪誤差紀錄" />
+    <Folder Include="POUs\功能塊\資料庫 Postgre相關\記錄用\程式紀錄" />
     <Folder Include="POUs\動作流程控制\外部輸送滾輪" />
     <Folder Include="POUs\安全控制" />
     <Folder Include="POUs\硬體控制" />
@@ -114,7 +115,7 @@
     <Folder Include="POUs\硬體控制\其他控制\三色燈" />
     <Folder Include="POUs\動作流程控制" />
     <Folder Include="POUs\動作流程控制\AxisGroup功能塊" />
-    <Folder Include="POUs\動作流程控制\JOG資料轉換" />
+    <Folder Include="POUs\動作流程控制\人機資料轉換" />
     <Folder Include="POUs\動作流程控制\測試功能" />
     <Folder Include="VISUs" />
   </ItemGroup>
@@ -276,13 +277,6 @@
     <Compile Include="POUs\功能塊\字串處理功能塊\字串連接\WStrConcat.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\功能塊\程式紀錄\StepLog_Struct.TcDUT">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="POUs\功能塊\程式紀錄\Step_Log.TcPOU">
-      <SubType>Code</SubType>
-      <ExcludeFromBuild>false</ExcludeFromBuild>
-    </Compile>
     <Compile Include="POUs\功能塊\資料庫 Postgre相關\ReadSQLData.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -295,10 +289,16 @@
     <Compile Include="POUs\功能塊\資料庫 Postgre相關\相關結構\寫入起始時間\Payload_Write_Time.TcDUT">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\FxErrPos.TcPOU">
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\滾輪誤差紀錄\FxErrPos.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\FxErrPos_Struct.TcDUT">
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\滾輪誤差紀錄\FxErrPos_Struct.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\程式紀錄\StepLog_Struct.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\程式紀錄\Step_Log.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\動作流程控制\AxisGroup功能塊\GroupA.TcPOU">
@@ -362,7 +362,7 @@
     <Compile Include="POUs\動作流程控制\AutoMain.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\動作流程控制\JOG資料轉換\WebHmi.TcPOU">
+    <Compile Include="POUs\動作流程控制\人機資料轉換\WebHmi.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\動作流程控制\測試功能\Sql_TestData.TcDUT">
@@ -432,8 +432,8 @@
   <ProjectExtensions>
     <PlcProjectOptions>
       <XmlArchive>
-  <Data>
-    <o xml:space="preserve" t="OptionKey">
+        <Data>
+          <o xml:space="preserve" t="OptionKey">
       <v n="Name">"&lt;ProjectRoot&gt;"</v>
       <d n="SubKeys" t="Hashtable" ckt="String" cvt="OptionKey">
         <v>{192FAD59-8248-4824-A8DE-9177C94C195A}</v>
@@ -503,14 +503,14 @@
       </d>
       <d n="Values" t="Hashtable" />
     </o>
-  </Data>
-  <TypeList>
-    <Type n="Boolean">System.Boolean</Type>
-    <Type n="Hashtable">System.Collections.Hashtable</Type>
-    <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
-    <Type n="String">System.String</Type>
-  </TypeList>
-</XmlArchive>
+        </Data>
+        <TypeList>
+          <Type n="Boolean">System.Boolean</Type>
+          <Type n="Hashtable">System.Collections.Hashtable</Type>
+          <Type n="OptionKey">{54dd0eac-a6d8-46f2-8c27-2f43c7e49861}</Type>
+          <Type n="String">System.String</Type>
+        </TypeList>
+      </XmlArchive>
     </PlcProjectOptions>
   </ProjectExtensions>
 </Project>
