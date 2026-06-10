@@ -556,6 +556,11 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[bDone := FALSE;
+
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','Fx_Home');
+_log.JsonOutput();
+
 step := 2000;]]></ST>
       </Implementation>
     </Method>
@@ -568,17 +573,27 @@ END_VAR
       <Implementation>
         <ST><![CDATA[_TargetPos := Pos;
 bDone := FALSE;
+
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','Fx_Move');
+_log.fbJson.AddKeyLreal('Pos', Pos);
+_log.JsonOutput();
+
+
 step := 1000;]]></ST>
       </Implementation>
     </Method>
     <Method Name="Fx_Set_A_Enc" Id="{3f3ddac9-bcb0-4070-8d12-9345305d8ec0}">
       <Declaration><![CDATA[METHOD Fx_Set_A_Enc : BOOL
 VAR_INPUT
-	
-END_VAR
-]]></Declaration>
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[bDone := FALSE;
+
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','Fx_Set_A_Enc');
+_log.JsonOutput();
+
 step := 2100;]]></ST>
       </Implementation>
     </Method>
