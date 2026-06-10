@@ -6,6 +6,7 @@ STRUCT
 	step_number : DINT;
 	created_at : LINT;
 	program_name : STRING(80);
+	extras_Srt : STRING(255) := '{}';
 END_STRUCT
 END_TYPE
 ]]></Declaration>

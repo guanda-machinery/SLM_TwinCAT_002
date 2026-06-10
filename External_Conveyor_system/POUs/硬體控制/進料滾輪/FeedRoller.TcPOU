@@ -31,10 +31,12 @@ END_VAR]]></Declaration>
 	IF bBuzy THEN
 		step := step  + 10000;
 	END_IF
-	IO.q114 := FALSE;
-	IO.q115 := FALSE;
-	IO.q305 := FALSE;
-	IO.q306 := FALSE;
+	IO.q102 := FALSE;
+	IO.q103 := FALSE;
+	IO.q309 := FALSE;
+	IO.q310 := FALSE;
+	IO.q311 := FALSE;
+	IO.q312 := FALSE;
 END_IF
 
 

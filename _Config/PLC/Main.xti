@@ -1251,7 +1251,7 @@ External Setpoint Generation:
 		</DataType>
 	</DataTypes>
 	<Project GUID="{9921DBC6-8FA2-4ECB-8283-76D7776F3D73}" Name="Main" PrjFilePath="..\..\Main\Main.plcproj" TmcFilePath="..\..\Main\Main.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x000e" CopyTmcToTarget="true" SymbolicMapping="true">
-		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="1" TmcHash="{F62455E9-3998-B59B-5024-80C2E6023448}" TmcPath="Main\Main.tmc">
+		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="1" TmcHash="{E7E5DD34-F706-15F6-CFF1-CCC6D2D5A26C}" TmcPath="Main\Main.tmc">
 			<Name>Main Instance</Name>
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 			<Vars VarGrpType="2" ContextId="1" AreaNo="17">

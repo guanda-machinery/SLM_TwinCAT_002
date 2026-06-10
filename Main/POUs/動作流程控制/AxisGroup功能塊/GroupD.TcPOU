@@ -96,6 +96,7 @@ VAR
 	tmr_oil: TON;
 	
 	_log : Step_Log; 
+	_logA : Step_Log; 
 END_VAR
 
 
@@ -196,7 +197,8 @@ io.q310 := q_Lens_Cap_Close;
 
 io.q308 := q_Lens_Blow;
 
-_log(name:= 'GroupD', step:= step);]]></ST>
+_log(name:= 'GroupD', step:= step);
+_logA(name:= 'GroupD_Mov', step:= StepA.Step);]]></ST>
     </Implementation>
     <Folder Name="入口" Id="{8f04e6ff-138d-4a6d-9a92-13d3e7675a5b}" />
     <Folder Name="內部功能" Id="{6667eb1b-bf27-40b1-9501-af6b166c47d1}" />
@@ -208,6 +210,14 @@ END_VAR
       <Implementation>
         <ST><![CDATA[bDone := FALSE;
 
+// ============ 紀錄啟動條件 ============
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','Do_WorkList');
+_log.JsonOutput();
+// ======================================
+
+
+
 Step := 100;]]></ST>
       </Implementation>
     </Method>
@@ -218,6 +228,17 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[StepA.bDone := FALSE;
+
+// ============ 紀錄啟動條件 ============
+_logA.fbJson.StartObject();
+_logA.fbJson.AddKeyString('MethodName','FindZ');
+_logA.JsonOutput();
+// ======================================
+
+
+
+
+
 StepA.step := 200;]]></ST>
       </Implementation>
     </Method>
@@ -228,6 +249,16 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[StepA.bDone := FALSE;
+
+// ============ 紀錄啟動條件 ============
+_logA.fbJson.StartObject();
+_logA.fbJson.AddKeyString('MethodName','FindZ_Fast');
+_logA.JsonOutput();
+// ======================================
+
+
+
+
 StepA.step := 220;]]></ST>
       </Implementation>
     </Method>
@@ -237,7 +268,7 @@ StepA.step := 220;]]></ST>
 Y_Move := Axis.GdY_total_Move - Axis.GdY_Last_Oil;
 Z_Move := Axis.GdZ_total_Move - Axis.GdZ_Last_Oil;
 
-IF X_Move > 10000 OR Y_Move > 10000 OR Z_Move > 10000 THEN
+IF X_Move > 1000000 OR Y_Move > 1000000 OR Z_Move > 1000000 THEN
 	IO.q207 := TRUE;
 END_IF]]></ST>
       </Implementation>
@@ -1021,6 +1052,17 @@ IF Speed > 0 THEN
 ELSE
 	moveCmd_Spd := SpdC.HomeSpeed;
 END_IF
+
+// ============ 紀錄啟動條件 ============
+_logA.fbJson.StartObject();
+_logA.fbJson.AddKeyString('MethodName','ToStanby');
+_logA.fbJson.AddKeyLreal('Velocity', Speed);
+_logA.JsonOutput();
+// ======================================
+
+
+
+
 StepA.step := 2000;]]></ST>
       </Implementation>
     </Method>
@@ -1038,6 +1080,17 @@ moveCmd_Y := Y_Point;
 moveCmd_Spd := Speed;
 
 StepA.bDone := FALSE;
+
+// ============ 紀錄啟動條件 ============
+_logA.fbJson.StartObject();
+_logA.fbJson.AddKeyString('MethodName','XY_Move');
+_logA.fbJson.AddKeyLreal('X_Point', X_Point);
+_logA.fbJson.AddKeyLreal('Y_Point', Y_Point);
+_logA.fbJson.AddKeyLreal('Velocity', Speed);
+_logA.JsonOutput();
+// ======================================
+
+
 StepA.step := 100;]]></ST>
       </Implementation>
     </Method>
@@ -1055,6 +1108,17 @@ moveCmd_Y := Y_Point;
 moveCmd_Spd := Speed;
 
 StepA.bDone := FALSE;
+
+// ============ 紀錄啟動條件 ============
+_logA.fbJson.StartObject();
+_logA.fbJson.AddKeyString('MethodName','XY_Move_Ref');
+_logA.fbJson.AddKeyLreal('X_Point', X_Point);
+_logA.fbJson.AddKeyLreal('Y_Point', Y_Point);
+_logA.fbJson.AddKeyLreal('Velocity', Speed);
+_logA.JsonOutput();
+// ======================================
+
+
 StepA.step := 1000;]]></ST>
       </Implementation>
     </Method>

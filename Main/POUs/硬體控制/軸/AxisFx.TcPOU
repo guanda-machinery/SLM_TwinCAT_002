@@ -99,7 +99,19 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[TargetPos := pos;
-step:=1300;]]></ST>
+
+// ============ 紀錄啟動條件 ============
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','SetPos');
+_log.fbJson.AddKeyLreal('Position', Pos);
+_log.JsonOutput();
+// ======================================
+
+step:=1300;
+
+
+
+]]></ST>
       </Implementation>
     </Method>
     <Action Name="Step1_13_SetPos" Id="{1ee2f36f-79e2-4391-8f05-529245cf7919}" FolderPath="內部程式\">

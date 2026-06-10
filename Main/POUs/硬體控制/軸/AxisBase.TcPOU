@@ -81,7 +81,6 @@ VAR
 	_retry_count: INT;
 
 	_log : Step_Log;
-// 	_log_data : string(256);
 END_VAR
 
 VAR_OUTPUT
@@ -136,7 +135,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[bDone := FALSE;
-step:=1;
+
 Mode := ActionMode.AbsMove;
 TargetPos := _Position;
 
@@ -144,7 +143,16 @@ IF _Velocity = 0 THEN
 	Velocity := 10;
 ELSE
 	Velocity := _Velocity;
-END_IF]]></ST>
+END_IF
+// ============ 紀錄啟動條件 ============
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','AbsMove');
+_log.fbJson.AddKeyLreal('Position', _Position);
+_log.fbJson.AddKeyLreal('Velocity', _Velocity);
+_log.JsonOutput();
+// ======================================
+
+step:=1;]]></ST>
       </Implementation>
     </Method>
     <Property Name="Axis_States" Id="{df6e4bcd-8d81-4f11-a5a4-6246208ce1fe}">
@@ -162,13 +170,19 @@ Axis_States := Axis1.Status;]]></ST>
     <Method Name="Homing" Id="{abce250f-ea38-4fb8-80e0-ef1eeaec195c}">
       <Declaration><![CDATA[METHOD Homing : BOOL
 VAR
-END_VAR
-
-]]></Declaration>
+END_VAR]]></Declaration>
       <Implementation>
         <ST><![CDATA[bDone := FALSE;
-step:=1;
-Mode := ActionMode.Home;]]></ST>
+Mode := ActionMode.Home;
+
+// ============ 紀錄啟動條件 ============
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','Homing');
+_log.JsonOutput();
+// ======================================
+
+
+step:=1;]]></ST>
       </Implementation>
     </Method>
     <Action Name="Main" Id="{d6d523ce-605f-4fc7-b327-0b4f9cd44eef}" FolderPath="內部程式\">
@@ -328,11 +342,20 @@ END_VAR
       <Declaration><![CDATA[METHOD PowerOff : BOOL
 VAR_INPUT
 END_VAR
+
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[(*===============================
 			關閉馬達
   ===============================*)
+
+// ============ 紀錄啟動條件 ============
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','PowerOff');
+_log.JsonOutput();
+// ======================================
+
+
 step:=800;]]></ST>
       </Implementation>
     </Method>
@@ -340,11 +363,22 @@ step:=800;]]></ST>
       <Declaration><![CDATA[METHOD PowerOn : BOOL
 VAR_INPUT
 END_VAR
+
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[bDone := FALSE;
-step:=1;
-Mode := ActionMode.DoNothing;]]></ST>
+Mode := ActionMode.DoNothing;
+
+
+
+// ============ 紀錄啟動條件 ============
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','PowerOn');
+_log.JsonOutput();
+// ======================================
+
+
+step:=1;]]></ST>
       </Implementation>
     </Method>
     <Method Name="RelMove" Id="{a4b4f739-7d84-4360-8875-5ba6873c9611}">
@@ -359,7 +393,6 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[bDone := FALSE;
-step:=1;
 Mode := ActionMode.RelMove;
 TargetPos := _Position;
 
@@ -368,7 +401,18 @@ IF _Velocity = 0 THEN
 ELSE
 	Velocity := _Velocity;
 END_IF
-]]></ST>
+
+
+// ============ 紀錄啟動條件 ============
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','RelMove');
+_log.fbJson.AddKeyLreal('Position', _Position);
+_log.fbJson.AddKeyLreal('Velocity', _Velocity);
+_log.JsonOutput();
+// ======================================
+
+
+step:=1;]]></ST>
       </Implementation>
     </Method>
     <Method Name="Set_Recoder" Id="{d0b62eb4-8d21-49fb-b612-ac9be58b9fa2}" FolderPath="設定\">
@@ -1267,6 +1311,16 @@ END_VAR
         <ST><![CDATA[(*===============================
 			關閉馬達
   ===============================*)
+
+
+// ============ 紀錄啟動條件 ============
+_log.fbJson.StartObject();
+_log.fbJson.AddKeyString('MethodName','Stop');
+_log.fbJson.AddKeyLreal('Dec', Dec);
+_log.JsonOutput();
+// ======================================
+
+
 step:=850;]]></ST>
       </Implementation>
     </Method>
