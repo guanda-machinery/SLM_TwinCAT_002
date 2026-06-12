@@ -1078,6 +1078,12 @@ END_CASE]]></ST>
 		
 	703:
 		Last_Pos := ReadSQLData.fNext_XPos;
+		// ============ 紀錄啟動條件 ============
+		_log.fbJson.StartObject();
+		_log.fbJson.AddKeyString('StepName','Get_Next_XPos');
+		_log.fbJson.AddKeyLreal('fNext_XPos', Last_Pos);
+		_log.JsonOutput();
+		// ======================================
 		_debug_X_NextPos[_debug_X_NextPos_count] := Last_Pos;
 		_debug_X_NextPos_count := 1;
 		step := step + 1;
@@ -1357,6 +1363,13 @@ CASE step OF
 		
 	803:
 		Last_Pos := ReadSQLData.fNext_XPos;
+		
+		// ============ 紀錄啟動條件 ============
+		_log.fbJson.StartObject();
+		_log.fbJson.AddKeyString('StepName','Get_Next_XPos');
+		_log.fbJson.AddKeyLreal('fNext_XPos', Last_Pos);
+		_log.JsonOutput();
+		// ======================================
 		
 		_debug_X_NextPos[_debug_X_NextPos_count] := Last_Pos;
 		_debug_X_NextPos_count := _debug_X_NextPos_count + 1;
@@ -1763,6 +1776,13 @@ CASE step OF
 		
 	903:
 		Last_Pos := ReadSQLData.fNext_XPos;
+		
+		// ============ 紀錄啟動條件 ============
+		_log.fbJson.StartObject();
+		_log.fbJson.AddKeyString('StepName','Get_Next_XPos');
+		_log.fbJson.AddKeyLreal('fNext_XPos', Last_Pos);
+		_log.JsonOutput();
+		// ======================================
 		
 		_debug_X_NextPos[_debug_X_NextPos_count] := Last_Pos;
 		_debug_X_NextPos_count := _debug_X_NextPos_count + 1;

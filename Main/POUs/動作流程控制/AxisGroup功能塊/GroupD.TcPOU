@@ -490,6 +490,13 @@ END_CASE
 		
 	312:
 		Hmi_Web.Process_Data_UUID_D_Start := TRUE;
+		// ============ 紀錄啟動條件 ============
+		_log.fbJson.StartObject();
+		_log.fbJson.AddKeyString('StepName','Laser_D_Start');
+		_log.fbJson.AddKeyBool('Process_Data_UUID_D_Start', Hmi_Web.Process_Data_UUID_A_Start);
+		_log.fbJson.AddKeyString('Payload_D_Data_Now', ProjectData.Payload_D_Data_Now.data_uid);
+		_log.JsonOutput();
+		// ======================================
 		step := step + 1;
 		
 	313:	
@@ -506,6 +513,11 @@ END_CASE
 		IF NOT Hmi_Web.Process_Data_UUID_D_Start THEN
 			Hmi_Web.Process_Data_UUID_D :='';
 			tmr01.IN := FALSE;
+			// ============ 紀錄啟動條件 ============
+			_log.fbJson.StartObject();
+			_log.fbJson.AddKeyString('StepName','Laser_D_Done');
+			_log.JsonOutput();
+			// ======================================
 			step := step + 1;
 		ELSIF tmr01.Q THEN
 			tmr01.IN := FALSE;
