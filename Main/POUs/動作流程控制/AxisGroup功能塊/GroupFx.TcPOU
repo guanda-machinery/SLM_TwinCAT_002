@@ -171,6 +171,8 @@ VAR
 	BD_Encoder_Active: BOOL;
 	
 	_log : Step_Log; 
+	_log_ac : Step_Log; 
+	_log_bd : Step_Log;
 END_VAR
 
 ]]></Declaration>
@@ -277,7 +279,9 @@ output();
 
 
 
-_log(name:= 'GroupFX', step:= step);]]></ST>
+_log(name:= 'GroupFX', step:= step);
+_log_ac(name:= 'GroupFX_ACcmp', step:= step);
+_log_bd(name:= 'GroupFX_BDcmp', step:= step);]]></ST>
     </Implementation>
     <Folder Name="內部功能" Id="{460ccaff-f0de-4f4a-ae51-469198ad2c0c}" />
     <Method Name="A_Press" Id="{f82ae2d7-18fc-4e60-8ad5-24798a574025}">
@@ -320,6 +324,15 @@ step := 1;
 AC_moveDis := ABS(Pos);
 
 step_AC_C.bDone := FALSE;
+
+// ============ 紀錄啟動條件 ============
+_log_ac.fbJson.StartObject();
+_log_ac.fbJson.AddKeyString('MethodName','AC_Clamp');
+_log_ac.fbJson.AddKeyLreal('Pos', Pos);
+_log_ac.JsonOutput();
+// ======================================
+
+
 step_AC_C.Step := 1;]]></ST>
       </Implementation>
     </Method>
@@ -362,6 +375,14 @@ step := 1;
 AC_moveDis := ABS(Dis);
 
 step_AC_C.bDone := FALSE;
+
+// ============ 紀錄啟動條件 ============
+_log_ac.fbJson.StartObject();
+_log_ac.fbJson.AddKeyString('MethodName','AC_UnClamp');
+_log_ac.fbJson.AddKeyLreal('Dis', Dis);
+_log_ac.JsonOutput();
+// ======================================
+
 step_AC_C.Step := 100;]]></ST>
       </Implementation>
     </Method>
@@ -405,6 +426,14 @@ step := 1;
 BD_moveDis := ABS(Pos);
 
 step_BD_C.bDone := FALSE;
+
+// ============ 紀錄啟動條件 ============
+_log_bd.fbJson.StartObject();
+_log_bd.fbJson.AddKeyString('MethodName','BD_Clamp');
+_log_bd.fbJson.AddKeyLreal('Pos', Pos);
+_log_bd.JsonOutput();
+// ======================================
+
 step_BD_C.Step := 1;]]></ST>
       </Implementation>
     </Method>
@@ -448,6 +477,14 @@ BD_moveDis := ABS(Dis);
 step := 1;
 
 step_BD_C.bDone := FALSE;
+
+// ============ 紀錄啟動條件 ============
+_log_bd.fbJson.StartObject();
+_log_bd.fbJson.AddKeyString('MethodName','BD_UnClamp');
+_log_bd.fbJson.AddKeyLreal('Dis', Dis);
+_log_bd.JsonOutput();
+// ======================================
+
 step_BD_C.Step := 100;]]></ST>
       </Implementation>
     </Method>

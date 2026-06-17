@@ -17,8 +17,28 @@ obj/
 *.bak
 *.tmc
 
+# 1. 徹底排除專案樹的個人配置與隱藏視窗狀態
+*.vstman
+*.vstdir
+*.tcmproj.user
+*.tsproj.user
+LineStorage/
+
+# 2. 排除 TwinCAT 自帶的原始碼控制暫存資料夾 (舊版或殘留機制產生的)
+_TcSourceControl/
+
+# 3. 排除變數強制執行 (Force) 與實時監控的暫存檔
+*.tcforce
+*.tcrec
+
+# 4. 排除診斷與效能分析產生的巨大檔案 (例如 Scope View 或記錄檔)
+*.tcscope
+*.svdata
+*.log
+
 # OS
 Thumbs.db
 Desktop.ini
 .DS_Store
 
+LineIDs.dbg

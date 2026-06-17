@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
-  <POU Name="Step_Log" Id="{9eaa8847-ee37-4c55-a09a-573350fdd7c5}" SpecialFunc="None">
+  <POU Name="Step_Log" Id="{1ac734b8-ac77-41fa-a92d-b65b18289bdc}" SpecialFunc="None">
     <Declaration><![CDATA[FUNCTION_BLOCK Step_Log
 VAR_INPUT
 	name : STRING(80);
@@ -23,9 +23,13 @@ VAR
 
 	db_fb_PLCDBCmdEvt : FB_PLCDBCmdEvt(sNetID:= '', tTimeout:= T#5S );
 	
-	_stPara		: ARRAY [0..2] OF ST_ExpParameter;
+	_stPara		: ARRAY [0..3] OF ST_ExpParameter;
 	
 	_SqlCommand : STRING(1024);
+	
+	_extrasstr : STRING(255);
+	
+	_fbJson      : FB_JsonSaxWriter;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -40,6 +44,10 @@ END_VAR
 		_logData_array[array_select_number].step_number := step;
 		
 		_logData_array[array_select_number].created_at := TO_LINT(F_GetSystemTime());
+		
+		_logData_array[array_select_number].extras_Srt := _extrasstr;
+		
+		_extrasstr := '{}';
 	END_IF
 	
 	exec_number := exec_number + 1;
@@ -55,16 +63,17 @@ IF exec_number > exec_done_number  THEN
 			_SqlCommand := 
 		
 			'INSERT 
-				INTO program_running_log 
-					(program_name, step_number, created_at)
+				INTO exp1_program_running_log 
+					(program_name, step_number, created_at, detail_data)
 				VALUES
-					({program_name}, {step_number}, to_timestamp(({created_at} - 116444736000000000) / 10000000.0));
+					({program_name}, {step_number}, to_timestamp(({created_at} - 116444736000000000) / 10000000.0), {detail_data}::jsonb);
 			';
 		
 		// 設定對應參數
 			_stPara[0].sParaName := 'step_number'; 			_stPara[0].eParaType := E_ExpParameterType.Int32; 		_stPara[0].nParaSize := SIZEOF(_logData.step_number);
 			_stPara[1].sParaName := 'created_at';			_stPara[1].eParaType := E_ExpParameterType.Int64;		_stPara[1].nParaSize := SIZEOF(_logData.created_at);
 			_stPara[2].sParaName := 'program_name'; 		_stPara[2].eParaType := E_ExpParameterType.STRING_; 	_stPara[2].nParaSize := 81;
+			_stPara[3].sParaName := 'detail_data'; 			_stPara[3].eParaType := E_ExpParameterType.STRING_; 	_stPara[3].nParaSize := 256;
 			
 		IF db_fb_PLCDBCmdEvt.Execute(
 				hDBID := 3,
@@ -82,5 +91,30 @@ IF exec_number > exec_done_number  THEN
 	END_IF
 END_IF]]></ST>
     </Implementation>
+    <Property Name="fbJson" Id="{8fb343a5-30a9-4e3d-a370-9f1eb0a6fd06}">
+      <Declaration><![CDATA[{attribute 'suppress_wrn_C0410'}
+PROPERTY fbJson : REFERENCE TO FB_JsonSaxWriter]]></Declaration>
+      <Get Name="Get" Id="{4ea8eff4-e5ff-4957-b65f-1b15f41f34b2}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbJson REF= _fbJson;
+
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="JsonOutput" Id="{875409e6-d58b-4f30-9773-f10e3a584d7b}">
+      <Declaration><![CDATA[METHOD JsonOutput : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbJson.EndObject();
+_extrasstr := fbJson.GetDocument();
+fbJson.ResetDocument();]]></ST>
+      </Implementation>
+    </Method>
   </POU>
 </TcPlcObject>
