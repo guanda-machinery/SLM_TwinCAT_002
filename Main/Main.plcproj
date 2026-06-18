@@ -53,17 +53,9 @@
       <DefaultResolution>Tc3_Database, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc3_Database</Namespace>
     </PlaceholderReference>
-    <PlaceholderReference Include="Tc3_DynamicMemory">
-      <DefaultResolution>Tc3_DynamicMemory, * (Beckhoff Automation GmbH)</DefaultResolution>
-      <Namespace>Tc3_DynamicMemory</Namespace>
-    </PlaceholderReference>
     <PlaceholderReference Include="Tc3_EventLogger">
       <DefaultResolution>Tc3_EventLogger, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc3_EventLogger</Namespace>
-    </PlaceholderReference>
-    <PlaceholderReference Include="Tc3_IoLink">
-      <DefaultResolution>Tc3_IoLink, * (Beckhoff Automation GmbH)</DefaultResolution>
-      <Namespace>Tc3_IoLink</Namespace>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc3_JsonXml">
       <DefaultResolution>Tc3_JsonXml, * (Beckhoff Automation GmbH)</DefaultResolution>
@@ -234,9 +226,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="MSG\通知訊息\uuidv7_g.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="NC_Task_1_SAF.TcTTO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="PlcTask.TcTTO">

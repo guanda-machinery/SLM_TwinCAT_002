@@ -3950,23 +3950,23 @@ CASE step OF
   ====================================*) 
 
 	8100:
-		IF PosC.GcX_P_Limite > 0 THEN
-			GcX.AbsMove(PosC.GcX_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GaX_P_Limite > 0 THEN
+			GaX.AbsMove(PosC.GaX_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GcX.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+			GaX.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8101:
-		IF	GcX.bDone OR		// 位置(軟體極限)到達
-			NOT GcX.OutLimiter OR		// 	硬體極限到達
+		IF	GaX.bDone OR		// 位置(軟體極限)到達
+			NOT GaX.OutLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Ga.X_P) THEN 		// 人機按鍵放開
 				step := 8109;
 		END_IF
 		
 	8109:
-		GcX.Stop();
+		GaX.Stop();
 		IF (NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Ga.X_P) THEN
 			step:=8001;
 		END_IF
@@ -3976,23 +3976,23 @@ CASE step OF
   ====================================*) 
 		
 	8120:
-		IF PosC.GcX_N_Limite <> 0 THEN
-			GcX.AbsMove(PosC.GcX_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GaX_N_Limite <> 0 THEN
+			GaX.AbsMove(PosC.GaX_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GcX.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+			GaX.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8121:
-		IF GcX.bDone OR		// 位置(軟體極限)到達
-			NOT GcX.inLimiter OR		// 	硬體極限到達
+		IF GaX.bDone OR		// 位置(軟體極限)到達
+			NOT GaX.inLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Ga.X_N) THEN  			// 人機按鍵放開
 			step:=8129;
 		END_IF
 		
 	8129:
-		GcX.Stop();
+		GaX.Stop();
 		IF (NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Ga.X_N) THEN
 			step:=8001;
 		END_IF
@@ -4014,23 +4014,23 @@ CASE step OF
   ====================================*) 
 
 	8200:
-		IF PosC.GcY_P_Limite > 0 OR NOT Hmi.Jog_UnLimite THEN
-			GcY.AbsMove(PosC.GcY_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GaY_P_Limite > 0 OR NOT Hmi.Jog_UnLimite THEN
+			GaY.AbsMove(PosC.GaY_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GcY.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+			GaY.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8201:
-		IF	GcY.bDone OR		// 位置(軟體極限)到達
-			NOT GcY.OutLimiter OR		// 	硬體極限到達
+		IF	GaY.bDone OR		// 位置(軟體極限)到達
+			NOT GaY.OutLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Ga.Y_P) THEN 		// 人機按鍵放開
 				step := 8209;
 		END_IF
 		
 	8209:
-		GcY.Stop();
+		GaY.Stop();
 		IF (NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Ga.Y_P) THEN
 			step := 8001;
 		END_IF
@@ -4040,23 +4040,23 @@ CASE step OF
   ====================================*) 
 		
 	8220:
-		IF PosC.GcY_N_Limite <> 0 OR NOT Hmi.Jog_UnLimite THEN
-			GcY.AbsMove(PosC.GcY_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GaY_N_Limite <> 0 OR NOT Hmi.Jog_UnLimite THEN
+			GaY.AbsMove(PosC.GaY_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GcY.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+			GaY.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8221:
-		IF GcY.bDone OR		// 位置(軟體極限)到達
-			NOT GcY.inLimiter OR		// 	硬體極限到達
+		IF GaY.bDone OR		// 位置(軟體極限)到達
+			NOT GaY.inLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Ga.Y_N) THEN 		// 人機按鍵放開
 				step := 8229;
 		END_IF
 		
 	8229:
-		GcY.Stop();
+		GaY.Stop();
 		IF (NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Ga.Y_N) THEN
 			step := 8001;
 		END_IF
@@ -4075,23 +4075,23 @@ CASE step OF
   ====================================*) 
 
 	8300:
-		IF PosC.GcZ_P_Limite > 0 THEN
-			GcZ.AbsMove(PosC.GcZ_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GaZ_P_Limite > 0 THEN
+			GaZ.AbsMove(PosC.GaZ_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GcZ.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+			GaZ.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8301:
-		IF	GcZ.bDone OR		// 位置(軟體極限)到達
-			NOT GcZ.OutLimiter OR		// 	硬體極限到達
+		IF	GaZ.bDone OR		// 位置(軟體極限)到達
+			NOT GaZ.OutLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Ga.Z_P) THEN 		// 人機按鍵放開
 				step := 8309;
 		END_IF
 		
 	8309:
-		GcZ.Stop();
+		GaZ.Stop();
 		IF (NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Ga.Z_P) THEN
 			step := 8001;
 		END_IF
@@ -4101,23 +4101,23 @@ CASE step OF
   ====================================*) 
 		
 	8320:
-		IF PosC.GcZ_N_Limite <> 0 THEN
-			GcZ.AbsMove(PosC.GcZ_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GaZ_N_Limite <> 0 THEN
+			GaZ.AbsMove(PosC.GaZ_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GcZ.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+			GaZ.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8321:
-		IF GcZ.bDone OR		// 位置(軟體極限)到達
-			NOT GcZ.inLimiter OR		// 	硬體極限到達
+		IF GaZ.bDone OR		// 位置(軟體極限)到達
+			NOT GaZ.inLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Ga.Z_N) THEN  			// 人機按鍵放開
 				step := 8329;
 		END_IF
 		
 	8329:
-		GcZ.Stop();
+		GaZ.Stop();
 		IF (NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Ga.Z_N) THEN
 			step := 8001;
 		END_IF
@@ -4322,23 +4322,23 @@ CASE step OF
   ====================================*) 
 
 	8700:
-		IF PosC.GaX_P_Limite <> 0 THEN
-			GaX.AbsMove(PosC.GaX_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GcX_P_Limite <> 0 THEN
+			GcX.AbsMove(PosC.GcX_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GaX.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+			GcX.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8701:
-		IF	GaX.bDone OR		// 位置(軟體極限)到達
-			NOT GaX.OutLimiter OR		// 	硬體極限到達
+		IF	GcX.bDone OR		// 位置(軟體極限)到達
+			NOT GcX.OutLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Gc.X_P) THEN 		// 人機按鍵放開
 				step := 8709;
 		END_IF
 		
 	8709:
-		GaX.Stop();
+		GcX.Stop();
 		IF (NOT HMI.Jog_X_P AND NOT hmi_web.Jog_Gc.X_P) THEN
 			step:=8001;
 		END_IF
@@ -4348,23 +4348,23 @@ CASE step OF
   ====================================*) 
 		
 	8720:
-		IF PosC.GaX_N_Limite <> 0 THEN
-			GaX.AbsMove(PosC.GaX_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GcX_N_Limite <> 0 THEN
+			GcX.AbsMove(PosC.GcX_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GaX.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+			GcX.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8721:
-		IF GaX.bDone OR		// 位置(軟體極限)到達
-			NOT GaX.inLimiter OR		// 	硬體極限到達
+		IF GcX.bDone OR		// 位置(軟體極限)到達
+			NOT GcX.inLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Gc.X_N) THEN  			// 人機按鍵放開
 			step:=8729;
 		END_IF
 		
 	8729:
-		GaX.Stop();
+		GcX.Stop();
 		IF (NOT HMI.Jog_X_N AND NOT hmi_web.Jog_Gc.X_N) THEN
 			step:=8001;
 		END_IF
@@ -4384,23 +4384,23 @@ CASE step OF
   ====================================*) 
 
 	8800:
-		IF PosC.GaY_P_Limite > 0 AND NOT Hmi.Jog_UnLimite THEN
-			GaY.AbsMove(PosC.GaY_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GcY_P_Limite > 0 AND NOT Hmi.Jog_UnLimite THEN
+			GcY.AbsMove(PosC.GcY_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GaY.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+			GcY.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8801:
-		IF	GaY.bDone OR		// 位置(軟體極限)到達
-			NOT GaY.OutLimiter OR		// 	硬體極限到達
+		IF	GcY.bDone OR		// 位置(軟體極限)到達
+			NOT GcY.OutLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Gc.Y_P) THEN 		// 人機按鍵放開
 				step := 8809;
 		END_IF
 		
 	8809:
-		GaY.Stop();
+		GcY.Stop();
 		IF (NOT HMI.Jog_Y_P AND NOT hmi_web.Jog_Gc.Y_P) THEN
 			step := 8001;
 		END_IF
@@ -4410,23 +4410,23 @@ CASE step OF
   ====================================*) 
 		
 	8820:
-		IF PosC.GaY_N_Limite <> 0 AND NOT Hmi.Jog_UnLimite THEN
-			GaY.AbsMove(PosC.GaY_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GcY_N_Limite <> 0 AND NOT Hmi.Jog_UnLimite THEN
+			GcY.AbsMove(PosC.GcY_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GaY.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+			GcY.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8821:
-		IF GaY.bDone OR		// 位置(軟體極限)到達
-			NOT GaY.inLimiter OR		// 	硬體極限到達
+		IF GcY.bDone OR		// 位置(軟體極限)到達
+			NOT GcY.inLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Gc.Y_N) THEN 		// 人機按鍵放開
 				step := 8829;
 		END_IF
 		
 	8829:
-		GaY.Stop();
+		GcY.Stop();
 		IF (NOT HMI.Jog_Y_N AND NOT hmi_web.Jog_Gc.Y_N) THEN
 			step := 8001;
 		END_IF
@@ -4445,23 +4445,23 @@ CASE step OF
   ====================================*) 
 
 	8900:
-		IF PosC.GaZ_P_Limite > 0 THEN
-			GaZ.AbsMove(PosC.GaZ_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GcZ_P_Limite > 0 THEN
+			GcZ.AbsMove(PosC.GcZ_P_Limite - 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GaZ.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
+			GcZ.RelMove(99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8901:
-		IF	GaZ.bDone OR		// 位置(軟體極限)到達
-			NOT GaZ.OutLimiter OR		// 	硬體極限到達
+		IF	GcZ.bDone OR		// 位置(軟體極限)到達
+			NOT GcZ.OutLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Gc.Z_P) THEN 		// 人機按鍵放開
 				step := 8909;
 		END_IF
 		
 	8909:
-		GaZ.Stop();
+		GcZ.Stop();
 		IF (NOT HMI.Jog_Z_P AND NOT hmi_web.Jog_Gc.Z_P) THEN
 			step := 8001;
 		END_IF
@@ -4471,23 +4471,23 @@ CASE step OF
   ====================================*) 
 		
 	8920:
-		IF PosC.GaZ_N_Limite <> 0 THEN
-			GaZ.AbsMove(PosC.GaZ_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
+		IF PosC.GcZ_N_Limite <> 0 THEN
+			GcZ.AbsMove(PosC.GcZ_N_Limite + 0.1, 100 * Hmi.Jog_Speed * 0.01);
 		ELSE
-			GaZ.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
+			GcZ.RelMove(-99999, 100 * Hmi.Jog_Speed * 0.01);
 		END_IF
 		step := step + 1;
 		
 		
 	8921:
-		IF GaZ.bDone OR		// 位置(軟體極限)到達
-			NOT GaZ.inLimiter OR		// 	硬體極限到達
+		IF GcZ.bDone OR		// 位置(軟體極限)到達
+			NOT GcZ.inLimiter OR		// 	硬體極限到達
 			(NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Gc.Z_N) THEN  			// 人機按鍵放開
 				 step := 8929;
 		END_IF
 		
 	8929:
-		GaZ.Stop();
+		GcZ.Stop();
 		IF (NOT HMI.Jog_Z_N AND NOT hmi_web.Jog_Gc.Z_N) THEN
 			step := 8001;
 		END_IF
