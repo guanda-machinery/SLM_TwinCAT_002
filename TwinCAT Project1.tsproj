@@ -1751,7 +1751,7 @@ External Setpoint Generation:
 		<ImageData Id="1009">424de6000000000000007600000028000000100000000e000000010004000000000070000000c40e0000c40e000000000000000000000000000000008000008000000080800080000000800080008080000080808000c0c0c0000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00fffffffffffffffffffff777777ffffffff7777777777fffff7777777f7777ffff777777fff777fff777777f777f777ff77777f77777f77ff77777777777777ff77f77777f77777ff777f777f777777fff777fff777777ffff7777f7777777fffff7777777777ffffffff777777fffff</ImageData>
 		<ImageData Id="1010">424de6000000000000007600000028000000100000000e000000010004000000000070000000c40e0000c40e000000000000000000000000000000008000008000000080800080000000800080008080000080808000c0c0c0000000ff0000ff000000ffff00ff000000ff00ff00ffff0000ffffff00fffffffffffffffffffff000000ffffffff0000000000fffff0000000f0000ffff000000fff000fff000000f000f000ff00000f00000f00ff00000000000000ff00f00000f00000ff000f000f000000fff000fff000000ffff0000f0000000fffff0000000000ffffffff000000fffff</ImageData>
 	</ImageDatas>
-	<Project ProjectGUID="{33494338-7D6D-4B94-B52F-3D84D6163BD1}" TargetNetId="5.143.127.236.1.1" Target64Bit="true" RelativeTargetNetId="true" RelativeIpAddresses="true" SaveSolutionArchive="true" ShowHideConfigurations="#x1c6">
+	<Project ProjectGUID="{33494338-7D6D-4B94-B52F-3D84D6163BD1}" TargetNetId="192.168.100.100.1.1" Target64Bit="true" RelativeTargetNetId="true" RelativeIpAddresses="true" SaveSolutionArchive="true" ShowHideConfigurations="#x1c6">
 		<System>
 			<Settings MaxCpus="4" NonWinCpus="2" MaxStackSize="128">
 				<Cpu CpuId="2"/>
@@ -1772,9 +1772,6 @@ External Setpoint Generation:
 				<Task Id="5" Priority="14" CycleTime="100000" AmsPort="350" Affinity="#x00000008" AdtTasks="true">
 					<Name>PlcTask</Name>
 				</Task>
-				<Task Id="7" Priority="28" CycleTime="20000" AmsPort="352" AutoStart="false" AdtTasks="true">
-					<Name>MPG_View</Name>
-				</Task>
 				<Task Id="10" Priority="22" CycleTime="100000" AmsPort="355" AdtTasks="true">
 					<Name>Conveyor</Name>
 				</Task>
@@ -1782,7 +1779,7 @@ External Setpoint Generation:
 		</System>
 		<Motion>
 			<NC>
-				<SafTask Priority="4" CycleTime="20000" AmsPort="501" Affinity="#x00000008" IoAtBegin="true" SafTaskInfo="257">
+				<SafTask Priority="4" CycleTime="20000" AmsPort="501" Affinity="#x00000008" IoAtBegin="true" AmsNetId="5.143.127.236.1.1" SafTaskInfo="257">
 					<Name>NC-Task 1 SAF</Name>
 					<Vars VarGrpType="1" InsertType="1">
 						<Name>Inputs</Name>
@@ -4655,7 +4652,6 @@ External Setpoint Generation:
 		<Plc>
 			<Project File="Main.xti"/>
 			<Project File="IO_Main_Task.xti"/>
-			<Project File="MPG_View.xti"/>
 			<Project File="IO_External_Task.xti"/>
 			<Project File="External_Conveyor_system.xti"/>
 		</Plc>
@@ -12725,7 +12721,7 @@ CH2: 測常盤 入口]]></Comment>
 		</SymbolWatch>
 	</Project>
 	<Mappings>
-		<MappingInfo Identifier="{00000000-2001-0850-0120-500862000403}" Id="#x020300a0"/>
+		<MappingInfo Identifier="{00000000-2001-0850-0020-500862000403}" Id="#x020300a0"/>
 		<MappingInfo Identifier="{00000000-2041-0850-4020-500873000403}" Id="#x02030060"/>
 		<MappingInfo Identifier="{00000000-0050-0304-1000-040350000403}" Id="#x02030010"/>
 		<MappingInfo Identifier="{00000000-0080-0304-1000-040384000403}" Id="#x02030080"/>
@@ -12735,12 +12731,12 @@ CH2: 測常盤 入口]]></Comment>
 		<MappingInfo Identifier="{00000000-20C2-0850-C020-500841000403}" Id="#x02030020"/>
 		<MappingInfo Identifier="{08502001-0030-0304-0020-500830000403}" Id="#x02030030" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{08502001-0040-0304-0020-500840000403}" Id="#x02030040" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502001-2041-0850-0120-500840205008}" Id="#x02030100" Watchdog="04000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502001-2041-0850-0020-500840205008}" Id="#x02030100" Watchdog="04000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502001-0080-0304-0020-500880000403}" Id="#x020300c0" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{05000010-2001-0850-1000-040301205008}" Id="#x020300d0" Watchdog="14000000040000000400000004000000"/>
+		<MappingInfo Identifier="{05000010-2001-0850-1000-040300205008}" Id="#x020300d0" Watchdog="14000000040000000400000004000000"/>
 		<MappingInfo Identifier="{05000010-2041-0850-1000-040340205008}" Id="#x02030050" Watchdog="14000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502041-0040-0304-4020-500840000403}" Id="#x02030140" Watchdog="00000000000000000000000000000000"/>
-		<MappingInfo Identifier="{08502081-2001-0850-8020-500801205008}" Id="#x020300e0" Watchdog="14000000040000000400000004000000"/>
+		<MappingInfo Identifier="{08502081-2001-0850-8020-500800205008}" Id="#x020300e0" Watchdog="14000000040000000400000004000000"/>
 		<MappingInfo Identifier="{08502081-0080-0304-8020-500880000403}" Id="#x02030150" Watchdog="00000000000000000000000000000000"/>
 		<MappingInfo Identifier="{085020C2-2041-0850-C020-500840205008}" Id="#x02030110" Watchdog="14000000040000000400000004000000"/>
 		<MappingInfo Identifier="{085020C2-0080-0304-C020-500880000403}" Id="#x02030090" Watchdog="00000000000000000000000000000000"/>

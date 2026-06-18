@@ -26,6 +26,7 @@ Hmi_Web.FxA_H_Pos := GroupFx.FxA_Clamp_Pos;
 // FxB 油壓夾輪位置
 Hmi_Web.FxB_H_Pos := GroupFx.FxB_Clamp_Pos;
 
+WebHmi.Homming();
 
 // 坐標系傳輸
 Hmi_Web.WCS_A := GroupA.RefPos;
@@ -39,6 +40,22 @@ Hmi_Web.WCS_D := GroupD.RefPos;]]></ST>
     <Action Name="Clamp" Id="{6e3df157-7972-4f49-b719-7172aaa8a34f}">
       <Implementation>
         <ST><![CDATA[]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="ErrorReset" Id="{49bf0790-ff85-4898-8789-5b6f95170134}">
+      <Implementation>
+        <ST><![CDATA[IF hmi.SysErrorRest THEN
+	Safety.SystemError := FALSE;
+	hmi.SysErrorRest := FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="Homming" Id="{6f9c74fc-01de-4190-aafa-fa4fa76aae74}">
+      <Implementation>
+        <ST><![CDATA[IF Hmi_Web.Auto_homming THEN
+	AutoMain.Homming();
+	Hmi_Web.Auto_homming := FALSE;
+END_IF]]></ST>
       </Implementation>
     </Action>
     <Action Name="WatchDog" Id="{8d35982f-38a0-4f62-af87-136a45b979d4}">

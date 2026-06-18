@@ -1335,5 +1335,97 @@ tmr800();
 tmrWdt();]]></ST>
       </Implementation>
     </Action>
+    <LineIds Name="AxisBase">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.AbsMove">
+      <LineId Id="3" Count="17" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Axis_States.Get">
+      <LineId Id="3" Count="0" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Homing">
+      <LineId Id="3" Count="9" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Main">
+      <LineId Id="2" Count="59" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.MC_FB">
+      <LineId Id="2" Count="50" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Name.Get">
+      <LineId Id="3" Count="1" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Name.Set">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Pos.Get">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.PowerOff">
+      <LineId Id="3" Count="10" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.PowerOn">
+      <LineId Id="3" Count="11" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.RelMove">
+      <LineId Id="3" Count="19" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Set_Recoder">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.SetDyn">
+      <LineId Id="3" Count="9" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.SetLimit">
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.State.Get">
+      <LineId Id="3" Count="2" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Step0_Start">
+      <LineId Id="134" Count="129" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Step1_1_AbsMove">
+      <LineId Id="2" Count="87" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Step1_2_RelMove">
+      <LineId Id="2" Count="99" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Step1_3_Home">
+      <LineId Id="2" Count="274" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Step8_End">
+      <LineId Id="2" Count="97" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Step9_SetLimit">
+      <LineId Id="2" Count="110" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.Stop">
+      <LineId Id="3" Count="12" />
+      <LineId Id="2" Count="0" />
+    </LineIds>
+    <LineIds Name="AxisBase.timer">
+      <LineId Id="2" Count="5" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
   </POU>
 </TcPlcObject>

@@ -8,29 +8,8 @@ VAR
 	sensorC : OMH555_Decoder;
 	sensorD : OMH555_Decoder;
 	
-	
-	
-	Test: BOOL;
-	par : LaserParameter_Data;
-	
-	fb_IolRead : FB_IolRead;
-	testArray : ARRAY [0..7] OF BYTE ;
-	
-	ExpEncA_pos : LREAL;
-	
-	ExpEncB_pos : LREAL;
-	
-	Exp2EncA_pos : LREAL;
-	
-	Exp2EncB_pos : LREAL;
-	
-	sensor_test_StartPos : LREAL;
-	
 	sensor_test_pos : LREAL;
-	
-	test_pos : INT;
-	
-	sensor_test : DT80_Decoder;
+
 END_VAR
 
 VAR_INPUT
@@ -43,22 +22,6 @@ sensorB();
 sensorc();
 sensorD();
 
-// sensor_test();
-// 
-// ExpEncB_pos := (TO_LREAL(axis.Encoder_FxB_ExPosEnc.MDP5001_511_Input.MDP5001_511_Counter_value) - 10000) * 0.5784;
-// 
-// Exp2EncB_pos := (TO_LREAL(axis.Encoder_FxB_PosEnc.MDP5001_511_Input.MDP5001_511_Counter_value ) - 10000) * 0.0461179;
-// 
-// sensor_test_pos := TO_LREAL(sensor_test.fDistance * 1000) - sensor_test_StartPos;
-// 
-// IF Set_SensoeZero THEN
-// 	sensor_test_StartPos := TO_LREAL(sensor_test.fDistance * 1000);
-// END_IF
-
-test_pos := TO_INT(TO_STRING(sensor_test_pos));
-
-fb_IolRead.pDSTBuf := ADR(fb_IolRead);
-fb_IolRead();
 
 
 ]]></ST>
