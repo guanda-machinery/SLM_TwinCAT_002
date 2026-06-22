@@ -2670,12 +2670,12 @@ END_CASE]]></ST>
 			step_BD_C.Step  := step_BD_C.Step  + 1;
 		END_IF
 		
-	313:
+	312:
 		o_BD_Clamp_Open		:= FALSE;
 		o_BD_Clamp_Close	:= FALSE;
 		step_BD_C.Step  := step_BD_C.Step  + 1;
 		
-	314:
+	313:
 		step_BD_C.Step  := 320;
 		
 		
