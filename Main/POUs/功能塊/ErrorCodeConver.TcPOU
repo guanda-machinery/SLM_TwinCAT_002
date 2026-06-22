@@ -69,7 +69,7 @@ END_IF
 
 strtmp2 := STRING_TO_WSTRING(strtmp1);
 
-strtmp2 := WCONCAT(STR1:= "(", STR2:= strtmp2);
+strtmp2 := WCONCAT(STR1:= "(0x", STR2:= strtmp2);
 
 strtmp2 := WCONCAT(STR1:= strtmp2, STR2:= ")" );
 
