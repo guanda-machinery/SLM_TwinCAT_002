@@ -1807,12 +1807,13 @@ END_IF
 //		END_IF
 		
 	2: // 確認材料進入FxA的夾輪
-		IF NOT (AC_in_sensor XOR AC_out_sensor) OR Hmi.Jog_UnLimite OR AC_moveDis > 0 THEN
-			step_AC_C.Step  := step_AC_C.Step  + 1;
-		ELSE
-			step_AC_C.Step  := step_AC_C.Step  + 20000;
-			pMsg.Push_Error(WStrConcat(name, ":未感應到原料，動作取消 "));
-		END_IF
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+// 		IF NOT (AC_in_sensor XOR AC_out_sensor) OR Hmi.Jog_UnLimite OR AC_moveDis > 0 THEN
+// 			step_AC_C.Step  := step_AC_C.Step  + 1;
+// 		ELSE
+// 			step_AC_C.Step  := step_AC_C.Step  + 20000;
+// 			pMsg.Push_Error(WStrConcat(name, ":未感應到原料，動作取消 "));
+// 		END_IF
 		
 	3:
 		IF o_Oil_Pressure_Pump THEN
@@ -2349,12 +2350,13 @@ END_IF]]></ST>
 		
 		
 	2: // 確認材料進入FxB的夾輪
-		IF NOT (BD_in_sensor XOR BD_out_sensor)  OR Hmi.Jog_UnLimite OR BD_moveDis > 0 THEN
-			step_BD_C.Step  := step_BD_C.Step  + 1;
-		ELSE
-			step_BD_C.Step  := step_BD_C.Step  + 10000;
-			pMsg.Push_Error(WStrConcat(name, ":未感應到原料，動作取消 "));
-		END_IF
+		step_BD_C.Step  := step_BD_C.Step  + 1;
+// 		IF NOT (BD_in_sensor XOR BD_out_sensor)  OR Hmi.Jog_UnLimite OR BD_moveDis > 0 THEN
+// 			step_BD_C.Step  := step_BD_C.Step  + 1;
+// 		ELSE
+// 			step_BD_C.Step  := step_BD_C.Step  + 10000;
+// 			pMsg.Push_Error(WStrConcat(name, ":未感應到原料，動作取消 "));
+// 		END_IF
 		
 //	102: // 確認BD下壓位置
 //		IF pressureB_home_sensor AND pressureD_home_sensor THEN
