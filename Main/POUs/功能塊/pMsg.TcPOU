@@ -29,12 +29,23 @@ end_if]]></ST>
       <Declaration><![CDATA[METHOD PUBLIC Push_Alarm_NoPause : BOOL
 VAR_INPUT
 	STR : WSTRING;
+	STR1 : WSTRING := "";
+	STR2 : WSTRING := "";
+	STR3 : WSTRING := "";
+	STR4 : WSTRING := "";
+	STR5 : WSTRING := "";
 END_VAR
+
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[msg.iMessageId := 0;
 msg.msgeLevel := MsgLevel.Alarm;
-msg.sMessageStr1:=STR;
+msg.sMessageStr1:=str;
+msg.sMessageStr1:=WCONCAT(STR1:= msg.sMessageStr1, STR2:= STR1);
+msg.sMessageStr1:=WCONCAT(STR1:= msg.sMessageStr1, STR2:= STR2);
+msg.sMessageStr1:=WCONCAT(STR1:= msg.sMessageStr1, STR2:= STR3);
+msg.sMessageStr1:=WCONCAT(STR1:= msg.sMessageStr1, STR2:= STR4);
+msg.sMessageStr1:=WCONCAT(STR1:= msg.sMessageStr1, STR2:= STR5);
 msg();]]></ST>
       </Implementation>
     </Method>

@@ -1,22 +1,29 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.15">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
   <POU Name="GetEtherSta" Id="{f8e6b35f-46d7-4679-ad0f-82ada64b5169}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM GetEtherSta
 VAR
 	fbGetAllSlaveStates : FB_EcGetAllSlaveStates;
-    sNetId      AT %I*  : AMSNETID ;
+    sNetId1      AT %I*  : AMSNETID ;
 	sNetId2      AT %I*  : AMSNETID ;
     bExecute            : BOOL;
-    devStates           : ARRAY[0..255] OF ST_EcSlaveState;
-	devStates2           : ARRAY[0..255] OF ST_EcSlaveState;
+	
+    devStates1				: ARRAY[0..255] OF ST_EcSlaveState;
+	devStates2				: ARRAY[0..255] OF ST_EcSlaveState;
+	devStates1_old			: ARRAY[0..255] OF BYTE;
+	devStates2_old			: ARRAY[0..255] OF BYTE;
+	Ethercat_1_IsAlarm		: BOOL;
+	Ethercat_2_IsAlarm		: BOOL;
+	
     nSlaves             : UINT := 0;
 	nSlaves2             : UINT := 0;
     nErrId              : UDINT;
 	
 	fbEcReqSlaveState : FB_EcReqSlaveState;
 	
-	fb_EcGetSlaveTopologyInfo	: FB_EcGetSlaveTopologyInfo;
-	TopologyInfo 				: ARRAY[0..255] OF ST_TopologyDataEx;
+	fb_EcGetSlaveTopologyInfo	: FB_EcGetConfSlaves;
+	SlaveData1 				: ARRAY[0..255] OF ST_EcSlaveConfigData;
+	SlaveData2 				: ARRAY[0..255] OF ST_EcSlaveConfigData;
 	
 	step: INT;
 	tmr1: TON;
@@ -47,9 +54,9 @@ nErrId := fbGetAllSlaveStates.nErrId;
 
 CASE step OF
 	0:
-		fb_EcGetSlaveTopologyInfo.sNetId	:= F_CreateAmsNetId(sNetId);
-		fb_EcGetSlaveTopologyInfo.pAddrBuf	:= ADR(TopologyInfo);
-		fb_EcGetSlaveTopologyInfo.cbBufLen	:= SIZEOF(TopologyInfo);
+		fb_EcGetSlaveTopologyInfo.sNetId	:= F_CreateAmsNetId(sNetId1);
+		fb_EcGetSlaveTopologyInfo.pArrEcConfSlaveInfo	:= ADR(SlaveData1);
+		fb_EcGetSlaveTopologyInfo.cbBufLen	:= SIZEOF(SlaveData1);
 		fb_EcGetSlaveTopologyInfo.bExecute	:= TRUE;
 		step := step + 1;
 		
@@ -65,13 +72,37 @@ CASE step OF
 		END_IF
 		
 	3:
+		fb_EcGetSlaveTopologyInfo.sNetId	:= F_CreateAmsNetId(sNetId2);
+		fb_EcGetSlaveTopologyInfo.pArrEcConfSlaveInfo	:= ADR(SlaveData2);
+		fb_EcGetSlaveTopologyInfo.cbBufLen	:= SIZEOF(SlaveData2);
+		fb_EcGetSlaveTopologyInfo.bExecute	:= TRUE;
+		step := step + 1;
+		
+	4:
+		IF fb_EcGetSlaveTopologyInfo.bBusy OR fb_EcGetSlaveTopologyInfo.bError THEN
+			step := step + 1;
+		END_IF
+		
+	5:
+		IF NOT fb_EcGetSlaveTopologyInfo.bBusy THEN
+			fb_EcGetSlaveTopologyInfo.bExecute := FALSE;
+			step := step + 1;
+		END_IF
+		
+	6:
+		tmr1.in := TRUE;
+		tmr1.pt := T#10S;
+		IF tmr1.Q THEN
+			tmr1.in := FALSE;
+			step := step + 1;
+		END_IF
 		step := 10;
 		
 		
 	10:
-		fbGetAllSlaveStates.sNetId:= F_CreateAmsNetId(sNetId);
-		fbGetAllSlaveStates.pStateBuf	:= ADR(devStates);
-		fbGetAllSlaveStates.cbBufLen	:= SIZEOF(devStates);
+		fbGetAllSlaveStates.sNetId:= F_CreateAmsNetId(sNetId1);
+		fbGetAllSlaveStates.pStateBuf	:= ADR(devStates1);
+		fbGetAllSlaveStates.cbBufLen	:= SIZEOF(devStates1);
 		fbGetAllSlaveStates.bExecute := TRUE;
 		step := step + 1;
 		
@@ -107,13 +138,35 @@ CASE step OF
 		END_IF
 		
 	16:
-		FOR i := 0 TO nSlaves2 DO
-			devStates[nSlaves + i] := devStates2[i];
+		FOR i := 0 TO nSlaves - 1 DO
+			IF devStates1[i].deviceState <> devStates1_old[i] THEN
+				IF NOT Ethercat_1_IsAlarm AND (devStates1[i].deviceState AND 16#F) <> 8 THEN
+					pMsg.Push_Alarm_NoPause("EtherCat網路1裝置:", TO_WSTRING(SlaveData1[i].sName), "狀態為", EtherCAT_Status(devStates1[i].deviceState));
+					Ethercat_1_IsAlarm := TRUE;
+				END_IF
+				devStates1_old[i] := devStates1[i].deviceState;
+			END_IF
 		END_FOR
+		
+		FOR i := 0 TO nSlaves2 - 1 DO
+			IF devStates2[i].deviceState <> devStates2_old[i] THEN
+				IF NOT Ethercat_2_IsAlarm AND (devStates2[i].deviceState AND 16#F) <> 8 THEN
+					pMsg.Push_Alarm_NoPause("EtherCat網路1裝置:", TO_WSTRING(SlaveData2[i].sName), "狀態為", EtherCAT_Status(devStates2[i].deviceState));
+					Ethercat_2_IsAlarm := TRUE;
+				END_IF
+				devStates2_old[i] := devStates2[i].deviceState;
+			END_IF
+		END_FOR
+		step := step + 1;
+		
+		
+	17:
+		Ethercat_1_IsAlarm := FALSE;
+		Ethercat_2_IsAlarm := FALSE;
 		step := 20;
 		
-		
 	20:
+		
 		tmr1.in := TRUE;
 		tmr1.pt := T#5S;
 		IF tmr1.Q THEN
@@ -144,7 +197,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[resetSlaveNumber := SlaveAddr;
-fb_EcSetSlaveState.sNetId := F_CreateAmsNetId(sNetId);
+fb_EcSetSlaveState.sNetId := F_CreateAmsNetId(sNetId1);
 bDone := FALSE;
 step100 := 100;]]></ST>
       </Implementation>
@@ -336,128 +389,5 @@ tmr100();
 fb_EcSetSlaveState();]]></ST>
       </Implementation>
     </Action>
-    <LineIds Name="GetEtherSta">
-      <LineId Id="13" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="5" Count="0" />
-      <LineId Id="29" Count="0" />
-      <LineId Id="28" Count="0" />
-      <LineId Id="167" Count="1" />
-      <LineId Id="172" Count="1" />
-      <LineId Id="169" Count="0" />
-      <LineId Id="174" Count="2" />
-      <LineId Id="178" Count="1" />
-      <LineId Id="177" Count="0" />
-      <LineId Id="180" Count="1" />
-      <LineId Id="183" Count="1" />
-      <LineId Id="186" Count="0" />
-      <LineId Id="182" Count="0" />
-      <LineId Id="187" Count="2" />
-      <LineId Id="170" Count="1" />
-      <LineId Id="30" Count="0" />
-      <LineId Id="85" Count="2" />
-      <LineId Id="34" Count="4" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="41" Count="2" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="92" Count="0" />
-      <LineId Id="91" Count="0" />
-      <LineId Id="48" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="49" Count="1" />
-      <LineId Id="93" Count="15" />
-      <LineId Id="89" Count="0" />
-      <LineId Id="109" Count="2" />
-      <LineId Id="113" Count="1" />
-      <LineId Id="51" Count="4" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="63" Count="5" />
-      <LineId Id="39" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="60" Count="0" />
-      <LineId Id="190" Count="1" />
-      <LineId Id="134" Count="0" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="157" Count="0" />
-      <LineId Id="156" Count="0" />
-      <LineId Id="136" Count="0" />
-      <LineId Id="61" Count="0" />
-    </LineIds>
-    <LineIds Name="GetEtherSta.ResetECat1">
-      <LineId Id="5" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="18" Count="0" />
-      <LineId Id="11" Count="0" />
-    </LineIds>
-    <LineIds Name="GetEtherSta.ResetECat2">
-      <LineId Id="5" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="23" Count="0" />
-      <LineId Id="11" Count="0" />
-    </LineIds>
-    <LineIds Name="GetEtherSta.Step100_resetECAT">
-      <LineId Id="186" Count="0" />
-      <LineId Id="189" Count="0" />
-      <LineId Id="192" Count="0" />
-      <LineId Id="194" Count="9" />
-      <LineId Id="193" Count="0" />
-      <LineId Id="191" Count="0" />
-      <LineId Id="1" Count="1" />
-      <LineId Id="4" Count="0" />
-      <LineId Id="8" Count="3" />
-      <LineId Id="14" Count="0" />
-      <LineId Id="21" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="183" Count="0" />
-      <LineId Id="25" Count="0" />
-      <LineId Id="24" Count="0" />
-      <LineId Id="19" Count="1" />
-      <LineId Id="26" Count="4" />
-      <LineId Id="41" Count="0" />
-      <LineId Id="31" Count="0" />
-      <LineId Id="33" Count="0" />
-      <LineId Id="42" Count="0" />
-      <LineId Id="36" Count="1" />
-      <LineId Id="35" Count="0" />
-      <LineId Id="102" Count="0" />
-      <LineId Id="32" Count="0" />
-      <LineId Id="39" Count="1" />
-      <LineId Id="99" Count="2" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="103" Count="3" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="96" Count="1" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="46" Count="19" />
-      <LineId Id="182" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="66" Count="1" />
-      <LineId Id="107" Count="2" />
-      <LineId Id="113" Count="0" />
-      <LineId Id="110" Count="2" />
-      <LineId Id="98" Count="0" />
-      <LineId Id="68" Count="1" />
-      <LineId Id="94" Count="1" />
-      <LineId Id="116" Count="3" />
-      <LineId Id="184" Count="0" />
-      <LineId Id="120" Count="15" />
-      <LineId Id="181" Count="0" />
-      <LineId Id="136" Count="10" />
-      <LineId Id="70" Count="0" />
-      <LineId Id="147" Count="0" />
-      <LineId Id="149" Count="3" />
-      <LineId Id="185" Count="0" />
-      <LineId Id="153" Count="15" />
-      <LineId Id="180" Count="0" />
-      <LineId Id="169" Count="10" />
-      <LineId Id="188" Count="0" />
-      <LineId Id="148" Count="0" />
-      <LineId Id="16" Count="0" />
-      <LineId Id="3" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="6" Count="0" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>

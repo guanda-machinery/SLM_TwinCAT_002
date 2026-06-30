@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="EtherCAT_Status" Id="{894bfbd3-a1c7-4ce5-a47b-0f4738333e2f}" SpecialFunc="None">
+    <Declaration><![CDATA[FUNCTION EtherCAT_Status : WSTRING
+VAR_INPUT
+	Status_input : BYTE;
+END_VAR
+VAR
+	Status1 : BYTE;
+	Status2 : BYTE;
+	OutTmp : WSTRING;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Status1 := (Status_input AND 16#F);
+Status2 := (Status_input AND 16#F0);
+
+CASE Status1 OF
+	1:
+		OutTmp := "INIT";
+		
+	2:
+		OutTmp := "PREOP";
+		
+	3:
+		OutTmp := "BOOTSTRAP";
+		
+	4:
+		OutTmp := "SAFEOP";
+		
+	8:
+		OutTmp := "OP";
+END_CASE
+
+OutTmp := WCONCAT(STR1:= OutTmp, STR2:= ",");
+
+CASE Status2 OF
+	16#10:
+		OutTmp := WCONCAT(STR1:= OutTmp, STR2:= "狀態機錯誤");
+		
+	16#20:
+		OutTmp := WCONCAT(STR1:= OutTmp, STR2:= "無效的產品代碼");
+		
+	16#40:
+		OutTmp := WCONCAT(STR1:= OutTmp, STR2:= "初始化發生錯誤");
+		
+	16#80:
+		OutTmp := WCONCAT(STR1:= OutTmp, STR2:= "從站已停用");
+END_CASE
+
+EtherCAT_Status := OutTmp;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

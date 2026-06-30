@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.14">
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
   <POU Name="EtherCat_Driver_Reset" Id="{1d283ff0-2f7c-4995-b878-ef1346bb5118}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM EtherCat_Driver_Reset
 VAR
@@ -38,7 +38,7 @@ CASE step OF
 		step := 10;
 		
 	10:
-		IF GetEtherSta.devStates[0].deviceState = 8 THEN
+		IF GetEtherSta.devStates1[0].deviceState = 8 THEN
 			step := step + 10;
 		ELSE
 			step := step + 1;
@@ -65,7 +65,7 @@ CASE step OF
 		step := 20;
 		
 	20:
-		IF GetEtherSta.devStates[1].deviceState = 8 THEN
+		IF GetEtherSta.devStates1[1].deviceState = 8 THEN
 			step := step + 10;
 		ELSE
 			step := step + 1;
@@ -92,7 +92,7 @@ CASE step OF
 		step := 30;
 		
 	30:
-		IF GetEtherSta.devStates[2].deviceState = 8 THEN
+		IF GetEtherSta.devStates1[2].deviceState = 8 THEN
 			step := step + 10;
 		ELSE
 			step := step + 1;
@@ -119,7 +119,7 @@ CASE step OF
 		step := 40;
 		
 	40:
-		IF GetEtherSta.devStates[3].deviceState = 8 THEN
+		IF GetEtherSta.devStates1[3].deviceState = 8 THEN
 			step := step + 10;
 		ELSE
 			step := step + 1;
@@ -324,61 +324,5 @@ step := 1;
 ]]></ST>
       </Implementation>
     </Method>
-    <LineIds Name="EtherCat_Driver_Reset">
-      <LineId Id="10" Count="0" />
-      <LineId Id="12" Count="0" />
-      <LineId Id="301" Count="11" />
-      <LineId Id="300" Count="0" />
-      <LineId Id="11" Count="0" />
-      <LineId Id="5" Count="1" />
-      <LineId Id="9" Count="0" />
-      <LineId Id="19" Count="2" />
-      <LineId Id="28" Count="2" />
-      <LineId Id="22" Count="1" />
-      <LineId Id="31" Count="1" />
-      <LineId Id="24" Count="3" />
-      <LineId Id="34" Count="2" />
-      <LineId Id="38" Count="1" />
-      <LineId Id="37" Count="0" />
-      <LineId Id="40" Count="3" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="47" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="48" Count="3" />
-      <LineId Id="53" Count="24" />
-      <LineId Id="52" Count="0" />
-      <LineId Id="78" Count="0" />
-      <LineId Id="80" Count="24" />
-      <LineId Id="79" Count="0" />
-      <LineId Id="105" Count="0" />
-      <LineId Id="107" Count="24" />
-      <LineId Id="106" Count="0" />
-      <LineId Id="297" Count="1" />
-      <LineId Id="132" Count="0" />
-      <LineId Id="240" Count="1" />
-      <LineId Id="134" Count="24" />
-      <LineId Id="133" Count="0" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="161" Count="24" />
-      <LineId Id="160" Count="0" />
-      <LineId Id="186" Count="0" />
-      <LineId Id="188" Count="24" />
-      <LineId Id="187" Count="0" />
-      <LineId Id="213" Count="0" />
-      <LineId Id="215" Count="24" />
-      <LineId Id="214" Count="0" />
-      <LineId Id="242" Count="0" />
-      <LineId Id="244" Count="24" />
-      <LineId Id="243" Count="0" />
-      <LineId Id="269" Count="0" />
-      <LineId Id="271" Count="25" />
-      <LineId Id="270" Count="0" />
-      <LineId Id="7" Count="0" />
-    </LineIds>
-    <LineIds Name="EtherCat_Driver_Reset.Start">
-      <LineId Id="6" Count="1" />
-      <LineId Id="5" Count="0" />
-    </LineIds>
   </POU>
 </TcPlcObject>
