@@ -250,6 +250,8 @@ END_IF
 // 處裡緊急停止訊號
 CASE step OF
 	0:
+		Button.StopButton_Light := 0;
+		Button.StartButton_Light := 0;
 		IF Hmi_Web.Jog_Mode THEN
 			Hmi.Jog_Mode := FALSE;
 			Hmi_Web.Jog_Mode := FALSE;

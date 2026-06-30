@@ -1242,7 +1242,7 @@ External Setpoint Generation:
 		</DataType>
 	</DataTypes>
 	<Project GUID="{9921DBC6-8FA2-4ECB-8283-76D7776F3D73}" Name="Main" PrjFilePath="..\..\Main\Main.plcproj" TmcFilePath="..\..\Main\Main.tmc" ReloadTmc="true" AmsPort="851" TargetArchiveSettings="#x0001" FileArchiveSettings="#x000e" CopyTmcToTarget="true" SymbolicMapping="true">
-		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="1" TmcHash="{8A56E2B2-B3C3-FA36-7B98-4B185E54DF27}" TmcPath="Main\Main.tmc">
+		<Instance Id="#x08502000" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="1" TmcHash="{F5816F14-7656-5866-4F76-2E543262A85D}" TmcPath="Main\Main.tmc">
 			<Name>Main Instance</Name>
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
 			<Vars VarGrpType="2" AreaNo="1">
@@ -1281,11 +1281,6 @@ External Setpoint Generation:
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
-					<Name>ExpConver.ExpConver_Reset</Name>
-					<Comment><![CDATA[ 進料機 錯誤重置]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
 					<Name>ExpConver.ExpConver_Mode</Name>
 					<Comment><![CDATA[ 進料機 模式]]></Comment>
 					<Type>INT</Type>
@@ -1294,6 +1289,11 @@ External Setpoint Generation:
 					<Name>ExpConver.ExpConver_WorkOrder_UUID</Name>
 					<Comment><![CDATA[ 進料機 進料的專案UUID]]></Comment>
 					<Type>STRING(36)</Type>
+				</Var>
+				<Var>
+					<Name>ExpConver.ExpConver_Reset</Name>
+					<Comment><![CDATA[ 進料機 錯誤重置]]></Comment>
+					<Type>BOOL</Type>
 				</Var>
 				<Var>
 					<Name>ExpConver.PullOver_Start</Name>
@@ -1650,7 +1650,7 @@ External Setpoint Generation:
 			<Vars VarGrpType="1">
 				<Name>PlcTask Inputs</Name>
 				<Var>
-					<Name>GetEtherSta.sNetId</Name>
+					<Name>GetEtherSta.sNetId1</Name>
 					<Type GUID="{18071995-0000-0000-0000-000000000041}">AMSNETID</Type>
 				</Var>
 				<Var>
@@ -1696,6 +1696,11 @@ External Setpoint Generation:
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
+					<Name>ExpConver.PullOver_bBuzy</Name>
+					<Comment><![CDATA[ 靠邊 動作中]]></Comment>
+					<Type>BOOL</Type>
+				</Var>
+				<Var>
 					<Name>ExpConver.ActionMode_Now</Name>
 					<Comment><![CDATA[ 執行中的動作]]></Comment>
 					<Type>UINT</Type>
@@ -1711,11 +1716,6 @@ External Setpoint Generation:
 					<Type>LREAL</Type>
 				</Var>
 				<Var>
-					<Name>ExpConver.PullOver_bBuzy</Name>
-					<Comment><![CDATA[ 靠邊 動作中]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
 					<Name>ExpConver.PullOver_bDone</Name>
 					<Comment><![CDATA[ 靠邊  動作完成]]></Comment>
 					<Type>BOOL</Type>
@@ -1723,11 +1723,6 @@ External Setpoint Generation:
 				<Var>
 					<Name>ExpConver.PullOver_bError</Name>
 					<Comment><![CDATA[ 靠邊  發生錯誤]]></Comment>
-					<Type>BOOL</Type>
-				</Var>
-				<Var>
-					<Name>ExpConver.In_Moter_Running</Name>
-					<Comment><![CDATA[ 進料滾輪啟動]]></Comment>
 					<Type>BOOL</Type>
 				</Var>
 				<Var>
@@ -1739,6 +1734,11 @@ External Setpoint Generation:
 					<Name>ExpConver.Out_sensor</Name>
 					<Comment><![CDATA[ 出料測感應器]]></Comment>
 					<Type>WORD</Type>
+				</Var>
+				<Var>
+					<Name>ExpConver.In_Moter_Running</Name>
+					<Comment><![CDATA[ 進料滾輪啟動]]></Comment>
+					<Type>BOOL</Type>
 				</Var>
 				<Var>
 					<Name>ExpConver.In_Moter_Error</Name>
@@ -2445,7 +2445,7 @@ External Setpoint Generation:
 	<Mappings>
 		<OwnerA Name="Main Instance">
 			<OwnerB Name="TIID^Device 1 (EtherCAT)">
-				<Link VarA="PlcTask Inputs^GetEtherSta.sNetId" VarB="InfoData^AmsNetId"/>
+				<Link VarA="PlcTask Inputs^GetEtherSta.sNetId1" VarB="InfoData^AmsNetId"/>
 			</OwnerB>
 			<OwnerB Name="TIID^Device 2 (EtherCAT)">
 				<Link VarA="PlcTask Inputs^GetEtherSta.sNetId2" VarB="InfoData^AmsNetId"/>
