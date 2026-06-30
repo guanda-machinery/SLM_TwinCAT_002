@@ -50,6 +50,9 @@ VAR
 	// 回原點模式
 	homeMode: BOOL;
 	
+	// A、C 能找到的 X保留位置
+	LastXCanFind	:	LREAL;
+	
 	_log : Step_Log; 
 END_VAR
 
@@ -1458,14 +1461,15 @@ CASE step OF
 			如果是則交換編碼器
 	===================================*)
 	830: // 判斷是否走快到結尾
+		LastXCanFind := 10 + 75 + MAX(ABS(MaCfg.laserA_X_DisSensor2LaserCenter), ABS(MaCfg.laserC_X_DisSensor2LaserCenter)); // 計算 測高感應器 能照到的 X位置
 		IF (Last_Pos + 1200) > ProjectData.Now_Steel.Length AND NOT GroupFx.b_AC_Clamp THEN
 			IF Fx.fPos < 1200 THEN
 				step := step + 1;
 			ELSE
 				step := 835;
 			END_IF
-		ELSIF (Last_Pos + 100) >= ProjectData.Now_Steel.Length THEN
-			Last_Pos := Last_Pos - 100;
+		ELSIF (Last_Pos + LastXCanFind) >= ProjectData.Now_Steel.Length THEN
+			Last_Pos := Last_Pos - LastXCanFind;
 			GroupA.Set_X_Ref(Value := Last_Pos);
 			GroupB.Set_X_Ref(Value := Last_Pos);
 			GroupC.Set_X_Ref(Value := Last_Pos);
@@ -1671,25 +1675,25 @@ CASE step OF
 		Fx 定位後，各組測高開始
 	===================================*)
 	860:
-		IF ProjectData.Now_Steel_Payload_A_DataNumber > 0 THEN
+		IF ProjectData.Now_Steel_Payload_A_DataNumber > 0 AND Sensor.sensorA.fDistance > 0 THEN
 			GroupA.FindZ();
 		END_IF
-		IF ProjectData.Now_Steel_Payload_B_DataNumber > 0 THEN
+		IF ProjectData.Now_Steel_Payload_B_DataNumber > 0 AND Sensor.sensorB.fDistance > 0 THEN
 			GroupB.FindZ();
 		END_IF
-		IF ProjectData.Now_Steel_Payload_C_DataNumber > 0 THEN
+		IF ProjectData.Now_Steel_Payload_C_DataNumber > 0 AND Sensor.sensorC.fDistance > 0 THEN
 			GroupC.FindZ();
 		END_IF
-		IF ProjectData.Now_Steel_Payload_D_DataNumber > 0 THEN
+		IF ProjectData.Now_Steel_Payload_D_DataNumber > 0 AND Sensor.sensorD.fDistance > 0 THEN
 			GroupD.FindZ();
 		END_IF
 		step := step + 1;
 		
 	861:
-		IF (GroupA.StepA.bBuzy OR GroupA.StepA.bError OR ProjectData.Now_Steel_Payload_A_DataNumber = 0) AND
-			(GroupB.StepA.bBuzy OR GroupB.StepA.bError OR ProjectData.Now_Steel_Payload_B_DataNumber = 0) AND
-			(GroupC.StepA.bBuzy OR GroupC.StepA.bError OR ProjectData.Now_Steel_Payload_C_DataNumber = 0) AND
-			(GroupD.StepA.bBuzy OR GroupD.StepA.bError OR ProjectData.Now_Steel_Payload_D_DataNumber = 0) THEN
+		IF (GroupA.StepA.bBuzy OR GroupA.StepA.bError OR ProjectData.Now_Steel_Payload_A_DataNumber = 0 OR Sensor.sensorA.fDistance = 0) AND
+			(GroupB.StepA.bBuzy OR GroupB.StepA.bError OR ProjectData.Now_Steel_Payload_B_DataNumber = 0 OR Sensor.sensorB.fDistance = 0) AND
+			(GroupC.StepA.bBuzy OR GroupC.StepA.bError OR ProjectData.Now_Steel_Payload_C_DataNumber = 0 OR Sensor.sensorC.fDistance = 0) AND
+			(GroupD.StepA.bBuzy OR GroupD.StepA.bError OR ProjectData.Now_Steel_Payload_D_DataNumber = 0 OR Sensor.sensorD.fDistance = 0) THEN
 				step := step + 1;
 		END_IF
 		
@@ -1698,10 +1702,10 @@ CASE step OF
 		GroupB.ReadyToMove := GroupB.StepA.bDone;
 		GroupC.ReadyToMove := GroupC.StepA.bDone;
 		GroupD.ReadyToMove := GroupD.StepA.bDone;
-		IF (GroupA.StepA.bDone OR ProjectData.Now_Steel_Payload_A_DataNumber = 0) AND
-			(GroupB.StepA.bDone OR ProjectData.Now_Steel_Payload_B_DataNumber = 0) AND
-			(GroupC.StepA.bDone OR ProjectData.Now_Steel_Payload_C_DataNumber = 0) AND 
-			(GroupD.StepA.bDone OR ProjectData.Now_Steel_Payload_D_DataNumber = 0) THEN
+		IF (GroupA.StepA.bDone OR ProjectData.Now_Steel_Payload_A_DataNumber = 0 OR Sensor.sensorA.fDistance = 0) AND
+			(GroupB.StepA.bDone OR ProjectData.Now_Steel_Payload_B_DataNumber = 0 OR Sensor.sensorA.fDistance = 0) AND
+			(GroupC.StepA.bDone OR ProjectData.Now_Steel_Payload_C_DataNumber = 0 OR Sensor.sensorA.fDistance = 0) AND 
+			(GroupD.StepA.bDone OR ProjectData.Now_Steel_Payload_D_DataNumber = 0 OR Sensor.sensorA.fDistance = 0) THEN
 			 	step := step + 1;
 		ELSIF 
 			(GroupA.StepA.bError AND ProjectData.Now_Steel_Payload_A_DataNumber > 0) OR
