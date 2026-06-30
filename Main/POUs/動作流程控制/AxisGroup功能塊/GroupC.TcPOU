@@ -324,6 +324,7 @@ END_VAR
 			
 	101:
 		// 初始化工作暫存器
+		Hmi_Web.Process_Data_UUID_A_Start := FALSE;
 		WorkNum := 0;
 		step := 110;
 		

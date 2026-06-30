@@ -350,6 +350,7 @@ END_VAR
 			
 	101:
 		// 初始化工作暫存器
+		Hmi_Web.Process_Data_UUID_D_Start := FALSE;
 		WorkNum := 0;
 		q_Lens_Cap_Open := TRUE;
 		step := 110;

@@ -321,6 +321,7 @@ END_VAR
  
 			
 	101:
+		Hmi_Web.Process_Data_UUID_B_Start := FALSE;
 		step := 110;
 		
 (*	===============================================
