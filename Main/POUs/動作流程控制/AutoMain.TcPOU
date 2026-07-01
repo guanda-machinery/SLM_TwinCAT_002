@@ -1698,14 +1698,14 @@ CASE step OF
 		END_IF
 		
 	862:
-		GroupA.ReadyToMove := GroupA.StepA.bDone;
-		GroupB.ReadyToMove := GroupB.StepA.bDone;
-		GroupC.ReadyToMove := GroupC.StepA.bDone;
-		GroupD.ReadyToMove := GroupD.StepA.bDone;
+		GroupA.ReadyToMove := (GroupA.StepA.bDone OR Sensor.sensorA.fDistance = 0);
+		GroupB.ReadyToMove := (GroupB.StepA.bDone OR Sensor.sensorB.fDistance = 0);
+		GroupC.ReadyToMove := (GroupC.StepA.bDone OR Sensor.sensorC.fDistance = 0);
+		GroupD.ReadyToMove := (GroupD.StepA.bDone OR Sensor.sensorD.fDistance = 0);
 		IF (GroupA.StepA.bDone OR ProjectData.Now_Steel_Payload_A_DataNumber = 0 OR Sensor.sensorA.fDistance = 0) AND
-			(GroupB.StepA.bDone OR ProjectData.Now_Steel_Payload_B_DataNumber = 0 OR Sensor.sensorA.fDistance = 0) AND
-			(GroupC.StepA.bDone OR ProjectData.Now_Steel_Payload_C_DataNumber = 0 OR Sensor.sensorA.fDistance = 0) AND 
-			(GroupD.StepA.bDone OR ProjectData.Now_Steel_Payload_D_DataNumber = 0 OR Sensor.sensorA.fDistance = 0) THEN
+			(GroupB.StepA.bDone OR ProjectData.Now_Steel_Payload_B_DataNumber = 0 OR Sensor.sensorB.fDistance = 0) AND
+			(GroupC.StepA.bDone OR ProjectData.Now_Steel_Payload_C_DataNumber = 0 OR Sensor.sensorC.fDistance = 0) AND 
+			(GroupD.StepA.bDone OR ProjectData.Now_Steel_Payload_D_DataNumber = 0 OR Sensor.sensorD.fDistance = 0) THEN
 			 	step := step + 1;
 		ELSIF 
 			(GroupA.StepA.bError AND ProjectData.Now_Steel_Payload_A_DataNumber > 0) OR

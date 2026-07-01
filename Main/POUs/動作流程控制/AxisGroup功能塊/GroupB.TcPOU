@@ -339,7 +339,7 @@ END_VAR
 					移動到位置
 	===============================================*)
 	120:
-		IF ReadyToMove THEN
+		IF _ReadyToMove THEN
 			step := step + 1;
 		END_IF
 		
