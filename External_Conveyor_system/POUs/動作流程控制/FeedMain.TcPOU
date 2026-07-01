@@ -952,7 +952,7 @@ CASE step OF
 		
 		
 	795:
-		IF StartMode = 400 OR NOT Feed_Enable OR IO.i402 OR IO.i404 THEN
+		IF StartMode = 400 OR IO.i402 OR IO.i404 THEN
 			bDone := TRUE;
 			step := 0;
 		ELSIF  ProjectData.WorkOrder_Nunber_At_waitLoading = 1 THEN
@@ -1330,8 +1330,10 @@ END_CASE]]></ST>
 		
 	1030:
 		IF ProjectData.WorkOrder_Nunber_At_waitLoading > 0 THEN
+			// 還有 等待進料狀(waitLoading) 的料的
 			FeedCar.AbsMove(ProjectData.WorkOrder_At_waitLoading[0].waitLoading_pos ,1);
 		ELSE
+			// 所有 等待進料(waitLoading) 的料都已完成
 			FeedCar.AbsMove(config.pos_StartPoint,1);
 		END_IF
 		step := step + 1;
