@@ -109,7 +109,7 @@ IF PullOver_bBuzy THEN
 	PullOver_Start := FALSE;
 END_IF
 
-ExpConver_Enable := NOT IO.i711 AND (AutoMain.step < 600 OR AutoMain.step > 1000);
+ExpConver_Enable := NOT IO.i711 AND NOT( AutoMain.step > 600 AND AutoMain.step < 800 );
 
 
 // IF AutoMain.step >= 0 AND AutoMain.step < 8000 AND Mode_Select = 1 THEN
