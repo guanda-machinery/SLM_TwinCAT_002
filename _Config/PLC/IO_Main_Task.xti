@@ -20,7 +20,7 @@
 			</ArrayInfo>
 		</DataType>
 	</DataTypes>
-	<Project GUID="{C7BEA9E2-4864-48AC-A671-1778B5858C50}" Name="IO_Main_Task" PrjFilePath="..\..\IO_Main_Task\IO_Main_Task.plcproj" TmcFilePath="..\..\IO_Main_Task\IO_Main_Task.tmc" ReloadTmc="true" AmsPort="853" FileArchiveSettings="#x000e" SymbolicMapping="true">
+	<Project GUID="{C7BEA9E2-4864-48AC-A671-1778B5858C50}" Name="IO_Main_Task" PrjFilePath="..\..\IO_Main_Task\IO_Main_Task.plcproj" TmcFilePath="..\..\IO_Main_Task\IO_Main_Task.tmc" ReloadTmc="true" AmsPort="853" SymbolicMapping="true">
 		<Instance Id="#x08502080" TcSmClass="TComPlcObjDef" KeepUnrestoredLinks="2" TmcHash="{AD3A05B2-0F26-A067-D8E7-938B8BEE2A9D}" TmcPath="IO_Main_Task\IO_Main_Task.tmc">
 			<Name>IO_Main_Task Instance</Name>
 			<CLSID ClassFactory="TcPlc30">{08500001-0000-0000-F000-000000000064}</CLSID>
