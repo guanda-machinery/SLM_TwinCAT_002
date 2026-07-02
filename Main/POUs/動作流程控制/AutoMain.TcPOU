@@ -54,6 +54,8 @@ VAR
 	LastXCanFind	:	LREAL;
 	
 	_log : Step_Log; 
+	// SQL請求序號
+	sql_hand: UDINT;
 END_VAR
 
 VAR_OUTPUT
@@ -182,7 +184,8 @@ CASE step_Feed.Step OF
 		END_IF
 
 	2:	// 從資料庫讀取是否有等待中的料
-		IF ReadSQLData.Get_Steel_Num_On_Wait() THEN
+		sql_hand := ReadSQLData.Get_Steel_Num_On_Wait();
+		IF sql_hand <> 0 THEN
 			step_Feed.Step := step_Feed.Step + 1;
 		END_IF
 		
@@ -192,7 +195,7 @@ CASE step_Feed.Step OF
 		END_IF
 			
 	4:
-		IF ReadSQLData.bDone THEN
+		IF ReadSQLData.bDone = sql_hand THEN
 			step_Feed.Step := step_Feed.Step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step_Feed.Step := step_Feed.Step + 10000;
@@ -549,8 +552,10 @@ END_CASE]]></ST>
 			讀取 資料庫 的 work_order 資料表
 	================================================*)
 		510:
-			ReadSQLData.Get_WorkkOrder();
-			step := step + 1;
+			sql_hand := ReadSQLData.Get_WorkkOrder();
+			IF sql_hand <> 0 THEN
+				step := step + 1;
+			END_IF
 			
 		511:
 			IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
@@ -558,7 +563,7 @@ END_CASE]]></ST>
 			END_IF
 			
 		512:
-			IF ReadSQLData.bDone THEN
+			IF ReadSQLData.bDone = sql_hand THEN
 				step := step + 1;
 			ELSIF ReadSQLData.bError THEN
 				step := step + 10000;
@@ -643,8 +648,10 @@ END_CASE]]></ST>
 		進料結束後 再次讀取資料庫
 	========================================*)
 		540:
-			ReadSQLData.Get_WorkkOrder();
-			step := step + 1;
+			sql_hand := ReadSQLData.Get_WorkkOrder();
+			IF sql_hand <> 0 THEN
+				step := step + 1;
+			END_IF
 			
 		541:
 			IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
@@ -652,7 +659,7 @@ END_CASE]]></ST>
 			END_IF
 			
 		542:
-			IF ReadSQLData.bDone THEN
+			IF ReadSQLData.bDone = sql_hand THEN
 				step := step + 1;
 			ELSIF ReadSQLData.bError THEN
 				step := step + 10000;
@@ -680,8 +687,10 @@ END_CASE]]></ST>
 			料已放置在 輸送滾輪 上
 	=======================================*)
 		550:
-			ReadSQLData.Get_WorkkOrder();
-			step := step + 1;
+			sql_hand := ReadSQLData.Get_WorkkOrder();
+			IF sql_hand <> 0 THEN
+				step := step + 1;
+			END_IF
 			
 		551:
 			IF (ReadSQLData.bBuzy OR ReadSQLData.bError) THEN
@@ -689,7 +698,7 @@ END_CASE]]></ST>
 			END_IF
 			
 		552:
-			IF ReadSQLData.bDone THEN
+			IF ReadSQLData.bDone = sql_hand THEN
 				step := step + 1;
 			ELSIF ReadSQLData.bError THEN
 				step := step + 10000;
@@ -721,8 +730,10 @@ END_CASE]]></ST>
 			從資料庫 讀取 材料資料
 	=======================================*)
 		570:
-			ReadSQLData.Get_SteelData(ProjectData.WorkOrder_Now.steel_id);
-			step := step + 1;
+			sql_hand := ReadSQLData.Get_SteelData(ProjectData.WorkOrder_Now.steel_id);
+			IF sql_hand <> 0 THEN
+				step := step + 1;
+			END_IF
 			
 		571:
 			IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
@@ -730,7 +741,7 @@ END_CASE]]></ST>
 			END_IF
 			
 		572:
-			IF ReadSQLData.bDone THEN
+			IF ReadSQLData.bDone = sql_hand THEN
 				step := step + 1;
 			ELSIF ReadSQLData.bError THEN
 				step := step + 10000;
@@ -1049,7 +1060,8 @@ END_CASE]]></ST>
 	============================*) 
 	690:
 		Last_Pos := 0;
-		IF  ReadSQLData.Set_Steel_Start(ProjectData.Now_Steel.uid) THEN
+		sql_hand := ReadSQLData.Set_Steel_Start(ProjectData.Now_Steel.uid);
+		IF sql_hand <> 0 THEN
 			step := step + 1;
 		END_IF
 		
@@ -1065,7 +1077,8 @@ END_CASE]]></ST>
 				搜尋 X工作點
 	===================================*)
 	700:
-		IF ReadSQLData.Get_X_NextPos(0) THEN
+		sql_hand := ReadSQLData.Get_X_NextPos(0);
+		IF sql_hand <> 0 THEN
 			step := step + 1;
 		END_IF
 		
@@ -1075,7 +1088,7 @@ END_CASE]]></ST>
 		END_IF
 		
 	702:
-		IF ReadSQLData.bDone THEN
+		IF ReadSQLData.bDone = sql_hand THEN
 			step := step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step := step + 10000;
@@ -1101,11 +1114,13 @@ END_CASE]]></ST>
 	==========================================*)
 	710:
 		IF ProjectData.Now_Steel.Height > 200 THEN
-			ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 300);
+			sql_hand := ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 300);
 		ELSE
-			ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 75);
+			sql_hand := ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 75);
 		END_IF
-		step := step + 1;
+		IF sql_hand <> 0 THEN
+			step := step + 1;
+		END_IF
 		
 	711:
 		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
@@ -1113,7 +1128,7 @@ END_CASE]]></ST>
 		END_IF
 		
 	712:
-		IF ReadSQLData.bDone THEN
+		IF ReadSQLData.bDone = sql_hand THEN
 			step := step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step := step + 10000;
@@ -1350,7 +1365,8 @@ CASE step OF
 				搜尋 X工作點
 	===================================*)
 	800:
-		IF ReadSQLData.Get_X_NextPos(Last_Pos + 200) THEN
+		sql_hand := ReadSQLData.Get_X_NextPos(Last_Pos + 200);
+		IF sql_hand <> 0 THEN
 			step := step + 1;
 		END_IF
 		
@@ -1360,7 +1376,7 @@ CASE step OF
 		END_IF
 		
 	802:
-		IF ReadSQLData.bDone THEN
+		IF ReadSQLData.bDone = sql_hand THEN
 			step := step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step := step + 10000;
@@ -1395,8 +1411,10 @@ CASE step OF
 				取得區間的打標工作
 	==========================================*)
 	810:
-		ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 200);
-		step := step + 1;
+		sql_hand := ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 200);
+		IF sql_hand <> 0 THEN
+			step := step + 1;
+		END_IF
 		
 	811:
 		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
@@ -1404,7 +1422,7 @@ CASE step OF
 		END_IF
 		
 	812:
-		IF ReadSQLData.bDone THEN
+		IF ReadSQLData.bDone = sql_hand THEN
 			step := step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step := step + 10000;
@@ -1764,7 +1782,8 @@ CASE step OF
 				搜尋 X工作點
 	===================================*)
 	900:
-		IF ReadSQLData.Get_X_NextPos(Last_Pos) THEN
+		sql_hand := ReadSQLData.Get_X_NextPos(Last_Pos);
+		IF sql_hand <> 0 THEN
 			step := step + 1;
 		END_IF
 		
@@ -1774,7 +1793,7 @@ CASE step OF
 		END_IF
 		
 	902:
-		IF ReadSQLData.bDone THEN
+		IF ReadSQLData.bDone = sql_hand THEN
 			step := step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step := step + 10000;
@@ -1828,8 +1847,10 @@ CASE step OF
 				取得區間的打標工作
 	==========================================*)
 	910:
-		ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 1);
-		step := step + 1;
+		sql_hand := ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 1);
+		IF sql_hand <> 0 THEN
+			step := step + 1;
+		END_IF
 		
 	911:
 		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
@@ -1837,7 +1858,7 @@ CASE step OF
 		END_IF
 		
 	912:
-		IF ReadSQLData.bDone THEN
+		IF ReadSQLData.bDone = sql_hand THEN
 			step := step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step := step + 10000;
@@ -2124,27 +2145,36 @@ END_CASE]]></ST>
 		GroupB.Oil();
 		GroupC.Oil();
 		GroupD.Oil();
-		ReadSQLData.Set_Steel_Finish(uid := ProjectData.Now_Steel.uid);
 		step := step + 1;
 		
 	1001:
-		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+		sql_hand := ReadSQLData.Set_Steel_Finish(uid := ProjectData.Now_Steel.uid);
+		IF sql_hand <> 0 THEN
 			step := step + 1;
 		END_IF
 		
 	1002:
-		IF ReadSQLData.bDone OR ReadSQLData.bError THEN
-			ProjectData.WorkOrder_Now.steel_id := '';
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
 			step := step + 1;
 		END_IF
 		
 	1003:
+		IF ReadSQLData.bDone = sql_hand OR ReadSQLData.bError THEN
+			ProjectData.WorkOrder_Now.steel_id := '';
+			step := step + 1;
+		END_IF
+		
+	1004:
 		step := 1010;
 		
 
 	1010:
-		ReadSQLData.Get_Steel_Num_On_Wait();
+		sql_hand := ReadSQLData.Get_Steel_Num_On_Wait();
+		IF sql_hand <> 0 THEN
+			step := step + 1;
+		END_IF
 		
+	1011:
 		GroupA.ToStanby(spdc.HighSpeed);
 		GroupB.ToStanby(spdc.HighSpeed);
 		GroupC.ToStanby(spdc.HighSpeed);
@@ -2158,7 +2188,7 @@ END_CASE]]></ST>
 		
 		step := step + 1;
 		
-	1011:
+	1012:
 		IF (GroupA.StepA.bBuzy OR GroupA.StepA.bError) AND 
 			(GroupB.StepA.bBuzy OR GroupB.StepA.bError) AND
 			(GroupC.StepA.bBuzy OR GroupC.StepA.bError) AND
@@ -2167,14 +2197,14 @@ END_CASE]]></ST>
 				step := step + 1;
 		END_IF
 		
-	1012:
+	1013:
 		IF GroupB.StepA.bDone AND (GroupFx.bDone OR fx.fPos >= 1800) THEN
 			step := step + 1;
 		ELSIF GroupA.StepA.bError OR GroupB.StepA.bError OR GroupC.StepA.bError OR GroupD.StepA.bError OR GroupFx.bError THEN
 			step := step + 10000;
 		END_IF
 		
-	1013:
+	1014:
 		
 		step := 1020;
 		
@@ -2237,7 +2267,7 @@ END_CASE]]></ST>
 		END_IF
 		
 	1033:
-		IF ReadSQLData.bDone OR ReadSQLData.bError THEN
+		IF ReadSQLData.bDone = sql_hand OR ReadSQLData.bError THEN
 			step := 1040;
 		END_IF
 		
@@ -2277,13 +2307,13 @@ END_CASE]]></ST>
 		
 		
 	1050:
-		IF ReadSQLData.bDone OR ReadSQLData.bError THEN
+		IF ReadSQLData.bDone = sql_hand OR ReadSQLData.bError THEN
 			step := step + 1;
 		END_IF
 		
 	1051:
 		IF ProjectData.WorkOrder_Num_On_Wait > 0 THEN
-			step := step + 1;
+			step := 1055;
 		ELSE
 			step := 1090;
 		END_IF
@@ -2315,8 +2345,10 @@ END_CASE]]></ST>
 			讀取資料庫 取得排程資料
 	========================================*)
 	1060:
-		ReadSQLData.Get_WorkkOrder();
-		step := step + 1;
+		sql_hand := ReadSQLData.Get_WorkkOrder();
+		IF sql_hand <> 0 THEN
+			step := step + 1;
+		END_IF
 			
 	1061:
 		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
@@ -2324,7 +2356,7 @@ END_CASE]]></ST>
 		END_IF
 			
 	1062:
-		IF ReadSQLData.bDone THEN
+		IF ReadSQLData.bDone = sql_hand THEN
 			step := step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step := step + 10000;
@@ -2345,8 +2377,10 @@ END_CASE]]></ST>
 				有進料完成的料
 	========================================*)
 	1070:
-		ReadSQLData.Get_SteelData(ProjectData.WorkOrder_Now.steel_id);
-		step := step + 1;
+		sql_hand := ReadSQLData.Get_SteelData(ProjectData.WorkOrder_Now.steel_id);
+		IF sql_hand <> 0 THEN
+			step := step + 1;
+		END_IF
 			
 	1071:
 		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
@@ -2354,7 +2388,7 @@ END_CASE]]></ST>
 		END_IF
 		
 	1072:
-		IF ReadSQLData.bDone THEN
+		IF ReadSQLData.bDone = sql_hand THEN
 			step := step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step := step + 10000;

@@ -2665,10 +2665,10 @@ END_CASE]]></ST>
 		step_BD_C.Step  := step_BD_C.Step  + 1;
 		
 	311:
-		tmr115.IN := NOT IO.i510;
-		tmr115.PT := T#1S;
-		IF tmr115.Q THEN
-			tmr115.IN := FALSE;
+		tmr106.IN := NOT IO.i510;
+		tmr106.PT := T#1S;
+		IF tmr106.Q THEN
+			tmr106.IN := FALSE;
 			step_BD_C.Step  := step_BD_C.Step  + 1;
 		END_IF
 		
@@ -2714,10 +2714,10 @@ END_CASE]]></ST>
 		step_BD_C.Step  := step_BD_C.Step  + 1;
 		
 	331:
-		tmr105.IN := NOT IO.i510;
-		tmr105.PT := T#1S;
-		IF tmr105.Q THEN
-			tmr105.IN := FALSE;
+		tmr106.IN := NOT IO.i510;
+		tmr106.PT := T#1S;
+		IF tmr106.Q THEN
+			tmr106.IN := FALSE;
 			step_BD_C.Step  := step_BD_C.Step  + 1;
 		END_IF
 		

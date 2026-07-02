@@ -84,6 +84,7 @@ VAR
 	
 	_log : Step_Log; 
 	_logA : Step_Log; 
+	sql_hand: UDINT;
 END_VAR
 
 VAR_OUTPUT
@@ -438,7 +439,8 @@ END_CASE
 		END_IF
 		
 	301:
-		IF  ReadSQLData.Set_Payload_Start(ProjectData.Payload_B_Data_Now.data_uid) THEN
+		sql_hand := ReadSQLData.Set_Payload_Start(ProjectData.Payload_B_Data_Now.data_uid);
+		IF sql_hand <> 0 THEN
 			step := step + 1;
 		END_IF
 		
@@ -498,7 +500,8 @@ END_CASE
 				開始下個循環或此區域結束
 	================================================*)	
 	320:
-		IF  ReadSQLData.Set_Payload_Finish(ProjectData.Payload_B_Data_Now.data_uid) THEN
+		sql_hand := ReadSQLData.Set_Payload_Finish(ProjectData.Payload_B_Data_Now.data_uid);
+		IF sql_hand <> 0 THEN
 			step := step + 1;
 		END_IF
 	

@@ -76,7 +76,7 @@ END_VAR]]></Declaration>
 	END_IF
 END_IF
 
-bBuzy := (step >= 1 AND step < 10000);
+bBuzy := (step >= 1 AND step <> 806 AND step < 10000);
 bError := (step >= 10000);
 
 // tmr_ErrorReset(in:= bError, PT:=T#1S);
@@ -993,7 +993,7 @@ END_CASE]]></ST>
 		
 		
 	804: // 確定有等待進料的料
-		IF  ProjectData.WorkOrder_Nunber_At_waitLoading > 0 AND ProjectData.WorkOrder_Nunber_At_Machining <= 0 THEN
+		IF  ProjectData.WorkOrder_Nunber_At_waitLoading > 0 THEN
 			step := step + 1;
 		ELSE
 			IF ProjectData.WorkOrder_Nunber_At_waitLoading <= 0 THEN
@@ -1027,7 +1027,7 @@ END_CASE]]></ST>
 		END_IF
 		
 	806:
-		IF Feed_Enable OR NOT NOT IO.i402 OR NOT IO.i404 THEN
+		IF Feed_Enable AND NOT IO.i402 AND NOT IO.i404 THEN
 			step := 810;
 		END_IF
 		
@@ -1351,27 +1351,26 @@ END_CASE]]></ST>
 		END_IF
 		
 	1033:
-		step := 1050;
+		step := 1040;
 		
-// 以整合進	PullOver 內
-// 	1040:
-// 		HeightMeasurer.Measure();
-// 		step := step + 1;
-// 		
-// 	1041:
-// 		IF (HeightMeasurer.bBuzy OR HeightMeasurer.bError) THEN
-// 			step := step + 1;
-// 		END_IF
-// 		
-// 	1042:
-// 		IF Hydraulic.bDone1 THEN
-// 			step := step + 1;
-// 		ELSIF Hydraulic.bError1 THEN
-// 			step := step + 10000;
-// 		END_IF
-// 		
-// 	1043:
-// 		step := 1050;
+	1040:
+		ReadSQLData.Get_WorkkOrder();
+		step := step + 1;
+		
+	1041:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1042:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1043:
+		step := 1050;
 		
 	
 	1050:
@@ -1388,7 +1387,7 @@ END_CASE]]></ST>
 		
 	1052:
 		IF ProjectData.WorkOrder_Nunber_At_waitLoading > 0 THEN
-			step := 0;
+			step := 800;
 		ELSIF ProjectData.WorkOrder_Nunber_At_holding <= 0 THEN
 			step := 0;
 		ELSE
