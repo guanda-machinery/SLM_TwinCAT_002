@@ -1529,9 +1529,9 @@ END_CASE
 		
 	112: // 程序暫停5秒
 		tmr1_01.PT := T#4S;
-		tmr1_01.IN := io.i402 AND io.i404;
+		tmr1_01.IN := io.i402 OR io.i404;
 		
-		tmr1_02.PT := T#6S;
+		tmr1_02.PT := T#5S;
 		tmr1_02.IN := TRUE;
 		IF tmr1_01.Q OR tmr1_02.q THEN
 			tmr1_01.IN := FALSE;
@@ -1572,7 +1572,7 @@ END_CASE
 		
 	190:
 		
-		tmr1_01.PT := T#6S;
+		tmr1_01.PT := T#3S;
 		tmr1_01.IN := TRUE;
 		IF tmr1_01.Q THEN
 			tmr1_01.IN := FALSE;

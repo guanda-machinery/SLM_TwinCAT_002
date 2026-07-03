@@ -2313,7 +2313,11 @@ END_CASE]]></ST>
 		
 	1051:
 		IF ProjectData.WorkOrder_Num_On_Wait > 0 THEN
-			step := 1055;
+			IF ExpConver.Feed_bDone THEN
+				step := step + 1;
+			ELSE
+				step := 1055;
+			END_IF
 		ELSE
 			step := 1090;
 		END_IF
@@ -2345,24 +2349,29 @@ END_CASE]]></ST>
 			讀取資料庫 取得排程資料
 	========================================*)
 	1060:
+		IF NOT ExpConver.Feed_bBuzy THEN
+			step := step + 1;
+		END_IF
+		
+	1061:	
 		sql_hand := ReadSQLData.Get_WorkkOrder();
 		IF sql_hand <> 0 THEN
 			step := step + 1;
 		END_IF
 			
-	1061:
+	1062:
 		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
 			step := step + 1;
 		END_IF
 			
-	1062:
+	1063:
 		IF ReadSQLData.bDone = sql_hand THEN
 			step := step + 1;
 		ELSIF ReadSQLData.bError THEN
 			step := step + 10000;
 		END_IF
 		
-	1063:
+	1064:
 		IF LEN(STR:=ProjectData.WorkOrder_inSide.steel_id) > 0 THEN
 			// 已經有 料的狀態 是 在輸送滾輪上(inSide)
 			ProjectData.WorkOrder_Now := ProjectData.WorkOrder_inSide;

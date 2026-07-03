@@ -341,6 +341,7 @@ CASE step OF
 				TO_WSTRING(step),
 				")"
 			));
+			Feed_bDone := TRUE;
 			step := 0;
 		END_IF
 	
