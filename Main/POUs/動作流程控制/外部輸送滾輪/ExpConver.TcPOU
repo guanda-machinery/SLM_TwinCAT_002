@@ -129,7 +129,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[ExpConver_Mode := 400;
+        <ST><![CDATA[ExpConver_Mode := 0;
 
 ExpConver_Start := TRUE;]]></ST>
       </Implementation>

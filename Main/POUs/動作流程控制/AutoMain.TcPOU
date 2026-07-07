@@ -1528,6 +1528,7 @@ CASE step OF
 		SensorTest.MovePos[6] := FxB_Exp_Pos;
 		
 		GroupFx.Fx_Set_A_Enc();
+		
 		GroupB.FindZ();
 		step := step + 1;
 		
@@ -2302,17 +2303,29 @@ END_CASE]]></ST>
 		END_IF
 		
 	1045:
-		step := 1050;
-		
-		
-		
-	1050:
 		IF ReadSQLData.bDone = sql_hand OR ReadSQLData.bError THEN
 			step := step + 1;
 		END_IF
 		
-	1051:
-		IF ProjectData.WorkOrder_Num_On_Wait > 0 THEN
+	1046:
+		sql_hand := ReadSQLData.Get_WorkkOrder();
+		step := step + 1;
+		
+	1047:
+		IF ReadSQLData.bDone = sql_hand OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1048:
+		step := 1050;
+		
+
+	1050:
+		IF LEN(STR:=ProjectData.WorkOrder_inSide.steel_id) > 0 THEN
+			// 已經有 料的狀態 是 在輸送滾輪上(inSide)
+			ProjectData.WorkOrder_Now := ProjectData.WorkOrder_inSide;
+			step := 1060;
+		ELSIF ProjectData.WorkOrder_Num_On_Wait > 0 THEN
 			IF ExpConver.Feed_bDone THEN
 				step := step + 1;
 			ELSE
@@ -2322,26 +2335,26 @@ END_CASE]]></ST>
 			step := 1090;
 		END_IF
 		
-	1052:	
+	1051:	
 		IF NOT ExpConver.Feed_bBuzy THEN
 			ExpConver.FeedAutoStart();
 			Hmi_Web.Auto_Start := FALSE;
 			step := step + 1;
 		END_IF
 		
-	1053:
+	1052:
 		IF ExpConver.Feed_bBuzy OR ExpConver.Feed_bError THEN
 			step := step + 1;
 		END_IF
 		
-	1054:
+	1053:
 		IF ExpConver.Feed_bDone THEN
 			step := step + 1;
 		ELSIF ExpConver.Feed_bError THEN
 			step := step + 10000;
 		END_IF
 		
-	1055:
+	1054:
 		step := 1060;
 
 

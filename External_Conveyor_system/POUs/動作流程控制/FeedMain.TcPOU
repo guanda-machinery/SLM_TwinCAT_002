@@ -327,12 +327,7 @@ CASE step OF
 	================================	*)
 	20: // 檢查待命區是否還有料
 		IF ProjectData.WorkOrder_Nunber_At_waitLoading > 0 THEN
-			IF StartMode = 400 THEN
-				bDone := TRUE;
-				step := 0;
-			ELSE
-				step := 800;
-			END_IF
+			step := 800;
 		ELSIF ProjectData.WorkOrder_Nunber_At_holding > 0 THEN
 			step := 400;
 		ELSE
@@ -341,7 +336,7 @@ CASE step OF
 				TO_WSTRING(step),
 				")"
 			));
-			Feed_bDone := TRUE;
+			bDone := TRUE;
 			step := 0;
 		END_IF
 	
@@ -953,14 +948,7 @@ CASE step OF
 		
 		
 	795:
-		IF StartMode = 400 OR IO.i402 OR IO.i404 THEN
-			bDone := TRUE;
-			step := 0;
-		ELSIF  ProjectData.WorkOrder_Nunber_At_waitLoading = 1 THEN
-			step := 890;
-		ELSE
-			step := 800;
-		END_IF
+		step := 800;
 		
 END_CASE]]></ST>
       </Implementation>
