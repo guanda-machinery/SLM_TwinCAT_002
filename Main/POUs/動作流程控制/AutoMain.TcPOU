@@ -1480,7 +1480,7 @@ CASE step OF
 	===================================*)
 	830: // 判斷是否走快到結尾
 		LastXCanFind := 10 + 75 + MAX(ABS(MaCfg.laserA_X_DisSensor2LaserCenter), ABS(MaCfg.laserC_X_DisSensor2LaserCenter)); // 計算 測高感應器 能照到的 X位置
-		IF (Last_Pos + 1200) > ProjectData.Now_Steel.Length AND NOT GroupFx.b_AC_Clamp THEN
+		IF (Last_Pos + 1200) > ProjectData.Now_Steel.Length AND GroupFx.b_BD_Clamp THEN
 			IF Fx.fPos < 1200 THEN
 				step := step + 1;
 			ELSE
@@ -1555,8 +1555,8 @@ CASE step OF
 		SensorTest.MovePos[9] := FxB_Exp_Pos;
 	
 		GroupFx.AC_Clamp();
-		GroupFx.B_UnPress();
-		GroupFx.D_UnPress();
+		GroupFx.B_UnPress(2);
+		GroupFx.D_UnPress(2);
 		step := step + 1;
 		
 	841:
@@ -1600,25 +1600,28 @@ CASE step OF
 		
 	846:
 		IF GroupFx.step_BD_C.bDone  THEN
-			GroupFx.B_Press();
-			GroupFx.D_Press();
+// 			GroupFx.B_Press();
+// 			GroupFx.D_Press();
 			step := step + 1;
 		ELSIF GroupFx.step_BD_C.bError THEN
 			step := step + 10000;
 		END_IF
 		
 	847:
-		IF (GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
-			 (GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError)  THEN
-			step := step + 1;
-		END_IF
+		step := 849;
 		
-	848:
-		IF GroupFx.step_BD_C.bDone AND GroupFx.step_A_P.bDone AND GroupFx.step_B_P.bDone AND GroupFx.step_C_P.bDone AND GroupFx.step_D_P.bDone THEN
-			step := step + 1;
-		ELSIF GroupFx.step_BD_C.bError OR GroupFx.step_A_P.bError OR GroupFx.step_B_P.bError OR GroupFx.step_C_P.bError OR GroupFx.step_D_P.bError THEN
-			step := step + 10000;
-		END_IF
+// 	847:
+// 		IF (GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+// 			 (GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError)  THEN
+// 			step := step + 1;
+// 		END_IF
+// 		
+// 	848:
+// 		IF GroupFx.step_BD_C.bDone AND GroupFx.step_A_P.bDone AND GroupFx.step_B_P.bDone AND GroupFx.step_C_P.bDone AND GroupFx.step_D_P.bDone THEN
+// 			step := step + 1;
+// 		ELSIF GroupFx.step_BD_C.bError OR GroupFx.step_A_P.bError OR GroupFx.step_B_P.bError OR GroupFx.step_C_P.bError OR GroupFx.step_D_P.bError THEN
+// 			step := step + 10000;
+// 		END_IF
 	
 		
 	849:
@@ -1915,7 +1918,7 @@ CASE step OF
 			如果是則交換編碼器
 	===================================*)
 	930: // 判斷是否走快到結尾
-		IF (Last_Pos + 1100) > ProjectData.Now_Steel.Length AND NOT GroupFx.b_AC_Clamp THEN
+		IF (Last_Pos + 1100) > ProjectData.Now_Steel.Length AND GroupFx.b_BD_Clamp THEN
 			IF Fx.fPos < 1000 THEN
 				// 料還沒到 前端
 				step := step + 1;
@@ -1985,8 +1988,8 @@ CASE step OF
 		SensorTest.MovePos[9] := FxB_Exp_Pos;
 	
 		GroupFx.AC_Clamp();
-		GroupFx.B_UnPress();
-		GroupFx.D_UnPress();
+		GroupFx.B_UnPress(2);
+		GroupFx.D_UnPress(2);
 		step := step + 1;
 		
 	941:
@@ -2030,24 +2033,27 @@ CASE step OF
 		
 	946:
 		IF GroupFx.step_BD_C.bDone THEN
-			GroupFx.B_Press();
-			GroupFx.D_Press();
+// 			GroupFx.B_Press();
+// 			GroupFx.D_Press();
 			step := step + 1;
 		ELSIF GroupFx.step_BD_C.bError THEN
 			step := step + 10000;
 		END_IF
 		
 	947:
-		IF (GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND (GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError)  THEN
-			step := step + 1;
-		END_IF
+		step := 949;
 		
-	948:
-		IF GroupFx.step_A_P.bDone AND GroupFx.step_B_P.bDone AND GroupFx.step_C_P.bDone AND GroupFx.step_D_P.bDone THEN
-			step := step + 1;
-		ELSIF GroupFx.step_A_P.bError OR GroupFx.step_B_P.bError OR GroupFx.step_C_P.bError OR GroupFx.step_D_P.bError THEN
-			step := step + 10000;
-		END_IF
+// 	947:
+// 		IF (GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND (GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError)  THEN
+// 			step := step + 1;
+// 		END_IF
+// 		
+// 	948:
+// 		IF GroupFx.step_A_P.bDone AND GroupFx.step_B_P.bDone AND GroupFx.step_C_P.bDone AND GroupFx.step_D_P.bDone THEN
+// 			step := step + 1;
+// 		ELSIF GroupFx.step_A_P.bError OR GroupFx.step_B_P.bError OR GroupFx.step_C_P.bError OR GroupFx.step_D_P.bError THEN
+// 			step := step + 10000;
+// 		END_IF
 		
 	949:
 		step := 950;
@@ -2180,7 +2186,10 @@ END_CASE]]></ST>
 		GroupB.ToStanby(spdc.HighSpeed);
 		GroupC.ToStanby(spdc.HighSpeed);
 		GroupD.ToStanby(spdc.HighSpeed);
-		
+		GroupFx.A_UnPress(5);
+		GroupFx.B_UnPress(5);
+		GroupFx.C_UnPress(5);
+		GroupFx.D_UnPress(5);
 		IF (fx.fPos < 1800) THEN
 			GroupFx.Fx_Move(1800);
 		ELSE
@@ -2199,7 +2208,7 @@ END_CASE]]></ST>
 		END_IF
 		
 	1013:
-		IF GroupB.StepA.bDone AND (GroupFx.bDone OR fx.fPos >= 1800) THEN
+		IF (GroupFx.bDone OR fx.fPos >= 1800) THEN
 			step := step + 1;
 		ELSIF GroupA.StepA.bError OR GroupB.StepA.bError OR GroupC.StepA.bError OR GroupD.StepA.bError OR GroupFx.bError THEN
 			step := step + 10000;
@@ -2210,19 +2219,20 @@ END_CASE]]></ST>
 		step := 1020;
 		
 	1020:
-		GroupFx.A_UnPress();
-		GroupFx.B_UnPress();
-		GroupFx.C_UnPress();
-		GroupFx.D_UnPress();
+// 		GroupFx.A_UnPress(5);
+// 		GroupFx.B_UnPress(5);
+// 		GroupFx.C_UnPress(5);
+// 		GroupFx.D_UnPress(5);
 		step := step + 1;
 		
 	1021:
-		IF (GroupFx.step_A_P.bBuzy OR GroupFx.step_A_P.bError) AND
-			(GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
-			(GroupFx.step_C_P.bBuzy OR GroupFx.step_C_P.bError) AND
-			(GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError) THEN
-				step := step + 1;
-		END_IF
+		step := step + 1;
+// 		IF (GroupFx.step_A_P.bBuzy OR GroupFx.step_A_P.bError) AND
+// 			(GroupFx.step_B_P.bBuzy OR GroupFx.step_B_P.bError) AND
+// 			(GroupFx.step_C_P.bBuzy OR GroupFx.step_C_P.bError) AND
+// 			(GroupFx.step_D_P.bBuzy OR GroupFx.step_D_P.bError) THEN
+// 				step := step + 1;
+// 		END_IF
 		
 	1022:
 		tmr01.PT:= T#2S;
@@ -2424,6 +2434,10 @@ END_CASE]]></ST>
 	1090:
 		GroupFx.AC_UnClamp();
 		GroupFx.BD_UnClamp();
+		GroupFx.A_UnPress();
+		GroupFx.B_UnPress();
+		GroupFx.C_UnPress();
+		GroupFx.D_UnPress();
 		step := step + 1;
 		
 	1091:
@@ -4752,7 +4766,7 @@ CASE step OF
   ====================================*) 
 
 	9300: // 夾
-		IF NOT io.i501 AND NOT io.i503 THEN
+		IF (NOT io.i501 AND NOT io.i503) OR Hmi.Jog_UnLimite THEN
 			GroupFx.AC_Clamp();
 			step := step + 1;
 		ELSE
@@ -4790,6 +4804,7 @@ CASE step OF
 			step := step + 1;
 		ELSE
 			step := 9319;
+			Hmi_Web.Jog_FxA.H_Hold := FALSE;
 			pMsg.Push_alarm("JOG FxA: 尚未執行FxA夾輪靠緊");
 		END_IF
 		
@@ -4810,13 +4825,14 @@ CASE step OF
 		step:=9319;
 		
 	9319:
+		
 		step:=8001;
 
 (*====================================
 				放
   ====================================*) 
 	9320: // 放
-		IF NOT io.i501 AND NOT io.i503 THEN
+		IF (NOT io.i501 AND NOT io.i503) OR Hmi.Jog_UnLimite THEN
 			GroupFx.AC_UnClamp(99999);
 			step := step + 1;
 		ELSE
@@ -4869,6 +4885,8 @@ CASE step OF
 		
 	9339:
 		IF NOT Hmi_Web.Jog_FxA.V_Close THEN
+			GroupFx.A_Stop();
+			GroupFx.C_Stop();
 			step:=8001;
 		END_IF
 		
@@ -4896,6 +4914,8 @@ CASE step OF
 		
 	9349:
 		IF NOT Hmi_Web.Jog_FxA.V_Open THEN
+			GroupFx.A_Stop();
+			GroupFx.C_Stop();
 			step:=8001;
 		END_IF
 		
@@ -4951,7 +4971,7 @@ CASE step OF
   ====================================*) 
 
 	9400: // 夾
-		IF NOT io.i502 AND NOT io.i504 THEN
+		IF (NOT io.i502 AND NOT io.i504) OR Hmi.Jog_UnLimite THEN
 			GroupFx.BD_Clamp();
 			step := step + 1;
 		ELSE
@@ -4990,6 +5010,7 @@ CASE step OF
 			step := step + 1;
 		ELSE
 			step := 9419;
+			Hmi_Web.Jog_FxB.H_Hold := FALSE;
 			pMsg.Push_alarm("JOG FxB: 尚未執行FxB夾輪靠緊");
 		END_IF
 		
@@ -5016,7 +5037,7 @@ CASE step OF
 					放
   	====================================*) 
 	9420: // 放
-		IF NOT io.i502 AND NOT io.i504 THEN
+		IF(NOT io.i502 AND NOT io.i504) OR Hmi.Jog_UnLimite THEN
 			GroupFx.BD_UnClamp(99999);
 			step := step + 1;
 		ELSE
@@ -5069,6 +5090,8 @@ CASE step OF
 		
 	9439:
 		IF NOT Hmi_Web.Jog_FxB.V_Close THEN
+			GroupFx.B_Stop();
+			GroupFx.D_Stop();
 			step:=8001;
 		END_IF
 		
@@ -5096,6 +5119,8 @@ CASE step OF
 		
 	9449:
 		IF NOT Hmi_Web.Jog_FxB.V_Open THEN
+			GroupFx.B_Stop();
+			GroupFx.D_Stop();
 			step:=8001;
 		END_IF
 END_CASE]]></ST>

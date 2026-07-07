@@ -152,7 +152,10 @@ VAR
 	AC_StartPos: LREAL;
 	BD_StartPos: LREAL;
 	
-	
+	_A_UnPush_Time: INT;
+	_B_UnPush_Time: INT;
+	_C_UnPush_Time: INT;
+	_D_UnPush_Time: INT;
 
 	
 	boot : BOOL := TRUE;
@@ -297,8 +300,8 @@ step_A_P.bDone := FALSE;
 step_A_P.Step:=1;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="A_UnPress" Id="{90c5d193-64e1-40a8-a620-a7d9371bce0f}">
-      <Declaration><![CDATA[METHOD A_UnPress : BOOL
+    <Method Name="A_Stop" Id="{6145b342-a3e9-4f82-b5ea-38d101e5fb0f}">
+      <Declaration><![CDATA[METHOD A_Stop : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -307,6 +310,25 @@ END_VAR
 step := 1;
 
 step_A_P.bDone := FALSE;
+o_PressureA_Up := FALSE;
+o_PressureA_Dn := FALSE;
+step_A_P.Step:=0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="A_UnPress" Id="{90c5d193-64e1-40a8-a620-a7d9371bce0f}">
+      <Declaration><![CDATA[METHOD A_UnPress : BOOL
+VAR_INPUT
+	// 1單位為 100ms
+	UnPress_Time : INT := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_A_P.bDone := FALSE;
+_A_UnPush_Time := UnPress_Time;
+
 step_A_P.Step:=100;]]></ST>
       </Implementation>
     </Method>
@@ -331,7 +353,6 @@ _log_ac.fbJson.AddKeyString('MethodName','AC_Clamp');
 _log_ac.fbJson.AddKeyLreal('Pos', Pos);
 _log_ac.JsonOutput();
 // ======================================
-
 
 step_AC_C.Step := 1;]]></ST>
       </Implementation>
@@ -399,8 +420,8 @@ step_B_P.bDone := FALSE;
 step_B_P.Step:=1;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="B_UnPress" Id="{aa493dc3-71f1-46ed-bcb9-00711252eb65}">
-      <Declaration><![CDATA[METHOD B_UnPress : BOOL
+    <Method Name="B_Stop" Id="{039d0313-62d1-456a-bcdb-e30431c9e701}">
+      <Declaration><![CDATA[METHOD B_Stop : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -409,6 +430,24 @@ END_VAR
 step := 1;
 
 step_B_P.bDone := FALSE;
+o_PressureB_Up := FALSE;
+o_PressureB_Dn := FALSE;
+step_B_P.Step:=0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="B_UnPress" Id="{aa493dc3-71f1-46ed-bcb9-00711252eb65}">
+      <Declaration><![CDATA[METHOD B_UnPress : BOOL
+VAR_INPUT
+	// 1單位為 100ms
+	UnPress_Time : INT := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_B_P.bDone := FALSE;
+_B_UnPush_Time := UnPress_Time;
 step_B_P.Step:=100;]]></ST>
       </Implementation>
     </Method>
@@ -501,8 +540,8 @@ step_C_P.bDone := FALSE;
 step_C_P.Step:=1;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="C_UnPress" Id="{729dd88b-2b83-4242-9240-0338568fc20c}">
-      <Declaration><![CDATA[METHOD C_UnPress : BOOL
+    <Method Name="C_Stop" Id="{00f41935-565a-4d72-9e11-4835647c0bd4}">
+      <Declaration><![CDATA[METHOD C_Stop : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -511,6 +550,24 @@ END_VAR
 step := 1;
 
 step_C_P.bDone := FALSE;
+o_PressureC_Up := FALSE;
+o_PressureC_Dn := FALSE;
+step_C_P.Step:=0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="C_UnPress" Id="{729dd88b-2b83-4242-9240-0338568fc20c}">
+      <Declaration><![CDATA[METHOD C_UnPress : BOOL
+VAR_INPUT
+	// 1單位為 100ms
+	UnPress_Time : INT := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_C_P.bDone := FALSE;
+_C_UnPush_Time := UnPress_Time;
 step_C_P.Step:=100;]]></ST>
       </Implementation>
     </Method>
@@ -527,8 +584,8 @@ step_D_P.bDone := FALSE;
 step_D_P.Step:=1;]]></ST>
       </Implementation>
     </Method>
-    <Method Name="D_UnPress" Id="{01a498ba-7e88-4fb5-98e0-45af1d078f7d}">
-      <Declaration><![CDATA[METHOD D_UnPress : BOOL
+    <Method Name="D_Stop" Id="{0120b47a-fd35-483b-8b68-189ba4e64874}">
+      <Declaration><![CDATA[METHOD D_Stop : BOOL
 VAR_INPUT
 END_VAR
 ]]></Declaration>
@@ -537,6 +594,24 @@ END_VAR
 step := 1;
 
 step_D_P.bDone := FALSE;
+o_PressureD_Up := FALSE;
+o_PressureD_Dn := FALSE;
+step_D_P.Step:=0;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="D_UnPress" Id="{01a498ba-7e88-4fb5-98e0-45af1d078f7d}">
+      <Declaration><![CDATA[METHOD D_UnPress : BOOL
+VAR_INPUT
+	// 1單位為 100ms
+	UnPress_Time : INT := 0;
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[bDone := FALSE;
+step := 1;
+
+step_D_P.bDone := FALSE;
+_D_UnPush_Time := UnPress_Time;
 step_D_P.Step:=100;]]></ST>
       </Implementation>
     </Method>
@@ -986,7 +1061,7 @@ END_CASE]]></ST>
 		IF IO.i709 AND NOT AC_Encoder_Active THEN
 			step := step + 1;
 		ELSE
-			step := 1050;
+			step := 1090;
 		END_IF
 		
 	1041:
@@ -1014,6 +1089,46 @@ END_CASE]]></ST>
 		
 		
 	1050:
+		step_AC_C.bDone := FALSE;
+		step_AC_C.Step := 1;
+		step := step + 1;
+		
+	1051:
+		IF step_AC_C.bBuzy OR step_AC_C.bError THEN
+			step := step + 1;
+		END_IF
+		
+	1052:
+		IF step_AC_C.bDone THEN
+			step := step + 1;
+		ELSIF step_AC_C.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1053:
+		step_A_P.Step := 1;
+		step_C_P.Step := 1;
+		step_A_P.bDone := FALSE;
+		step_C_P.bDone := FALSE;
+		step := step + 1;
+		
+	1054:
+		IF (step_A_P.bBuzy OR step_A_P.bError) AND  (step_C_P.bBuzy OR step_C_P.bError) THEN
+			step := step + 1;
+		END_IF
+		
+		
+	1055:
+		IF step_A_P.bDone AND step_C_P.bDone THEN
+			step := step + 1;
+		ELSIF step_A_P.bError OR step_C_P.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	1056:
+		step := 1090;
+		
+	1090:
 		bDone := TRUE;
 		step := 0;
 END_CASE]]></ST>
@@ -1632,19 +1747,20 @@ END_CASE]]></ST>
 
 	// FxA動作前檢查檢查
 	1: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
-		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
-			step_A_P.Step := step_A_P.Step + 1;
-		ELSE
-			step_A_P.Step := step_A_P.Step + 10000;
-			strmem1.WRITE(name);
-			strmem1.APPEND(".A_Push");
-			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
-			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
-			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
-			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
-			strmem1.APPEND(")");
-			pMsg.Push_Error(strmem1.READ);
-		END_IF
+		step_A_P.Step := step_A_P.Step + 1;
+// 		IF GbZ.fPos >= 495 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+// 			step_A_P.Step := step_A_P.Step + 1;
+// 		ELSE
+// 			step_A_P.Step := step_A_P.Step + 10000;
+// 			strmem1.WRITE(name);
+// 			strmem1.APPEND(".A_Push");
+// 			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+// 			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+// 			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+// 			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+// 			strmem1.APPEND(")");
+// 			pMsg.Push_Error(strmem1.READ);
+// 		END_IF
 		
 	2:
 		tmr111.IN := TRUE;
@@ -1660,6 +1776,8 @@ END_CASE]]></ST>
 		END_IF
 		
 	3:
+		tmr101.IN := FALSE;
+		tmr111.IN := FALSE;
 		step_A_P.Step := 10;
 		
 		
@@ -1678,14 +1796,14 @@ END_CASE]]></ST>
 		END_IF
 		
 	12:
-		o_PressureA_Dn := FALSE;
+// 		o_PressureA_Dn := FALSE;
 		step_A_P.Step := step_A_P.Step + 1;
 		
 	13:
 		tmr101.IN := pressureA_pressure_sensor;
 		tmr101.PT := T#500MS;
 		tmr111.IN := TRUE;
-		tmr111.PT := T#10S;
+		tmr111.PT := T#30S;
 		IF tmr101.q OR tmr111.q THEN
 			tmr101.IN := FALSE;
 			tmr111.IN := FALSE;
@@ -1702,7 +1820,8 @@ END_CASE]]></ST>
  	================================*)
 	// FxA動作前檢查檢查
 	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
-		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+		IF GbZ.fPos >= 495 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite OR 
+			(_A_UnPush_Time > 0 AND _A_UnPush_Time < 10) THEN
 			step_A_P.Step := step_A_P.Step + 1;
 		ELSE
 			step_A_P.Step := step_A_P.Step + 10000;
@@ -1730,16 +1849,28 @@ END_CASE]]></ST>
 		END_IF
 		
 	102:
+		tmr101.IN := FALSE;
+		tmr111.IN := FALSE;
 		step_A_P.Step := 110;
 		
 		
 	110: // 放開啟動
 		o_PressureA_Up := TRUE;
 		o_PressureA_Dn := FALSE;
-		step_A_P.Step := step_A_P.Step + 1;
+		IF _A_UnPush_Time > 0 THEN
+			// 微上升
+			step_A_P.Step  := step_A_P.Step  + 20;
+		ELSE
+			// 升回原點
+			step_A_P.Step  := step_A_P.Step  + 10;
+		END_IF
+		
+(*	========================================
+					升回原點
+	========================================	*)
 		
 		
-	111:
+	120:
 		tmr101.IN := TRUE;
 		tmr101.PT := T#500MS;
 		IF tmr101.q THEN
@@ -1747,24 +1878,45 @@ END_CASE]]></ST>
 			step_A_P.Step := step_A_P.Step + 1;
 		END_IF
 		
-	112:
-		o_PressureA_Up := FALSE;
+	121:
+// 		o_PressureA_Up := FALSE;
 		step_A_P.Step := step_A_P.Step + 1;
 		
-	113:
+	122:
 		tmr101.IN := pressureA_home_sensor;
 		tmr101.PT := T#500MS;
 		tmr111.IN := TRUE;
-		tmr111.PT := T#10S;
+		tmr111.PT := T#30S;
 		IF tmr01.q OR tmr111.q THEN
 			tmr101.IN := FALSE;
 			tmr111.IN := FALSE;
+			o_PressureA_Up := FALSE;
 			step_A_P.Step := step_A_P.Step + 1;
 		END_IF
 		
-	114:
+	123:
 		step_A_P.bDone := TRUE;
 		step_A_P.Step := 0;
+		
+(*	========================================
+					微上升
+	========================================	*)
+	
+	130:
+		tmr101.IN := TRUE;
+		tmr101.PT := TO_TIME(_A_UnPush_Time * 100);
+		IF tmr104.q THEN
+			tmr104.IN := FALSE;
+			step_A_P.Step  := step_A_P.Step  + 1;
+		END_IF
+		
+	131:
+		o_PressureA_Up := FALSE;
+		step_A_P.Step  := step_A_P.Step  + 1;
+		
+	132:
+		step_A_P.bDone := TRUE;
+		step_A_P.Step  := 0;
 END_CASE
 
 step_A_P.bBuzy := step_A_P.Step > 0 AND step_A_P.Step < 10000;
@@ -1782,21 +1934,23 @@ END_IF
         <ST><![CDATA[CASE step_AC_C.Step  OF
 	// FxA動作前檢查檢查
 	1:  // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
-		tmr01.IN := FALSE;
-		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
-		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
-		IF GbZ.fPos >= 490 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
-			step_AC_C.Step  := step_AC_C.Step  + 1;
-		ELSE
-			step_AC_C.Step  := step_AC_C.Step  + 20000;
-			strmem1.WRITE(name);
-			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
-			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
-			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
-			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
-			strmem1.APPEND(")");
-			pMsg.Push_Error(strmem1.READ);
-		END_IF
+		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
+// 		tmr01.IN := FALSE;
+// 		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter_on_latch_C := FALSE;
+// 		Axis.Encoder_FxA_Clamp.MDP5001_511_Output.MDP5001_511_Control.Set_counter := FALSE;
+// 		IF GbZ.fPos >= 490 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+// 			step_AC_C.Step  := step_AC_C.Step  + 1;
+// 		ELSE
+// 			step_AC_C.Step  := step_AC_C.Step  + 20000;
+// 			strmem1.WRITE(name);
+// 			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+// 			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+// 			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+// 			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+// 			strmem1.APPEND(")");
+// 			pMsg.Push_Error(strmem1.READ);
+// 		END_IF
 		
 		// 確認AC下壓位置
 //		IF pressureA_home_sensor AND pressureC_home_sensor THEN
@@ -1808,6 +1962,7 @@ END_IF
 		
 	2: // 確認材料進入FxA的夾輪
 		step_AC_C.Step  := step_AC_C.Step  + 1;
+		
 // 		IF NOT (AC_in_sensor XOR AC_out_sensor) OR Hmi.Jog_UnLimite OR AC_moveDis > 0 THEN
 // 			step_AC_C.Step  := step_AC_C.Step  + 1;
 // 		ELSE
@@ -1866,6 +2021,7 @@ END_IF
 		step_AC_C.Step  := step_AC_C.Step  + 1;
 		
 	13:
+		b_AC_Clamp := TRUE;
 		step_AC_C.Step  := 90;
 		
 {region "============= 進到設定位置  ============="}
@@ -1905,6 +2061,7 @@ END_IF
 		step_AC_C.Step  := step_AC_C.Step  + 1;
 			 
 	43:
+		
 		 step_AC_C.Step  := 90;
 	
 {endregion}
@@ -1918,8 +2075,6 @@ END_CASE
 
 IF o_AC_Clamp_Open THEN
 	b_AC_Clamp := FALSE;
-ELSIF step_AC_C.Step  = 90 THEN
-	b_AC_Clamp := TRUE;
 END_IF
 
 step_AC_C.bBuzy := step_AC_C.Step > 0 AND step_AC_C.Step < 10000;
@@ -2190,7 +2345,7 @@ END_CASE]]></ST>
 
 	// FxA動作前檢查檢查
 	1: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
-		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+		IF GbZ.fPos >= 495 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
 			step_B_P.Step  := step_B_P.Step  + 1;
 		ELSE
 			step_B_P.Step  := step_B_P.Step  + 10000;
@@ -2218,6 +2373,8 @@ END_CASE]]></ST>
 		END_IF
 		
 	3:
+		tmr102.IN := FALSE;
+		tmr112.IN := FALSE;
 		step_B_P.Step  := 10;
 		
 		
@@ -2235,14 +2392,14 @@ END_CASE]]></ST>
 		END_IF
 		
 	12:
-		o_PressureB_Dn := FALSE;
+// 		o_PressureB_Dn := FALSE;
 		step_B_P.Step  := step_B_P.Step  + 1;
 		
 	13:
 		tmr102.IN := pressureB_pressure_sensor;
 		tmr102.PT := T#500MS;
 		tmr112.IN := TRUE;
-		tmr112.PT := T#10S;
+		tmr112.PT := T#30S;
 		IF tmr102.q OR tmr112.q THEN
 			tmr102.IN := FALSE;
 			tmr112.IN := FALSE;
@@ -2259,7 +2416,8 @@ END_CASE]]></ST>
  	================================*)
 	// FxA動作前檢查檢查
 	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
-		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+		IF GbZ.fPos >= 495 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite OR 
+			(_B_UnPush_Time > 0 AND _B_UnPush_Time < 10) THEN
 			step_B_P.Step  := step_B_P.Step  + 1;
 		ELSE
 			step_B_P.Step  := step_B_P.Step  + 10000;
@@ -2285,15 +2443,27 @@ END_CASE]]></ST>
 		END_IF
 		
 	102:
+		tmr102.IN := FALSE;
+		tmr112.IN := FALSE;
 		step_B_P.Step  := 110;
 		
 		
 	110: // 放開啟動
 		o_PressureB_Up := TRUE;
 		o_PressureB_Dn := FALSE;
-		step_B_P.Step  := step_B_P.Step  + 1;
+		IF _B_UnPush_Time > 0 THEN
+			// 微上升
+			step_B_P.Step  := step_B_P.Step  + 20;
+		ELSE
+			// 升回原點
+			step_B_P.Step  := step_B_P.Step  + 10;
+		END_IF
 		
-	111:
+(*	========================================
+					升回原點
+	========================================	*)
+		
+	120:
 		tmr102.IN := TRUE;
 		tmr102.PT := T#500MS;
 		IF tmr102.q THEN
@@ -2301,22 +2471,42 @@ END_CASE]]></ST>
 			step_B_P.Step  := step_B_P.Step  + 1;
 		END_IF
 		
-	112:
-		o_PressureB_Up := FALSE;
+	121:
+// 		o_PressureB_Up := FALSE;
 		step_B_P.Step  := step_B_P.Step  + 1;
 		
-	113:
+	122:
 		tmr102.IN := pressureB_home_sensor;
 		tmr102.PT := T#500MS;
 		tmr112.IN := TRUE;
-		tmr112.PT := T#10S;
+		tmr112.PT := T#30S;
 		IF tmr102.q OR tmr112.q THEN
 			tmr102.IN := FALSE;
 			tmr112.IN := FALSE;
+			o_PressureB_Up := FALSE;
 			step_B_P.Step  := step_B_P.Step  + 1;
 		END_IF
 		
-	114:
+	123:
+		step_B_P.bDone := TRUE;
+		step_B_P.Step  := 0;
+		
+(*	========================================
+					微上升
+	========================================	*)
+	130:
+		tmr102.IN := TRUE;
+		tmr102.PT := TO_TIME(_B_UnPush_Time * 100);
+		IF tmr102.q THEN
+			tmr102.IN := FALSE;
+			step_B_P.Step  := step_B_P.Step  + 1;
+		END_IF
+		
+	131:
+		o_PressureB_Up := FALSE;
+		step_B_P.Step  := step_B_P.Step  + 1;
+		
+	132:
 		step_B_P.bDone := TRUE;
 		step_B_P.Step  := 0;
 END_CASE
@@ -2419,6 +2609,7 @@ END_IF]]></ST>
 		step_BD_C.Step  := step_BD_C.Step  + 1;
 		
 	13:
+		b_BD_Clamp := TRUE;
 		step_BD_C.Step  := 90;
 		
 	{region "============= 進到設定位置  ============="}
@@ -2470,8 +2661,6 @@ END_CASE
 
 IF o_BD_Clamp_Open THEN
 	b_BD_Clamp := FALSE;
-ELSIF step_BD_C.Step  = 90 THEN
-	b_BD_Clamp := TRUE;
 END_IF
 
 step_BD_C.bBuzy := step_BD_C.Step > 0 AND step_BD_C.Step < 10000;
@@ -2742,19 +2931,20 @@ END_CASE]]></ST>
 
 	// FxA動作前檢查檢查
 	1: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
-		IF GbZ.fPos >= 500 OR GbX.fPos > 50 OR NOT Hmi.Jog_UnLimite THEN
-			step_C_P.Step  := step_C_P.Step  + 1;
-		ELSE
-			step_C_P.Step  := step_C_P.Step  + 10000;
-			strmem1.WRITE(name);
-			strmem1.APPEND(".C_Push");
-			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
-			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
-			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
-			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
-			strmem1.APPEND(")");
-			pMsg.Push_Error(strmem1.READ);
-		END_IF
+		step_C_P.Step  := step_C_P.Step  + 1;
+// 		IF GbZ.fPos >= 495 OR GbX.fPos > 50 OR Hmi.Jog_UnLimite THEN
+// 			step_C_P.Step  := step_C_P.Step  + 1;
+// 		ELSE
+// 			step_C_P.Step  := step_C_P.Step  + 10000;
+// 			strmem1.WRITE(name);
+// 			strmem1.APPEND(".C_Push");
+// 			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
+// 			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
+// 			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
+// 			strmem1.APPEND(STR := WCONCAT(",Z:", TO_WSTRING(GbZ.pos)));
+// 			strmem1.APPEND(")");
+// 			pMsg.Push_Error(strmem1.READ);
+// 		END_IF
 		
 	2:
 		tmr114.IN := TRUE;
@@ -2770,6 +2960,8 @@ END_CASE]]></ST>
 		END_IF
 		
 	3:
+		tmr103.IN := FALSE;
+		tmr113.IN := FALSE;
 		step_C_P.Step  := 10;
 		
 		
@@ -2787,14 +2979,14 @@ END_CASE]]></ST>
 		END_IF
 		
 	12:
-		o_PressureC_Dn := FALSE;
+// 		o_PressureC_Dn := FALSE;
 		step_C_P.Step  := step_C_P.Step  + 1;
 		
 	13:
 		tmr103.IN := pressureC_pressure_sensor;
 		tmr103.PT := T#500MS;
 		tmr113.IN := TRUE;
-		tmr113.PT := T#10S;
+		tmr113.PT := T#30S;
 		IF tmr103.q OR tmr113.q THEN
 			tmr103.IN := FALSE;
 			tmr113.IN := FALSE;
@@ -2811,7 +3003,8 @@ END_CASE]]></ST>
  	================================*)
 	// FxA動作前檢查檢查
 	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
-		IF GbZ.pos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+		IF GbZ.pos >= 495 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite OR
+			(_C_UnPush_Time > 0 AND _C_UnPush_Time < 10) THEN
 			step_C_P.Step  := step_C_P.Step  + 1;
 		ELSE
 			step_C_P.Step  := step_C_P.Step  + 10000;
@@ -2837,15 +3030,26 @@ END_CASE]]></ST>
 		END_IF
 		
 	102:
+		tmr103.IN := FALSE;
+		tmr113.IN := FALSE;
 		step_C_P.Step  := 110;
 		
 		
 	110: // 放開啟動
 		o_PressureC_Up := TRUE;
 		o_PressureC_Dn := FALSE;
-		step_C_P.Step  := step_C_P.Step  + 1;
+		IF _C_UnPush_Time > 0 THEN
+			// 微上升
+			step_C_P.Step  := step_C_P.Step  + 20;
+		ELSE
+			// 升回原點
+			step_C_P.Step  := step_C_P.Step  + 10;
+		END_IF
 		
-	111:
+(*	========================================
+					升回原點
+	========================================	*)
+	120:
 		tmr103.IN := TRUE;
 		tmr103.PT := T#500MS;
 		IF tmr103.q THEN
@@ -2853,11 +3057,11 @@ END_CASE]]></ST>
 			step_C_P.Step  := step_C_P.Step  + 1;
 		END_IF
 		
-	112:
-		o_PressureC_Up := FALSE;
+	121:
+// 		o_PressureC_Up := FALSE;
 		step_C_P.Step  := step_C_P.Step  + 1;
 		
-	113:
+	122:
 		tmr103.IN := pressureC_home_sensor;
 		tmr103.PT := T#500MS;
 		tmr113.IN := TRUE;
@@ -2865,12 +3069,34 @@ END_CASE]]></ST>
 		IF tmr103.q OR tmr113.q THEN
 			tmr103.IN := FALSE;
 			tmr113.IN := FALSE;
+			o_PressureC_Up := FALSE;
 			step_C_P.Step  := step_C_P.Step  + 1;
 		END_IF
 		
-	114:
+	123:
 		step_C_P.bDone := TRUE;
 		step_C_P.Step  := 0;
+
+(*	========================================
+					微上升
+	========================================	*)
+	
+	130:
+		tmr103.IN := TRUE;
+		tmr103.PT := TO_TIME(_C_UnPush_Time * 100);
+		IF tmr103.q THEN
+			tmr103.IN := FALSE;
+			step_C_P.Step  := step_C_P.Step  + 1;
+		END_IF
+		
+	131:
+		o_PressureC_Up := FALSE;
+		step_C_P.Step  := step_C_P.Step  + 1;
+		
+	132:
+		step_C_P.bDone := TRUE;
+		step_C_P.Step  := 0;
+	
 END_CASE
 
 step_C_P.bBuzy := step_C_P.Step  > 0 AND step_C_P.Step  < 10000;
@@ -2890,7 +3116,7 @@ END_IF]]></ST>
 
 	// FxA動作前檢查檢查
 	1: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
-		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR NOT Hmi.Jog_UnLimite THEN
+		IF GbZ.fPos >= 495 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
 			step_D_P.Step  := step_D_P.Step  + 1;
 		ELSE
 			step_D_P.Step  := step_D_P.Step  + 10000;
@@ -2917,6 +3143,8 @@ END_IF]]></ST>
 		END_IF
 		
 	3:
+		tmr104.IN := FALSE;
+		tmr114.IN := FALSE;
 		step_D_P.Step  := 10;
 		
 		
@@ -2933,15 +3161,15 @@ END_IF]]></ST>
 			step_D_P.Step  := step_D_P.Step  + 1;
 		END_IF
 		
-	12:
-		o_PressureD_Dn := FALSE;
+	12: // 改三位閥，須持續送
+// 		o_PressureD_Dn := FALSE;
 		step_D_P.Step  := step_D_P.Step  + 1;
 		
 	13:
 		tmr104.IN := pressureD_pressure_sensor;
 		tmr104.PT := T#500MS;
 		tmr114.IN := TRUE;
-		tmr114.PT := T#10S;
+		tmr114.PT := T#30S;
 		IF tmr104.q OR tmr114.q THEN
 			tmr104.IN := FALSE;
 			tmr114.IN := FALSE;
@@ -2958,12 +3186,13 @@ END_IF]]></ST>
  	================================*)
 	// FxA動作前檢查檢查
 	100: // 檢查Group B Z軸位置，需在桁架中間 (Z pos > 500 )
-		IF GbZ.fPos >= 500 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite THEN
+		IF GbZ.fPos >= 495 OR GbX.fPos < 50 OR Hmi.Jog_UnLimite OR 
+			(_D_UnPush_Time > 0 AND _D_UnPush_Time < 10) THEN
 			step_D_P.Step  := step_D_P.Step  + 1;
 		ELSE
 			step_D_P.Step  := step_D_P.Step  + 10000;
 			strmem1.WRITE(name);
-			strmem1.APPEND(".C_Push");
+			strmem1.APPEND(".D_Push");
 			strmem1.APPEND(":Group B 位置錯誤,再非安全位置:");
 			strmem1.APPEND(STR := WCONCAT("(X:", TO_WSTRING(GbX.pos)));
 			strmem1.APPEND(STR := WCONCAT(",Y:", TO_WSTRING(GbY.pos)));
@@ -2978,22 +3207,32 @@ END_IF]]></ST>
 			IF o_Oil_Pressure_Pump THEN
 				step_D_P.Step  := step_D_P.Step  + 1;
 			ELSIF tmr114.Q THEN
-				pMsg.Push_Error(WStrConcat(name, ".C_Push:下壓D等待油壓系統啟動逾時"));
+				pMsg.Push_Error(WStrConcat(name, ".D_Push:下壓D等待油壓系統啟動逾時"));
 				step_D_P.Step  := step_D_P.Step  + 10000;
 			END_IF
 		END_IF
 		
 	102:
+		tmr104.IN := FALSE;
+		tmr114.IN := FALSE;
 		step_D_P.Step  := 110;
 		
 		
 	110: // 放開啟動
 		o_PressureD_Up := TRUE;
 		o_PressureD_Dn := FALSE;
-		step_D_P.Step  := step_D_P.Step  + 1;
+		IF _D_UnPush_Time > 0 THEN
+			// 微上升
+			step_D_P.Step  := step_D_P.Step  + 20;
+		ELSE
+			// 升回原點
+			step_D_P.Step  := step_D_P.Step  + 10;
+		END_IF
 		
-		
-	111:
+(*	========================================
+					升回原點
+	========================================	*)
+	120: // 升回原點
 		tmr104.IN := TRUE;
 		tmr104.PT := T#500MS;
 		IF tmr104.q THEN
@@ -3001,24 +3240,45 @@ END_IF]]></ST>
 			step_D_P.Step  := step_D_P.Step  + 1;
 		END_IF
 		
-	112:
-		o_PressureD_Up := FALSE;
+	121: // 改三位閥，須持續送
+// 		o_PressureD_Up := FALSE;
 		step_D_P.Step  := step_D_P.Step  + 1;
 		
-	113:
+	122:
 		tmr104.IN := pressureD_home_sensor;
 		tmr104.PT := T#500MS;
 		tmr114.IN := TRUE;
-		tmr114.PT := T#10S;
+		tmr114.PT := T#30S;
 		IF tmr104.q OR tmr114.q THEN
 			tmr104.IN := FALSE;
 			tmr114.IN := FALSE;
+			o_PressureD_Up := FALSE;
 			step_D_P.Step  := step_D_P.Step  + 1;
 		END_IF
 		
-	114:
+	123:
 		step_D_P.bDone := TRUE;
 		step_D_P.Step  := 0;
+
+(*	========================================
+					微上升
+	========================================	*)
+	130:
+		tmr104.IN := TRUE;
+		tmr104.PT := TO_TIME(_D_UnPush_Time * 100);
+		IF tmr104.q THEN
+			tmr104.IN := FALSE;
+			step_D_P.Step  := step_D_P.Step  + 1;
+		END_IF
+		
+	131:
+		o_PressureD_Up := FALSE;
+		step_D_P.Step  := step_D_P.Step  + 1;
+		
+	132:
+		step_D_P.bDone := TRUE;
+		step_D_P.Step  := 0;
+		
 END_CASE
 
 step_D_P.bBuzy := step_D_P.Step  > 0 AND step_D_P.Step  < 10000;
