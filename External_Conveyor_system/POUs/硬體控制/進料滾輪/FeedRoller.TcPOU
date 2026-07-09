@@ -27,7 +27,8 @@ VAR_OUTPUT
 	At_Down : BOOL;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF (EStop OR SystemError OR Input.Feed_Reset) AND bBuzy THEN
+      <ST><![CDATA[// 沒 SystemError 是避免進料機影響到整體動作
+IF (EStop OR Input.Feed_Reset) AND bBuzy THEN
 	IF bBuzy THEN
 		step := step  + 10000;
 	END_IF
