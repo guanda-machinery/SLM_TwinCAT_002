@@ -34,6 +34,7 @@ VAR
 	moveZdis	: REAL;
 	tmr01A		: TON;
 	tmr01		: TON;
+	tmr02		: TON;
 	
 	// 坐標系的參考原點
 	pointRef : XYZ_Point;
@@ -149,6 +150,7 @@ IF (EStop OR SystemError) THEN
 	IF StepA.bBuzy THEN
 		StepA.step := StepA.step  + 10000;
 	END_IF
+	Hmi_Web.Process_Data_UUID_D_Start := FALSE;
 	q_Lens_Blow := FALSE;
 END_IF
 
@@ -203,6 +205,22 @@ _logA(name:= 'GroupD_Mov', step:= StepA.Step);]]></ST>
     </Implementation>
     <Folder Name="入口" Id="{8f04e6ff-138d-4a6d-9a92-13d3e7675a5b}" />
     <Folder Name="內部功能" Id="{6667eb1b-bf27-40b1-9501-af6b166c47d1}" />
+    <Method Name="Close_Conver" Id="{5a9c2501-ffc5-4c0a-a112-d22d4e4b715e}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Close_Conver
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy THEN
+	IF NOT i_Lens_Cap_IsClose THEN
+		q_Lens_Cap_Open := FALSE;
+		q_Lens_Cap_Close := TRUE;
+	ELSE
+		q_Lens_Cap_Close := FALSE;
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Method Name="Do_WorkList" Id="{4a8d171c-ca3d-4158-abfa-6b49f6b45767}" FolderPath="入口\">
       <Declaration><![CDATA[METHOD Do_WorkList : BOOL
 VAR_INPUT
@@ -274,6 +292,22 @@ IF X_Move > 1000000 OR Y_Move > 1000000 OR Z_Move > 1000000 THEN
 END_IF]]></ST>
       </Implementation>
     </Action>
+    <Method Name="Open_Conver" Id="{7514ba50-3c5f-485e-8b32-6bf93d7a3dd9}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Open_Conver
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[IF NOT bBuzy  THEN
+	IF NOT i_Lens_Cap_IsOpen THEN
+		q_Lens_Cap_Open := TRUE;
+		q_Lens_Cap_Close := FALSE;
+	ELSE
+		q_Lens_Cap_Open := FALSE;
+	END_IF
+END_IF]]></ST>
+      </Implementation>
+    </Method>
     <Property Name="ReadyToMove" Id="{1352bef9-cba7-469d-b2b2-be9eaaf8915b}" FolderPath="入口\">
       <Declaration><![CDATA[PROPERTY ReadyToMove : BOOL]]></Declaration>
       <Get Name="Get" Id="{54289df7-0471-42c3-9e1c-f8a4f41df3f4}">
@@ -507,23 +541,29 @@ END_CASE
 		tmr01.IN := TRUE;
 		IF tmr01.Q THEN
 			tmr01.IN := FALSE;
+			tmr02.IN := FALSE;
 			step := step + 1;
 		END_IF
 		
 	314:
 		tmr01.PT := TO_TIME(MaCfg.LaserPrinter_Timeout);
 		tmr01.IN := TRUE;
-		IF NOT Hmi_Web.Process_Data_UUID_D_Start THEN
+		tmr02.PT := T#500MS;
+		tmr02.IN := NOT Hmi_Web.Process_Data_UUID_D_Start;
+		
+		IF tmr02.q THEN // 程式通知打標完成
 			Hmi_Web.Process_Data_UUID_D :='';
 			tmr01.IN := FALSE;
+			tmr02.IN := FALSE;
 			// ============ 紀錄啟動條件 ============
 			_log.fbJson.StartObject();
 			_log.fbJson.AddKeyString('StepName','Laser_D_Done');
 			_log.JsonOutput();
 			// ======================================
 			step := step + 1;
-		ELSIF tmr01.Q THEN
+		ELSIF tmr01.Q THEN // 打標超時
 			tmr01.IN := FALSE;
+			tmr02.IN := FALSE;
 			pMsg.Push_Error("GroupD:雷射動作超時");
 			step := step + 10000;
 		END_IF
@@ -1040,6 +1080,7 @@ END_CASE]]></ST>
       <Implementation>
         <ST><![CDATA[tmr01A();
 tmr01();
+tmr02();
 
 // tmr_oil(in := IO.q207 AND IO.i310, PT:=T#2S);
 tmr_oil(in := IO.q207, PT:=T#2S);

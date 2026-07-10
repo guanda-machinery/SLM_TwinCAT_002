@@ -18,6 +18,7 @@ VAR_GLOBAL
 	
 	
 	Now_Steel	: tsSteelData;
+	old_Steel	: tsSteelData;
 	
 	// 接縫 (出現在BH，板長不夠時兩塊板連接的位置)
 	Joint_Pos : LREAL := 0;

@@ -35,6 +35,7 @@ VAR
 	moveZdis	: REAL;
 	tmr01A		: TON;
 	tmr01		: TON;
+	tmr02		: TON;
 	
 	// 坐標系的參考原點
 	pointRef : XYZ_Point;
@@ -130,6 +131,7 @@ IF (EStop OR SystemError) THEN
 	IF StepA.bBuzy THEN
 		StepA.step := StepA.step  + 10000;
 	END_IF
+	Hmi_Web.Process_Data_UUID_A_Start := FALSE;
 	q_Lens_Blow := FALSE;
 END_IF
 
@@ -460,15 +462,19 @@ END_CASE
 		tmr01.IN := TRUE;
 		IF tmr01.Q THEN
 			tmr01.IN := FALSE;
+			tmr02.IN := FALSE;
 			step := step + 1;
 		END_IF
 		
 	313:
 		tmr01.PT := TO_TIME(MaCfg.LaserPrinter_Timeout);
 		tmr01.IN := TRUE;
+		tmr02.PT := T#500MS;
+		tmr02.IN := NOT Hmi_Web.Process_Data_UUID_B_Start;
 		IF NOT Hmi_Web.Process_Data_UUID_C_Start THEN
 			Hmi_Web.Process_Data_UUID_C :='';
 			tmr01.IN := FALSE;
+			tmr02.IN := FALSE;
 			// ============ 紀錄啟動條件 ============
 			_log.fbJson.StartObject();
 			_log.fbJson.AddKeyString('StepName','Laser_A_Done');
@@ -477,6 +483,7 @@ END_CASE
 			step := step + 1;
 		ELSIF tmr01.Q THEN
 			tmr01.IN := FALSE;
+			tmr02.IN := FALSE;
 			pMsg.Push_Error("GroupA:雷射動作超時");
 			step := step + 10000;
 		END_IF
@@ -984,6 +991,7 @@ END_CASE]]></ST>
       <Implementation>
         <ST><![CDATA[tmr01A();
 tmr01();
+tmr02();
 
 // tmr_oil(in := IO.q204 AND IO.i302, PT:=T#2S);
 tmr_oil(in := IO.q204 , PT:=T#2S);
