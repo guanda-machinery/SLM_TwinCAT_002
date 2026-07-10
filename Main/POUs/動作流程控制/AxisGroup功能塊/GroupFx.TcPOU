@@ -293,8 +293,11 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
+
 
 step_A_P.bDone := FALSE;
 step_A_P.Step:=1;]]></ST>
@@ -306,10 +309,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
-
-step_A_P.bDone := FALSE;
+        <ST><![CDATA[step_A_P.bDone := FALSE;
 o_PressureA_Up := FALSE;
 o_PressureA_Dn := FALSE;
 step_A_P.Step:=0;]]></ST>
@@ -323,8 +323,10 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
 
 step_A_P.bDone := FALSE;
 _A_UnPush_Time := UnPress_Time;
@@ -340,8 +342,10 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
 
 AC_moveDis := ABS(Pos);
 
@@ -391,8 +395,11 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
+
 AC_moveDis := ABS(Dis);
 
 step_AC_C.bDone := FALSE;
@@ -413,8 +420,10 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
 
 step_B_P.bDone := FALSE;
 step_B_P.Step:=1;]]></ST>
@@ -426,9 +435,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
-
+        <ST><![CDATA[
 step_B_P.bDone := FALSE;
 o_PressureB_Up := FALSE;
 o_PressureB_Dn := FALSE;
@@ -443,8 +450,10 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
 
 step_B_P.bDone := FALSE;
 _B_UnPush_Time := UnPress_Time;
@@ -459,8 +468,10 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
 
 BD_moveDis := ABS(Pos);
 
@@ -511,9 +522,12 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
+
 BD_moveDis := ABS(Dis);
-step := 1;
 
 step_BD_C.bDone := FALSE;
 
@@ -533,8 +547,10 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
 
 step_C_P.bDone := FALSE;
 step_C_P.Step:=1;]]></ST>
@@ -546,9 +562,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
-
+        <ST><![CDATA[
 step_C_P.bDone := FALSE;
 o_PressureC_Up := FALSE;
 o_PressureC_Dn := FALSE;
@@ -563,8 +577,10 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
 
 step_C_P.bDone := FALSE;
 _C_UnPush_Time := UnPress_Time;
@@ -577,8 +593,10 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
 
 step_D_P.bDone := FALSE;
 step_D_P.Step:=1;]]></ST>
@@ -590,9 +608,7 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
-
+        <ST><![CDATA[
 step_D_P.bDone := FALSE;
 o_PressureD_Up := FALSE;
 o_PressureD_Dn := FALSE;
@@ -607,8 +623,10 @@ VAR_INPUT
 END_VAR
 ]]></Declaration>
       <Implementation>
-        <ST><![CDATA[bDone := FALSE;
-step := 1;
+        <ST><![CDATA[IF NOT o_Oil_Pressure_Pump THEN
+	bDone := FALSE;
+	step := 1;
+END_IF
 
 step_D_P.bDone := FALSE;
 _D_UnPush_Time := UnPress_Time;
@@ -1119,13 +1137,7 @@ END_CASE]]></ST>
 		
 		
 	1055:
-		IF step_A_P.bDone AND step_C_P.bDone THEN
-			step := step + 1;
-		ELSIF step_A_P.bError OR step_C_P.bError THEN
-			step := step + 10000;
-		END_IF
 		
-	1056:
 		step := 1090;
 		
 	1090:
