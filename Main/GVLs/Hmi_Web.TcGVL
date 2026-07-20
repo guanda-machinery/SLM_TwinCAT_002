@@ -46,7 +46,7 @@ VAR_GLOBAL
 	
 	
 	
-
+	
 
 	
 	// 自動流程 暫停/繼續
@@ -92,8 +92,12 @@ VAR_GLOBAL
 	Jog_UnLimite : BOOL;
 	
 	// Jog模式 速度
-	Jog_Speed: REAL := 30;
+	Jog_Speed: REAL := 80;
 	
+	jog_trig_R : ARRAY [0..9] OF R_TRIG;
+
+
+	jog_trig_F : ARRAY [0..9] OF F_TRIG; 
 	
 	
 (*==================== Ga Jog模式====================*)	
@@ -142,6 +146,10 @@ VAR_GLOBAL
 	WCS_D : XYZ_Point;
 	
 	
+END_VAR
+VAR_GLOBAL PERSISTENT
+	// 工件誤差修正
+	Auto_Steel_X_Offset : LREAL;
 END_VAR]]></Declaration>
   </GVL>
 </TcPlcObject>

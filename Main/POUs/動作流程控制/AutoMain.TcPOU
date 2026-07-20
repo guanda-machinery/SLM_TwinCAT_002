@@ -56,6 +56,8 @@ VAR
 	_log : Step_Log; 
 	// SQL請求序號
 	sql_hand: UDINT;
+	
+	
 END_VAR
 
 VAR_OUTPUT
@@ -406,22 +408,31 @@ END_IF
 		END_IF
 		
 	112:
-		ExpConver.FeedHomeStart();
-		step := step + 1;
+		IF ExpConver.Feed_bBuzy THEN
+			ExpConver.Feed_Reset();
+		ELSE
+			step := 114;
+		END_IF
 		
 	113:
+		IF NOT ExpConver.Feed_bBuzy AND NOT ExpConver.ExpConver_Reset THEN
+			step := step + 1;
+		END_IF
+		
+	114:
+		ExpConver.FeedHomeStart();
 		IF (ExpConver.Feed_bBuzy OR ExpConver.Feed_bError) THEN
 			step := step + 1;
 		END_IF
 
-	114:
+	115:
 		IF GroupB.StepA.bDone THEN
 			step := step + 1;
 		ELSIF GroupA.StepA.bError OR GroupB.StepA.bError OR GroupC.StepA.bError OR GroupD.StepA.bError THEN
 			step := step + 10000;
 		END_IF
 		
-	115:
+	116:
 		step := 120;
 		
 		
@@ -3654,7 +3665,8 @@ IF step < 9700 OR step >= 9800 THEN
 END_IF
 
 
-
+Hmi_Web.jog_trig_R[0](CLK := Hmi_Web.Jog_Gd.Laser_Cover);
+Hmi_Web.jog_trig_F[0](CLK := Hmi_Web.Jog_Gd.Laser_Cover);
 
 
 CASE step OF
@@ -3818,9 +3830,9 @@ CASE step OF
 			step := 9200;
 		ELSIF Hmi_Web.Jog_Gd.Z_N THEN
 			step := 9220;
-		ELSIF Hmi_Web.Jog_Gd.Laser_Cover THEN
+		ELSIF Hmi_Web.jog_trig_R[0].Q THEN
 			GroupD.Open_Conver();
-		ELSIF not Hmi_Web.Jog_Gd.Laser_Cover THEN
+		ELSIF Hmi_Web.jog_trig_F[0].Q THEN
 			GroupD.Close_Conver();
 		ELSIF Hmi_Web.Jog_FxA.H_Close THEN
 			step := 9300;
@@ -4023,7 +4035,8 @@ CASE step OF
 		pmsg.Push_Info("退出手動模式");
 		step:=9900;
 		
-END_CASE]]></ST>
+END_CASE
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="step_8100_Jog_GroupA_X" Id="{e799dead-5ecb-44cb-96a8-211ac7ea9e16}" FolderPath="JOG流程8100_9400\">
@@ -4959,7 +4972,7 @@ CASE step OF
 		
 	9371:
 		IF Fx.bDone OR Fx.bError OR NOT Hmi_Web.Jog_FxA.N THEN
-			step := 9389;
+			step := 9379;
 		END_IF
 		
 	9379:

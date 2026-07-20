@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="Step_Log_Clear" Id="{9f3db44a-1879-4a93-ada6-f6fd1c5e22d1}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM Step_Log_Clear
+VAR
+	db_fb_PLCDBCmdEvt : FB_PLCDBCmdEvt(sNetID:= '', tTimeout:= T#5S );
+	
+	_stPara		: ARRAY [0..3] OF ST_ExpParameter;
+	
+	_SqlCommand : STRING(1024);
+	
+	_extrasstr : STRING(255);
+	
+	_fbJson      : FB_JsonSaxWriter;
+	Clear_date: LINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[Clear_date := TO_LINT(F_GetSystemTime());
+
+// SQL命令
+_SqlCommand := 
+
+'DELETE 
+	INTO program_running_log 
+		(program_name, step_number, created_at, detail_data)
+	VALUES
+		({program_name}, {step_number}, to_timestamp(({created_at} - 116444736000000000) / 10000000.0), {detail_data}::jsonb);
+';
+
+
+db_fb_PLCDBCmdEvt.Execute(
+	hDBID := 3,
+	pExpression := ADR(_SqlCommand),			// SQL 命令 ex. SELECT * FROM PlcTest.newtable WHERE ID = {ID}  
+	cbExpression := SIZEOF(_SqlCommand),		// SQL 命令字串的長度
+	pData:= 0,		// 帶入的參數值
+	cbData:= 0,//itmp, 	// 帶入的參數值大小
+	pParameter:= 0, 				// 帶入的參數類型設定  ex.上面命令內的 {ID} 類型設定
+	cbParameter:= 0,			// 帶入的參數類型設定的大小
+)  ]]></ST>
+    </Implementation>
+    <Property Name="fbJson" Id="{22b63b51-49bd-4cb3-aee3-95cf126aa71f}">
+      <Declaration><![CDATA[{attribute 'suppress_wrn_C0410'}
+PROPERTY fbJson : REFERENCE TO FB_JsonSaxWriter]]></Declaration>
+      <Get Name="Get" Id="{45dc1dab-0b7c-47d5-91e0-f88e56ddf519}">
+        <Declaration><![CDATA[VAR
+END_VAR
+]]></Declaration>
+        <Implementation>
+          <ST><![CDATA[fbJson REF= _fbJson;
+
+]]></ST>
+        </Implementation>
+      </Get>
+    </Property>
+    <Method Name="JsonOutput" Id="{8e99a240-a291-4b5a-8e93-a0e6b6bae871}">
+      <Declaration><![CDATA[METHOD JsonOutput : BOOL
+VAR_INPUT
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[fbJson.EndObject();
+_extrasstr := fbJson.GetDocument();
+fbJson.ResetDocument();]]></ST>
+      </Implementation>
+    </Method>
+  </POU>
+</TcPlcObject>

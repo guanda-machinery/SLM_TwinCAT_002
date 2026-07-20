@@ -76,7 +76,9 @@ VAR
 	
 	// 出料滾輪啟動
 	Out_Moter_Start 				AT %Q*	: BOOL;
+	
 	trig1: R_TRIG;
+	trig2: R_TRIG;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -87,9 +89,9 @@ END_VAR
 	ExpConver_Mode := 0;
 END_IF
 
-IF Feed_bBuzy AND ActionMode_Now <> 8001 THEN
-	ExpConver_Start := FALSE;
-ELSIF ExpConver_Mode = 8001 AND ActionMode_Now = 0 THEN
+trig2(CLK := Feed_bBuzy );
+
+IF trig2.q THEN
 	ExpConver_Start := FALSE;
 END_IF
 
@@ -109,19 +111,7 @@ IF PullOver_bBuzy THEN
 	PullOver_Start := FALSE;
 END_IF
 
-ExpConver_Enable := NOT IO.i711 AND NOT( AutoMain.step > 600 AND AutoMain.step < 800 );
-
-
-// IF AutoMain.step >= 0 AND AutoMain.step < 8000 AND Mode_Select = 1 THEN
-// 	ExpConver.ExpConver_Mode := 8000;
-// 	ExpConver_Start := true;
-// ELSIF AutoMain.step >= 8000 AND AutoMain.step < 9800 AND Mode_Select = 0 THEN
-// 	ExpConver_AutoMode := FALSE;
-// 	ExpConver_JogMode := TRUE;
-// ELSE
-// 	ExpConver_AutoMode := FALSE;
-// 	ExpConver_JogMode := FALSE;
-// END_IF]]></ST>
+ExpConver_Enable := NOT IO.i711 AND NOT( AutoMain.step > 600 AND AutoMain.step < 800 );]]></ST>
     </Implementation>
     <Method Name="Feed_holding_2_waitLoading" Id="{e384fc41-9010-444a-a276-09fa267ee1c7}">
       <Declaration><![CDATA[METHOD Feed_holding_2_waitLoading
@@ -161,6 +151,7 @@ END_VAR
 ]]></Declaration>
       <Implementation>
         <ST><![CDATA[ExpConver_Mode := 0;
+
 
 ExpConver_Start := TRUE;]]></ST>
       </Implementation>

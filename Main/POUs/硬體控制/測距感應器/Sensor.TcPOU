@@ -9,6 +9,8 @@ VAR
 	sensorD : OMH555_Decoder;
 	
 	sensor_test_pos : LREAL;
+	
+	Sensor_Maintenance_required : ARRAY [0..3] OF BOOL;
 
 END_VAR
 
@@ -23,7 +25,33 @@ sensorc();
 sensorD();
 
 
+IF Sensor_Maintenance_required[0] <> sensorA.bMaintenance_required THEN
+	IF sensorA.bMaintenance_required THEN
+		pMsg.Push_Alarm("雷射頭A: 測距感應器需要維護");
+	END_IF
+	Sensor_Maintenance_required[0] := sensorA.bMaintenance_required;
+END_IF
 
+IF Sensor_Maintenance_required[1] <> sensorB.bMaintenance_required THEN
+	IF sensorB.bMaintenance_required THEN
+		pMsg.Push_Alarm("雷射頭B: 測距感應器需要維護");
+	END_IF
+	Sensor_Maintenance_required[1] := sensorB.bMaintenance_required;
+END_IF
+
+IF Sensor_Maintenance_required[2] <> sensorC.bMaintenance_required THEN
+	IF sensorC.bMaintenance_required THEN
+		pMsg.Push_Alarm("雷射頭C: 測距感應器需要維護");
+	END_IF
+	Sensor_Maintenance_required[2] := sensorC.bMaintenance_required;
+END_IF
+
+IF Sensor_Maintenance_required[3] <> sensorD.bMaintenance_required THEN
+	IF sensorD.bMaintenance_required THEN
+		pMsg.Push_Alarm("雷射頭D: 測距感應器需要維護");
+	END_IF
+	Sensor_Maintenance_required[3] := sensorD.bMaintenance_required;
+END_IF
 ]]></ST>
     </Implementation>
   </POU>

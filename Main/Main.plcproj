@@ -297,6 +297,9 @@
     <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\程式紀錄\Step_Log.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\功能塊\資料庫 Postgre相關\記錄用\程式紀錄\Step_Log_Clear.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\動作流程控制\AxisGroup功能塊\GroupA.TcPOU">
       <SubType>Code</SubType>
       <ExcludeFromBuild>false</ExcludeFromBuild>

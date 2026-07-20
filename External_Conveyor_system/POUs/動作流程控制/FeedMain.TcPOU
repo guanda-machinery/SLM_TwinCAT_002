@@ -1646,7 +1646,7 @@ CASE step OF
 		
 	9801:
 // 		pmsg.Push_Info("退出手動模式");
-		step:=0;
+		step := 0;
 		
 END_CASE]]></ST>
       </Implementation>

@@ -3927,9 +3927,10 @@ External Setpoint Generation:
 						<OtherSettings AllowMotionCmdToSlave="true"/>
 					</AxisPara>
 					<Encoder Name="Enc" EncType="19">
-						<EncPara ScaleFactorNumerator="10.6657070589373" ScaleFactorDenominator="1048576" Offset="-6.99960428588602" Inverse="true" MaxCount="#xffffffff" ReferenceSystem="1">
+						<EncPara ScaleFactorNumerator="10.6657070589373" ScaleFactorDenominator="1048576" Offset="-16.9999125967594" Inverse="true" MaxCount="#xffffffff" ReferenceSystem="1">
 							<SoftEndMinControl Range="-2"/>
 							<SoftEndMaxControl Range="321.993438720703"/>
+							<ParameterChanged>7</ParameterChanged>
 						</EncPara>
 						<Vars VarGrpType="1">
 							<Name>Inputs</Name>
