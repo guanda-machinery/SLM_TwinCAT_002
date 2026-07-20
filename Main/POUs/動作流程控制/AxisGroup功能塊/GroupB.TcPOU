@@ -454,7 +454,11 @@ END_CASE
 	===============================================*)	
 	310:
 		q_Lens_Blow := TRUE;
-		step := step + 1;
+		IF LEN(Hmi_Web.Process_Data_UUID_B) = 0 THEN
+			Hmi_Web.Process_Data_UUID_B := ProjectData.Payload_B_Data_buff[WorkNum].data_uid;
+		ELSE
+			step := step + 1;
+		END_IF
 		
 	311:
 		Hmi_Web.Process_Data_UUID_B_Start := TRUE;
@@ -479,9 +483,9 @@ END_CASE
 	313:
 		tmr01.PT := TO_TIME(MaCfg.LaserPrinter_Timeout);
 		tmr01.IN := TRUE;
-		tmr02.PT := T#500MS;
+		tmr02.PT := T#1S;
 		tmr02.IN := NOT Hmi_Web.Process_Data_UUID_B_Start;
-		IF NOT Hmi_Web.Process_Data_UUID_B_Start THEN
+		IF tmr02.Q THEN
 			Hmi_Web.Process_Data_UUID_B :='';
 			tmr01.IN := FALSE;
 			tmr02.IN := FALSE;

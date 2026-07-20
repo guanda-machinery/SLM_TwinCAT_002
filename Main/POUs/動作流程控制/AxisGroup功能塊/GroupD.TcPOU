@@ -518,7 +518,11 @@ END_CASE
 	310:
 		q_Lens_Blow := TRUE;
 		q_Lens_Cap_Open := TRUE;
-		step := step + 1;
+		IF LEN(Hmi_Web.Process_Data_UUID_D) = 0 THEN
+			Hmi_Web.Process_Data_UUID_D := ProjectData.Payload_D_Data_buff[WorkNum].data_uid;
+		ELSE
+			step := step + 1;
+		END_IF
 		
 	311: // 確認鏡頭蓋已開
 		IF i_Lens_Cap_IsOpen THEN
@@ -548,7 +552,7 @@ END_CASE
 	314:
 		tmr01.PT := TO_TIME(MaCfg.LaserPrinter_Timeout);
 		tmr01.IN := TRUE;
-		tmr02.PT := T#500MS;
+		tmr02.PT := T#1S;
 		tmr02.IN := NOT Hmi_Web.Process_Data_UUID_D_Start;
 		
 		IF tmr02.q THEN // 程式通知打標完成
@@ -665,7 +669,6 @@ END_CASE]]></ST>
       <Implementation>
         <ST><![CDATA[CASE StepA.step OF
 	200: // 判斷當距離再200~400間
-		q_Lens_Cap_Open := TRUE;
 		IF DisSensor_Dis < 200 OR DisSensor_Dis > 400 THEN
 			StepA.step := StepA.step + 1;
 		ELSE
@@ -719,6 +722,7 @@ END_CASE]]></ST>
 		END_IF
 		
 	224:
+		q_Lens_Cap_Open := TRUE;
 		StepA.step := 230;
 		
 		
@@ -783,6 +787,7 @@ END_CASE]]></ST>
 		StepA.step := 250;
 		
 	250:
+		q_Lens_Cap_Open := FALSE;
 		z_PosMeasure := Az.Pos;
 		StepA.bDone := TRUE;
 		StepA.step	:= 0;
