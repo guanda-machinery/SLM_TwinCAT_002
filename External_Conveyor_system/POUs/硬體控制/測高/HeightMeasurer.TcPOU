@@ -18,6 +18,8 @@ VAR
 	_speed: LREAL;
 	bBoot: BOOL := true;
 	tmpTargetPos: LREAL;
+	
+	tmp_MeasurePos: LREAL;
 END_VAR
 
 VAR_OUTPUT
@@ -159,7 +161,7 @@ END_VAR
 		step := 30;
 		
 	30:
-		Axis.Axis_H_Measure.AbsMove(config.H_Measure_ZeroPoint, 60);
+		Axis.Axis_H_Measure.AbsMove(config.H_Measure_ZeroPoint, 100);
 		step := step + 1;
 		
 	31:
@@ -193,6 +195,7 @@ END_VAR
 		
 	40:
 		MeasureValue := config.H_Measure_ZeroPoint - Axis.Axis_H_Measure.fPos;
+		tmp_MeasurePos := Axis.Axis_H_Measure.fPos;
 		step := step + 1;
 		
 	41:
@@ -205,7 +208,7 @@ END_VAR
 		END_IF
 		
 	43:
-		IF Axis.Axis_H_Measure.bDone OR Axis.Axis_H_Measure.origin THEN
+		IF Axis.Axis_H_Measure.bDone OR (tmp_MeasurePos - Axis.Axis_H_Measure.fPos) > 50  THEN
 			step := step + 1;
 		ELSIF Axis.Axis_H_Measure.bError THEN
 			step := step + 10000;
