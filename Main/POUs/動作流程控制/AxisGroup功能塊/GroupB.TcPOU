@@ -689,7 +689,7 @@ END_CASE]]></ST>
 		END_IF
 		
 	231:
-		Ay.RelMove(30, SpdC.DotSpeed);
+		Ay.AbsMove(_Position:= PosC.GbX_P_Limite - 120, SpdC.DotSpeed);
 		StepA.step := StepA.step + 1;
 		
 	232:

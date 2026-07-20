@@ -598,7 +598,7 @@ END_CASE]]></ST>
 		StepA.step := 220;
 		
 	220:
-		tmpPos_X := 0;
+		tmpPos_X := 150;
 		tmpPos_Y := (ProjectData.Now_Steel.Width / 2) + pointRef.Y;
 		tmpPos_Z := ProjectData.Now_Steel.Height + MaCfg.laserC_Dis + MaCfg.laserC_Z_ReferencePos;
 		StepA.step := StepA.step + 1;
@@ -635,7 +635,7 @@ END_CASE]]></ST>
 		END_IF
 		
 	231:
-		Ay.RelMove(60, SpdC.DotSpeed);
+		Ay.AbsMove((ProjectData.Now_Steel.Width - 10) + pointRef.Y, SpdC.DotSpeed);
 		StepA.step := StepA.step + 1;
 		
 	232:
@@ -648,7 +648,7 @@ END_CASE]]></ST>
 			Ay.Stop();
 			StepA.step := StepA.step + 1;
 		ELSIF Ays.bDone THEN
-			pMsg.Push_Error("GroupB_FindZ:再有效距離內找不到可量測的點");
+			pMsg.Push_Error("GroupC_FindZ:再有效距離內找不到可量測的點");
 			StepA.step := StepA.step + 10000;
 		ELSIF Ays.bError THEN
 			StepA.step := StepA.step + 10000;
