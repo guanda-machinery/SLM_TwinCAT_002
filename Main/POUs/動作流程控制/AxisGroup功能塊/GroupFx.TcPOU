@@ -1283,7 +1283,7 @@ END_CASE]]></ST>
 		移動鋼樑 到 原點偏移位置
 	================================*)
 	2040:  // 
-		Fx.RelMove(posc.Fx_HomeOffset, SpdC.HighSpeed_FX);
+		Fx.RelMove(posc.Fx_HomeOffset + Hmi_Web.Auto_Steel_X_Offset, SpdC.HighSpeed_FX);
 		step := step + 1;
 		
 	2041:
@@ -1899,7 +1899,7 @@ END_CASE]]></ST>
 		tmr101.PT := T#500MS;
 		tmr111.IN := TRUE;
 		tmr111.PT := T#30S;
-		IF tmr01.q OR tmr111.q THEN
+		IF tmr101.q OR tmr111.q THEN
 			tmr101.IN := FALSE;
 			tmr111.IN := FALSE;
 			o_PressureA_Up := FALSE;
