@@ -111,9 +111,9 @@ VAR_INPUT
 	
 	(*
 		holdingEntranceRack 吊掛入料區
-		entranceRack 入料區
+		entranceRack 機器入料區
 		holdingExitRack 吊掛出料區
-		exitRack 出料區
+		exitRack 機器出料區
 		machine 機台內
 	*)
 // 	location : STRING(80) := '';
@@ -171,6 +171,55 @@ END_VAR
 _tmp_db_Steel_Status.steel_status := 'waitLoading';
 
 _tmp_db_Steel_Status.steel_location := '';
+
+step := 1000;]]></ST>
+      </Implementation>
+    </Method>
+    <Method Name="Set_Work_Order_Status" Id="{8cbc6009-5243-4019-a438-b03776a489db}" FolderPath="入口\">
+      <Declaration><![CDATA[METHOD Set_Work_Order_Status
+VAR_INPUT
+	uuid : STRING(36);
+	
+	status		: STRING;
+	
+	location	: STRING;
+	(*
+	finish 加工完成
+	inSide 入料  
+	holding 暫存中(在吊掛區等待進入料架)
+	machining 加工中
+	alignment 無靠邊插單
+	inserts 插單
+	waitLoading 等待上料(在料架上等待，後進入機台)
+	waitUnloading 等待下料(在料架上等待，後進入出料吊掛區或其他機台)
+	paired 已配對
+	pairing 配對中
+	pairedFailed 配對失敗
+	dxfTransferring DXF 傳輸中
+	connectedFailed 連線失敗
+	transformFailed 轉換失敗
+	waitPaired 等待配對
+	pairedCancel 配對取消
+	unknown 未知
+	*)
+// 	status : STRING(80) := '';
+	
+	(*
+		holdingEntranceRack 吊掛入料區
+		entranceRack 入料區
+		holdingExitRack 吊掛出料區
+		exitRack 出料區
+		machine 機台內
+	*)
+// 	location : STRING(80) := '';
+END_VAR
+]]></Declaration>
+      <Implementation>
+        <ST><![CDATA[_tmp_db_Steel_Status.uuid := uuid;
+
+_tmp_db_Steel_Status.steel_status := status;
+
+_tmp_db_Steel_Status.steel_location := location;
 
 step := 1000;]]></ST>
       </Implementation>
