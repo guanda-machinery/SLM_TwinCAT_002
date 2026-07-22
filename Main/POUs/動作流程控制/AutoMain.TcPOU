@@ -1084,6 +1084,18 @@ END_CASE]]></ST>
 		END_IF
 		
 	691:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
+			
+	692:
+		IF ReadSQLData.bDone = sql_hand THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	693:
 		step := 700;
 END_CASE]]></ST>
       </Implementation>
@@ -1132,7 +1144,7 @@ END_CASE]]></ST>
 	==========================================*)
 	710:
 		IF ProjectData.Now_Steel.Height > 200 THEN
-			sql_hand := ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 300);
+			sql_hand := ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 200);
 		ELSE
 			sql_hand := ReadSQLData.Get_Payload(Start_Pos := Last_Pos, End_Pos := Last_Pos + 75);
 		END_IF
@@ -1707,7 +1719,7 @@ CASE step OF
 		END_IF
 		
 	858:
-		step := 860;
+		step := 870;
 		
 	
 		
@@ -1762,7 +1774,7 @@ CASE step OF
 				開始各組區域打標
 	=============================================*)
 	870: 
-		tmr01.PT := T#1S;
+		tmr01.PT := T#0.5S;
 		tmr01.IN := TRUE;
 		IF tmr01.Q THEN
 			tmr01.IN := FALSE;
@@ -1770,6 +1782,10 @@ CASE step OF
 		END_IF
 		
 	871:
+		GroupA.ReadyToMove := TRUE;
+		GroupB.ReadyToMove := TRUE;
+		GroupC.ReadyToMove := TRUE;
+		GroupD.ReadyToMove := TRUE;
 		GroupA.ReadyToPrint := TRUE;
 		GroupB.ReadyToPrint := TRUE;
 		GroupC.ReadyToPrint := TRUE;
@@ -2354,7 +2370,7 @@ END_CASE]]></ST>
 			// 已經有 料的狀態 是 在輸送滾輪上(inSide)
 			ProjectData.WorkOrder_Now := ProjectData.WorkOrder_inSide;
 			step := 1060;
-		ELSIF ProjectData.WorkOrder_Num_On_Wait > 0 THEN
+		ELSIF ProjectData.WorkOrder_Num_On_Wait > 0  THEN
 			IF ExpConver.Feed_bDone THEN
 				step := step + 1;
 			ELSE
@@ -2369,10 +2385,12 @@ END_CASE]]></ST>
 			ExpConver.FeedAutoStart();
 			Hmi_Web.Auto_Start := FALSE;
 			step := step + 1;
+		ELSIF (ExpConver.ActionMode_Now > 400 AND ExpConver.ActionMode_Now < 800) THEN
+			step := 1060;
 		END_IF
 		
 	1052:
-		IF ExpConver.Feed_bBuzy OR ExpConver.Feed_bError THEN
+		IF ExpConver.Feed_bBuzy OR ExpConver.Feed_bError OR ExpConver.ActionMode_Now = 806 THEN
 			step := step + 1;
 		END_IF
 		
@@ -2391,7 +2409,7 @@ END_CASE]]></ST>
 			讀取資料庫 取得排程資料
 	========================================*)
 	1060:
-		IF NOT ExpConver.Feed_bBuzy THEN
+		IF NOT ExpConver.Feed_bBuzy OR (ExpConver.ActionMode_Now > 400 AND ExpConver.ActionMode_Now < 800) THEN
 			step := step + 1;
 		END_IF
 		

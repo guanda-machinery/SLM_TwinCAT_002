@@ -688,23 +688,33 @@ END_CASE]]></ST>
 	496:
 		step := 500;
 		
-	500:
+	500: // 判斷是否有只有一隻料，只有一支料直接送入進料區
+		IF ProjectData.WorkOrder_Nunber_At_waitLoading = 0 AND ProjectData.WorkOrder_Nunber_At_holding = 1 AND	// 只有一支料
+			(Feed_Enable AND NOT IO.i402 AND NOT IO.i404) THEN 													// 允許進料狀態
+ 			step := 550;
+		ELSE
+			step := step + 1;
+		END_IF	
+		
+		
+(*	================== 標準進料流程 ==================*)		
+	501:
 		FeedCar.AbsMove(config.pos_Workpiace_StanbyPoint, 1);
 		step := step + 1;
 		
-	501:
+	502:
 		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
 			step := step + 1;
 		END_IF
 		
-	502:
+	503:
 		IF FeedCar.bDone THEN
 			step := step + 1;
 		ELSIF FeedCar.bError THEN
 			step := step + 10000;
 		END_IF
 		
-	503:
+	504:
 		step := 510;
 		
 	510: // 臺車下降
@@ -726,8 +736,29 @@ END_CASE]]></ST>
 	513:
 		step := 600;
 		
+(*	================== 只進一支料流程 ==================*)
+	550:
+		ReadSQLData.Set_Work_Order_Status( 
+			uuid := ProjectData.WorkOrder_At_holding[0].steel_id,
+			status := 'inSide',
+			location := 'entranceRack'
+			);
+		step := step + 1;
 		
+	551:
+		IF ReadSQLData.bBuzy OR ReadSQLData.bError THEN
+			step := step + 1;
+		END_IF
 		
+	552:
+		IF ReadSQLData.bDone THEN
+			step := step + 1;
+		ELSIF ReadSQLData.bError THEN
+			step := step + 10000;
+		END_IF
+		
+	553:
+		step := 900;
 END_CASE]]></ST>
       </Implementation>
     </Action>
@@ -1180,24 +1211,31 @@ END_CASE]]></ST>
 			step := 880;
 		END_IF
 			
+			
+	880:
+		IF feed_MoveLastPos + 100 > config.pos_Workpiace_FeedPoint THEN
+			step := 910;
+		ELSE
+			step := step + 1;
+		END_IF
 		
-	880: // 一到最後一次的 開始搬移位置
+	881: // 一到最後一次的 開始搬移位置
 		FeedCar.AbsMove(feed_MoveLastPos,1);
 		step := step + 1;
 		
-	881: // 
+	882: // 
 		IF (FeedCar.bBuzy OR FeedCar.bError) THEN
 			step := step + 1;
 		END_IF
 		
-	882:
+	883:
 		IF FeedCar.bDone THEN
 			step := step + 1;
 		ELSIF FeedCar.bError THEN
 			step := step + 10000;
 		END_IF
 		
-	883:
+	884:
 		step := 890;
 	
 	890: // 臺車上升
