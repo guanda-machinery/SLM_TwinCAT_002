@@ -72,7 +72,7 @@
                     </o>
                     <o>
                       <v n="Type" t="TypeClass">Real</v>
-                      <v n="Value">"1341.37"</v>
+                      <v n="Value">"1339.56"</v>
                     </o>
                     <o>
                       <v n="Type" t="TypeClass">Real</v>
@@ -160,7 +160,7 @@
                     </o>
                     <o>
                       <v n="Type" t="TypeClass">LReal</v>
-                      <v n="Value">"200"</v>
+                      <v n="Value">"400"</v>
                     </o>
                     <o>
                       <v n="Type" t="TypeClass">LReal</v>

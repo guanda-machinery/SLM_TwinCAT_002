@@ -487,7 +487,7 @@ END_CASE
 	313:
 		tmr01.PT := TO_TIME(MaCfg.LaserPrinter_Timeout);
 		tmr01.IN := TRUE;
-		tmr02.PT := T#1S;
+		tmr02.PT := T#250mS;
 		tmr02.IN := NOT Hmi_Web.Process_Data_UUID_A_Start;
 		IF tmr02.Q THEN
 			Hmi_Web.Process_Data_UUID_A :='';

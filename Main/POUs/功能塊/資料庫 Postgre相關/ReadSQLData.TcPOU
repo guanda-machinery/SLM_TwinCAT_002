@@ -1456,7 +1456,7 @@ CASE step OF
 			from 
 				public.work_order_data
 			where 
-				part_nest_id = {uuid}::uuid
+				part_nest_id = {uuid}
 		);';
 				
 		
@@ -1514,7 +1514,7 @@ CASE step OF
 		SET 
 			steel_status = $'machining$', steel_location = $'machine$'
 		WHERE
-			part_nest_id = {id}::UUID
+			part_nest_id = {id}
 		';
 		
 	

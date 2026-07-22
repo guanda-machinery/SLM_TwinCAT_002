@@ -103,6 +103,7 @@
     <Folder Include="POUs\動作流程控制\外部輸送滾輪" />
     <Folder Include="POUs\安全控制" />
     <Folder Include="POUs\硬體控制" />
+    <Folder Include="POUs\硬體控制\其他控制\螢幕旋轉" />
     <Folder Include="POUs\硬體控制\其他控制\按鈕燈" />
     <Folder Include="POUs\硬體控制\測距感應器" />
     <Folder Include="POUs\硬體控制\軸" />
@@ -323,6 +324,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\硬體控制\其他控制\按鈕燈\Button.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\硬體控制\其他控制\螢幕旋轉\TurnMonitor.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\硬體控制\手搖輪\Jog_MPG.TcPOU">

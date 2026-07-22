@@ -99,6 +99,7 @@ VAR
 	_log : Step_Log; 
 	_logA : Step_Log; 
 	sql_hand: UDINT;
+	tmpPos_Y1: LREAL;
 END_VAR
 
 
@@ -410,9 +411,15 @@ END_VAR
 		END_IF
 		
 	121:
+		tmpPos_Y1 := ProjectData.Payload_D_Data_Now.Point_Y;
+		
+		IF tmpPos_Y1 > 80 AND tmpPos_Y1 < (ProjectData.Now_Steel.Height -80) THEN
+			tmpPos_Y1 := tmpPos_Y1 - 2;
+		END_IF
+		
 		XY_Move_Ref(
 			ProjectData.Payload_D_Data_Now.Point_X, 
-			ProjectData.Payload_D_Data_Now.Point_Y, 
+			tmpPos_Y1, 
 			SpdC.HighSpeed
 		);
 		step := step + 1;
@@ -462,9 +469,15 @@ END_CASE]]></ST>
 					移動到位置
 	===============================================*)
 	220:
+		tmpPos_Y1 := ProjectData.Payload_D_Data_Now.Point_Y;
+		
+		IF tmpPos_Y1 > 80 AND tmpPos_Y1 < (ProjectData.Now_Steel.Height -80) THEN
+			tmpPos_Y1 := tmpPos_Y1 - 2;
+		END_IF
+		
 		XY_Move_Ref(
 			ProjectData.Payload_D_Data_Now.Point_X, 
-			ProjectData.Payload_D_Data_Now.Point_Y, 
+			tmpPos_Y1, 
 			SpdC.HighSpeed
 		);
 		step := step + 1;
@@ -552,7 +565,7 @@ END_CASE
 	314:
 		tmr01.PT := TO_TIME(MaCfg.LaserPrinter_Timeout);
 		tmr01.IN := TRUE;
-		tmr02.PT := T#1S;
+		tmr02.PT := T#250MS;
 		tmr02.IN := NOT Hmi_Web.Process_Data_UUID_D_Start;
 		
 		IF tmr02.q THEN // 程式通知打標完成

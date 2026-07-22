@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4026.13">
+  <POU Name="TurnMonitor" Id="{114d041d-47a2-461f-89c9-b79f74015110}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM TurnMonitor
+VAR
+	MonitorSensor_RTrig : R_trig;
+	MonitorSensor_FTrig : F_trig;
+	
+	winCmd: NT_StartProcess := (NETID := '192.168.31.180.1.1');
+	
+	turn270: BOOL;
+	turn0: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[MonitorSensor_RTrig(CLK := IO.i207);
+MonitorSensor_FTrig(CLK := IO.i207);
+
+IF MonitorSensor_RTrig OR turn270 THEN 
+	turn270 := FALSE;
+	winCmd.DIRNAME := 'C:\Users\MyUser\Documents\multimonitortool-x64';
+	winCmd.PATHSTR := 'C:\Users\MyUser\Documents\multimonitortool-x64\MultiMonitorTool.exe';
+	winCmd.COMNDLINE := '/SetOrientation 1 270';
+	winCmd.START := TRUE;
+END_IF
+
+IF MonitorSensor_RTrig OR turn0 THEN 
+	turn270 := FALSE;
+	winCmd.DIRNAME := 'C:\Users\MyUser\Documents\multimonitortool-x64';
+	winCmd.PATHSTR := 'C:\Users\MyUser\Documents\multimonitortool-x64\MultiMonitorTool.exe';
+	winCmd.COMNDLINE := '/SetOrientation 1 0';
+	winCmd.START := TRUE;
+END_IF
+
+
+IF NOT winCmd.BUSY THEN
+	winCmd := FALSE;
+END_IF]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>

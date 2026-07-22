@@ -473,7 +473,7 @@ END_CASE
 	313:
 		tmr01.PT := TO_TIME(MaCfg.LaserPrinter_Timeout);
 		tmr01.IN := TRUE;
-		tmr02.PT := T#1S;
+		tmr02.PT := T#250mS;
 		tmr02.IN := NOT Hmi_Web.Process_Data_UUID_C_Start;
 		IF tmr02.Q THEN
 			Hmi_Web.Process_Data_UUID_C :='';
@@ -592,6 +592,9 @@ END_CASE]]></ST>
 		END_IF
 		
 	201:
+		IF pointRef.Y = 0 THEN
+			pointRef.Y := MaCfg.laserA_Y_ReferencePos - ProjectData.Now_Steel.Width;
+		END_IF
 		StepA.step := 210;
 		
 		
@@ -634,28 +637,35 @@ END_CASE]]></ST>
 	223:
 		StepA.step := 230;
 		
-		
 	230:
+		IF DisSensor_Dis > 0 THEN
+			StepA.step := StepA.step + 1;
+		ELSE
+			pMsg.Push_Error("GroupA: 測距感應器數值錯誤");
+			StepA.step := StepA.step + 10000;
+		END_IF
+		
+	231:
 		moveZdis := DisSensor_Dis - Macfg.laserA_Dis;
 		StepA.step := StepA.step + 1;
 		
-	231:
+	232:
 		Az.RelMove(moveZdis * -1, SpdC.HighSpeed);
 		StepA.step := StepA.step + 1;
 		
-	232:
+	233:
 		IF Azs.bBuzy OR Azs.bError THEN
 			StepA.step := StepA.step + 1;
 		END_IF
 		
-	233:
+	234:
 		IF Azs.bDone THEN
 			StepA.step := StepA.step + 1;
 		ELSIF Azs.bError THEN
 			StepA.step := StepA.step + 10000;
 		END_IF
 		
-	234:
+	235:
 		tmr01A.IN := TRUE;
 		tmr01A.PT := T#2S;
 		IF tmr01A.Q THEN
@@ -663,7 +673,7 @@ END_CASE]]></ST>
 			StepA.step := StepA.step + 1;
 		END_IF
 		
-	235:
+	236:
 		StepA.step := 240;
 		
 		
